@@ -64,12 +64,12 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar three 
 }
 TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar two-register miscellaneous") {
   // Commented out lines showcase unallocated encodings.
-  TEST_SINGLE(suqadd(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "suqadd b30, b29");
+  TEST_SINGLE(suqadd(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "suqadd b30, b29");
   TEST_SINGLE(suqadd(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "suqadd h30, h29");
   TEST_SINGLE(suqadd(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "suqadd s30, s29");
   TEST_SINGLE(suqadd(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "suqadd d30, d29");
 
-  TEST_SINGLE(sqabs(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "sqabs b30, b29");
+  TEST_SINGLE(sqabs(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "sqabs b30, b29");
   TEST_SINGLE(sqabs(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "sqabs h30, h29");
   TEST_SINGLE(sqabs(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "sqabs s30, s29");
   TEST_SINGLE(sqabs(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "sqabs d30, d29");
@@ -94,7 +94,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar two-re
   //TEST_SINGLE(abs(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "abs s30, s29");
   TEST_SINGLE(abs(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "abs d30, d29");
 
-  TEST_SINGLE(sqxtn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "sqxtn b30, h29");
+  TEST_SINGLE(sqxtn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "sqxtn b30, h29");
   TEST_SINGLE(sqxtn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "sqxtn h30, s29");
   TEST_SINGLE(sqxtn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "sqxtn s30, d29");
   //TEST_SINGLE(sqxtn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "sqxtn d30, d29");
@@ -149,12 +149,12 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar two-re
   TEST_SINGLE(frecpx(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "frecpx s30, s29");
   TEST_SINGLE(frecpx(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "frecpx d30, d29");
 
-  TEST_SINGLE(usqadd(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "usqadd b30, b29");
+  TEST_SINGLE(usqadd(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "usqadd b30, b29");
   TEST_SINGLE(usqadd(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "usqadd h30, h29");
   TEST_SINGLE(usqadd(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "usqadd s30, s29");
   TEST_SINGLE(usqadd(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "usqadd d30, d29");
 
-  TEST_SINGLE(sqneg(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "sqneg b30, b29");
+  TEST_SINGLE(sqneg(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "sqneg b30, b29");
   TEST_SINGLE(sqneg(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "sqneg h30, h29");
   TEST_SINGLE(sqneg(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "sqneg s30, s29");
   TEST_SINGLE(sqneg(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "sqneg d30, d29");
@@ -174,12 +174,12 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar two-re
   //TEST_SINGLE(neg(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "neg s30, s29");
   TEST_SINGLE(neg(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "neg d30, d29");
 
-  TEST_SINGLE(sqxtun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "sqxtun b30, h29");
+  TEST_SINGLE(sqxtun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "sqxtun b30, h29");
   TEST_SINGLE(sqxtun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "sqxtun h30, s29");
   TEST_SINGLE(sqxtun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "sqxtun s30, d29");
   //TEST_SINGLE(sqxtun(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "sqxtun d30, d29");
 
-  TEST_SINGLE(uqxtn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "uqxtn b30, h29");
+  TEST_SINGLE(uqxtn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29), "uqxtn b30, h29");
   TEST_SINGLE(uqxtn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "uqxtn h30, s29");
   TEST_SINGLE(uqxtn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "uqxtn s30, d29");
   //TEST_SINGLE(uqxtn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "uqxtn d30, d29");
@@ -241,31 +241,31 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar pairwi
   //TEST_SINGLE(addp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "addp s30, s29");
   TEST_SINGLE(addp(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "addp d30, v29.2d");
 
-  TEST_SINGLE(fmaxnmp(HReg::h30, HReg::h29),  "fmaxnmp h30, v29.2h");
+  TEST_SINGLE(fmaxnmp(HReg::h30, HReg::h29), "fmaxnmp h30, v29.2h");
   //TEST_SINGLE(fmaxnmp(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "fmaxnmp b30, b29");
   //TEST_SINGLE(fmaxnmp(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "fmaxnmp h30, h29");
   TEST_SINGLE(fmaxnmp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "fmaxnmp s30, v29.2s");
   TEST_SINGLE(fmaxnmp(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "fmaxnmp d30, v29.2d");
 
-  TEST_SINGLE(faddp(HReg::h30, HReg::h29),  "faddp h30, v29.2h");
+  TEST_SINGLE(faddp(HReg::h30, HReg::h29), "faddp h30, v29.2h");
   //TEST_SINGLE(faddp(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "faddp b30, b29");
   //TEST_SINGLE(faddp(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "faddp h30, h29");
   TEST_SINGLE(faddp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "faddp s30, v29.2s");
   TEST_SINGLE(faddp(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "faddp d30, v29.2d");
 
-  TEST_SINGLE(fmaxp(HReg::h30, HReg::h29),  "fmaxp h30, v29.2h");
+  TEST_SINGLE(fmaxp(HReg::h30, HReg::h29), "fmaxp h30, v29.2h");
   //TEST_SINGLE(fmaxp(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "fmaxp b30, b29");
   //TEST_SINGLE(fmaxp(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "fmaxp h30, h29");
   TEST_SINGLE(fmaxp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "fmaxp s30, v29.2s");
   TEST_SINGLE(fmaxp(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "fmaxp d30, v29.2d");
 
-  TEST_SINGLE(fminnmp(HReg::h30, HReg::h29),  "fminnmp h30, v29.2h");
+  TEST_SINGLE(fminnmp(HReg::h30, HReg::h29), "fminnmp h30, v29.2h");
   //TEST_SINGLE(fminnmp(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "fminnmp b30, b29");
   //TEST_SINGLE(fminnmp(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "fminnmp h30, h29");
   TEST_SINGLE(fminnmp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "fminnmp s30, v29.2s");
   TEST_SINGLE(fminnmp(ScalarRegSize::i64Bit, VReg::v30, VReg::v29), "fminnmp d30, v29.2d");
 
-  TEST_SINGLE(fminp(HReg::h30, HReg::h29),  "fminp h30, v29.2h");
+  TEST_SINGLE(fminp(HReg::h30, HReg::h29), "fminp h30, v29.2h");
   //TEST_SINGLE(fminp(ScalarRegSize::i8Bit, VReg::v30, VReg::v29),  "fminp b30, b29");
   //TEST_SINGLE(fminp(ScalarRegSize::i16Bit, VReg::v30, VReg::v29), "fminp h30, h29");
   TEST_SINGLE(fminp(ScalarRegSize::i32Bit, VReg::v30, VReg::v29), "fminp s30, v29.2s");
@@ -452,7 +452,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   // TEST_SINGLE(sshr(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sshr h30, h29, #15");
   // TEST_SINGLE(sshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sshr s30, s29, #1");
   // TEST_SINGLE(sshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sshr s30, s29, #31");
-  TEST_SINGLE(sshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sshr d30, d29, #1");
+  TEST_SINGLE(sshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "sshr d30, d29, #1");
   TEST_SINGLE(sshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sshr d30, d29, #63");
 
   //TEST_SINGLE(ssra(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "ssra b30, b29, #1");
@@ -461,7 +461,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(ssra(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "ssra h30, h29, #15");
   //TEST_SINGLE(ssra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "ssra s30, s29, #1");
   //TEST_SINGLE(ssra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "ssra s30, s29, #31");
-  TEST_SINGLE(ssra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "ssra d30, d29, #1");
+  TEST_SINGLE(ssra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "ssra d30, d29, #1");
   TEST_SINGLE(ssra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "ssra d30, d29, #63");
 
   //TEST_SINGLE(srshr(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "srshr b30, b29, #1");
@@ -470,7 +470,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(srshr(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "srshr h30, h29, #15");
   //TEST_SINGLE(srshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "srshr s30, s29, #1");
   //TEST_SINGLE(srshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "srshr s30, s29, #31");
-  TEST_SINGLE(srshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "srshr d30, d29, #1");
+  TEST_SINGLE(srshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "srshr d30, d29, #1");
   TEST_SINGLE(srshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "srshr d30, d29, #63");
 
   //TEST_SINGLE(srsra(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "srsra b30, b29, #1");
@@ -479,7 +479,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(srsra(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "srsra h30, h29, #15");
   //TEST_SINGLE(srsra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "srsra s30, s29, #1");
   //TEST_SINGLE(srsra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "srsra s30, s29, #31");
-  TEST_SINGLE(srsra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "srsra d30, d29, #1");
+  TEST_SINGLE(srsra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "srsra d30, d29, #1");
   TEST_SINGLE(srsra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "srsra d30, d29, #63");
 
   //TEST_SINGLE(shl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "shl b30, b29, #1");
@@ -488,32 +488,32 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(shl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "shl h30, h29, #15");
   //TEST_SINGLE(shl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "shl s30, s29, #1");
   //TEST_SINGLE(shl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "shl s30, s29, #31");
-  TEST_SINGLE(shl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "shl d30, d29, #1");
+  TEST_SINGLE(shl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "shl d30, d29, #1");
   TEST_SINGLE(shl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "shl d30, d29, #63");
 
-  TEST_SINGLE(sqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqshl b30, b29, #1");
-  TEST_SINGLE(sqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqshl b30, b29, #7");
-  TEST_SINGLE(sqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqshl h30, h29, #1");
+  TEST_SINGLE(sqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqshl b30, b29, #1");
+  TEST_SINGLE(sqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqshl b30, b29, #7");
+  TEST_SINGLE(sqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqshl h30, h29, #1");
   TEST_SINGLE(sqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqshl h30, h29, #15");
-  TEST_SINGLE(sqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqshl s30, s29, #1");
+  TEST_SINGLE(sqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqshl s30, s29, #1");
   TEST_SINGLE(sqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqshl s30, s29, #31");
-  TEST_SINGLE(sqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqshl d30, d29, #1");
+  TEST_SINGLE(sqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "sqshl d30, d29, #1");
   TEST_SINGLE(sqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqshl d30, d29, #63");
 
-  TEST_SINGLE(sqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqshrn b30, h29, #1");
-  TEST_SINGLE(sqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqshrn b30, h29, #7");
-  TEST_SINGLE(sqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqshrn h30, s29, #1");
+  TEST_SINGLE(sqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqshrn b30, h29, #1");
+  TEST_SINGLE(sqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqshrn b30, h29, #7");
+  TEST_SINGLE(sqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqshrn h30, s29, #1");
   TEST_SINGLE(sqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqshrn h30, s29, #15");
-  TEST_SINGLE(sqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqshrn s30, d29, #1");
+  TEST_SINGLE(sqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqshrn s30, d29, #1");
   TEST_SINGLE(sqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqshrn s30, d29, #31");
   //TEST_SINGLE(sqshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqshrn d30, d29, #1");
   //TEST_SINGLE(sqshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqshrn d30, d29, #63");
 
-  TEST_SINGLE(sqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqrshrn b30, h29, #1");
-  TEST_SINGLE(sqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqrshrn b30, h29, #7");
-  TEST_SINGLE(sqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqrshrn h30, s29, #1");
+  TEST_SINGLE(sqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqrshrn b30, h29, #1");
+  TEST_SINGLE(sqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqrshrn b30, h29, #7");
+  TEST_SINGLE(sqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqrshrn h30, s29, #1");
   TEST_SINGLE(sqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqrshrn h30, s29, #15");
-  TEST_SINGLE(sqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqrshrn s30, d29, #1");
+  TEST_SINGLE(sqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqrshrn s30, d29, #1");
   TEST_SINGLE(sqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqrshrn s30, d29, #31");
   //TEST_SINGLE(sqrshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqrshrn d30, d29, #1");
   //TEST_SINGLE(sqrshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqrshrn d30, d29, #63");
@@ -525,7 +525,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(ushr(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "ushr h30, h29, #15");
   //TEST_SINGLE(ushr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "ushr s30, s29, #1");
   //TEST_SINGLE(ushr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "ushr s30, s29, #31");
-  TEST_SINGLE(ushr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "ushr d30, d29, #1");
+  TEST_SINGLE(ushr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "ushr d30, d29, #1");
   TEST_SINGLE(ushr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "ushr d30, d29, #63");
 
   //TEST_SINGLE(usra(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "usra b30, b29, #1");
@@ -534,7 +534,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(usra(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "usra h30, h29, #15");
   //TEST_SINGLE(usra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "usra s30, s29, #1");
   //TEST_SINGLE(usra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "usra s30, s29, #31");
-  TEST_SINGLE(usra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "usra d30, d29, #1");
+  TEST_SINGLE(usra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "usra d30, d29, #1");
   TEST_SINGLE(usra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "usra d30, d29, #63");
 
   //TEST_SINGLE(urshr(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "urshr b30, b29, #1");
@@ -543,7 +543,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(urshr(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "urshr h30, h29, #15");
   //TEST_SINGLE(urshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "urshr s30, s29, #1");
   //TEST_SINGLE(urshr(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "urshr s30, s29, #31");
-  TEST_SINGLE(urshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "urshr d30, d29, #1");
+  TEST_SINGLE(urshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "urshr d30, d29, #1");
   TEST_SINGLE(urshr(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "urshr d30, d29, #63");
 
   //TEST_SINGLE(ursra(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "ursra b30, b29, #1");
@@ -552,7 +552,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(ursra(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "ursra h30, h29, #15");
   //TEST_SINGLE(ursra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "ursra s30, s29, #1");
   //TEST_SINGLE(ursra(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "ursra s30, s29, #31");
-  TEST_SINGLE(ursra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "ursra d30, d29, #1");
+  TEST_SINGLE(ursra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "ursra d30, d29, #1");
   TEST_SINGLE(ursra(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "ursra d30, d29, #63");
 
   //TEST_SINGLE(sri(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sri b30, b29, #1");
@@ -561,7 +561,7 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(sri(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sri h30, h29, #15");
   //TEST_SINGLE(sri(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sri s30, s29, #1");
   //TEST_SINGLE(sri(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sri s30, s29, #31");
-  TEST_SINGLE(sri(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sri d30, d29, #1");
+  TEST_SINGLE(sri(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "sri d30, d29, #1");
   TEST_SINGLE(sri(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sri d30, d29, #63");
 
   //TEST_SINGLE(sli(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sli b30, b29, #1");
@@ -570,59 +570,59 @@ TEST_CASE_METHOD(TestDisassembler, "Emitter: Scalar: Advanced SIMD scalar shift 
   //TEST_SINGLE(sli(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sli h30, h29, #15");
   //TEST_SINGLE(sli(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sli s30, s29, #1");
   //TEST_SINGLE(sli(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sli s30, s29, #31");
-  TEST_SINGLE(sli(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sli d30, d29, #1");
+  TEST_SINGLE(sli(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "sli d30, d29, #1");
   TEST_SINGLE(sli(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sli d30, d29, #63");
 
-  TEST_SINGLE(sqshlu(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqshlu b30, b29, #1");
-  TEST_SINGLE(sqshlu(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqshlu b30, b29, #7");
-  TEST_SINGLE(sqshlu(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqshlu h30, h29, #1");
+  TEST_SINGLE(sqshlu(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqshlu b30, b29, #1");
+  TEST_SINGLE(sqshlu(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqshlu b30, b29, #7");
+  TEST_SINGLE(sqshlu(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqshlu h30, h29, #1");
   TEST_SINGLE(sqshlu(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqshlu h30, h29, #15");
-  TEST_SINGLE(sqshlu(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqshlu s30, s29, #1");
+  TEST_SINGLE(sqshlu(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqshlu s30, s29, #1");
   TEST_SINGLE(sqshlu(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqshlu s30, s29, #31");
-  TEST_SINGLE(sqshlu(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqshlu d30, d29, #1");
+  TEST_SINGLE(sqshlu(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "sqshlu d30, d29, #1");
   TEST_SINGLE(sqshlu(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqshlu d30, d29, #63");
 
-  TEST_SINGLE(uqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "uqshl b30, b29, #1");
-  TEST_SINGLE(uqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "uqshl b30, b29, #7");
-  TEST_SINGLE(uqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "uqshl h30, h29, #1");
+  TEST_SINGLE(uqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "uqshl b30, b29, #1");
+  TEST_SINGLE(uqshl(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "uqshl b30, b29, #7");
+  TEST_SINGLE(uqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "uqshl h30, h29, #1");
   TEST_SINGLE(uqshl(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "uqshl h30, h29, #15");
-  TEST_SINGLE(uqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "uqshl s30, s29, #1");
+  TEST_SINGLE(uqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "uqshl s30, s29, #1");
   TEST_SINGLE(uqshl(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "uqshl s30, s29, #31");
-  TEST_SINGLE(uqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "uqshl d30, d29, #1");
+  TEST_SINGLE(uqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1), "uqshl d30, d29, #1");
   TEST_SINGLE(uqshl(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "uqshl d30, d29, #63");
 
-  TEST_SINGLE(sqshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqshrun b30, h29, #1");
-  TEST_SINGLE(sqshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqshrun b30, h29, #7");
-  TEST_SINGLE(sqshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqshrun h30, s29, #1");
+  TEST_SINGLE(sqshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqshrun b30, h29, #1");
+  TEST_SINGLE(sqshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqshrun b30, h29, #7");
+  TEST_SINGLE(sqshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqshrun h30, s29, #1");
   TEST_SINGLE(sqshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqshrun h30, s29, #15");
-  TEST_SINGLE(sqshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqshrun s30, d29, #1");
+  TEST_SINGLE(sqshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqshrun s30, d29, #1");
   TEST_SINGLE(sqshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqshrun s30, d29, #31");
   //TEST_SINGLE(sqshrun(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqshrun d30, d29, #1");
   //TEST_SINGLE(sqshrun(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqshrun d30, d29, #63");
 
-  TEST_SINGLE(sqrshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "sqrshrun b30, h29, #1");
-  TEST_SINGLE(sqrshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "sqrshrun b30, h29, #7");
-  TEST_SINGLE(sqrshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "sqrshrun h30, s29, #1");
+  TEST_SINGLE(sqrshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "sqrshrun b30, h29, #1");
+  TEST_SINGLE(sqrshrun(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "sqrshrun b30, h29, #7");
+  TEST_SINGLE(sqrshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "sqrshrun h30, s29, #1");
   TEST_SINGLE(sqrshrun(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "sqrshrun h30, s29, #15");
-  TEST_SINGLE(sqrshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "sqrshrun s30, d29, #1");
+  TEST_SINGLE(sqrshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "sqrshrun s30, d29, #1");
   TEST_SINGLE(sqrshrun(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "sqrshrun s30, d29, #31");
   //TEST_SINGLE(sqrshrun(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "sqrshrun d30, d29, #1");
   //TEST_SINGLE(sqrshrun(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "sqrshrun d30, d29, #63");
 
-  TEST_SINGLE(uqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "uqshrn b30, h29, #1");
-  TEST_SINGLE(uqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "uqshrn b30, h29, #7");
-  TEST_SINGLE(uqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "uqshrn h30, s29, #1");
+  TEST_SINGLE(uqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "uqshrn b30, h29, #1");
+  TEST_SINGLE(uqshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "uqshrn b30, h29, #7");
+  TEST_SINGLE(uqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "uqshrn h30, s29, #1");
   TEST_SINGLE(uqshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "uqshrn h30, s29, #15");
-  TEST_SINGLE(uqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "uqshrn s30, d29, #1");
+  TEST_SINGLE(uqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "uqshrn s30, d29, #1");
   TEST_SINGLE(uqshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "uqshrn s30, d29, #31");
   //TEST_SINGLE(uqshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "uqshrn d30, d29, #1");
   //TEST_SINGLE(uqshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "uqshrn d30, d29, #63");
 
-  TEST_SINGLE(uqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1),   "uqrshrn b30, h29, #1");
-  TEST_SINGLE(uqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7),   "uqrshrn b30, h29, #7");
-  TEST_SINGLE(uqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1),  "uqrshrn h30, s29, #1");
+  TEST_SINGLE(uqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 1), "uqrshrn b30, h29, #1");
+  TEST_SINGLE(uqrshrn(ScalarRegSize::i8Bit, VReg::v30, VReg::v29, 7), "uqrshrn b30, h29, #7");
+  TEST_SINGLE(uqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 1), "uqrshrn h30, s29, #1");
   TEST_SINGLE(uqrshrn(ScalarRegSize::i16Bit, VReg::v30, VReg::v29, 15), "uqrshrn h30, s29, #15");
-  TEST_SINGLE(uqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1),  "uqrshrn s30, d29, #1");
+  TEST_SINGLE(uqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 1), "uqrshrn s30, d29, #1");
   TEST_SINGLE(uqrshrn(ScalarRegSize::i32Bit, VReg::v30, VReg::v29, 31), "uqrshrn s30, d29, #31");
   //TEST_SINGLE(uqrshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 1),  "uqrshrn d30, d29, #1");
   //TEST_SINGLE(uqrshrn(ScalarRegSize::i64Bit, VReg::v30, VReg::v29, 63), "uqrshrn d30, d29, #63");

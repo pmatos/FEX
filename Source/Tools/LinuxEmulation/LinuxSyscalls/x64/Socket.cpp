@@ -22,7 +22,9 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(recvmmsg, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, struct mmsghdr *msgvec, unsigned int vlen, int flags, struct timespec *timeout) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    recvmmsg,
+    [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, struct mmsghdr *msgvec, unsigned int vlen, int flags, struct timespec *timeout) -> uint64_t {
       uint64_t Result = ::recvmmsg(sockfd, msgvec, vlen, flags, timeout);
       SYSCALL_ERRNO();
     });
@@ -42,12 +44,14 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(setsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, const void *optval, socklen_t optlen) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    setsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, const void *optval, socklen_t optlen) -> uint64_t {
       uint64_t Result = ::setsockopt(sockfd, level, optname, optval, optlen);
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(getsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, void *optval, socklen_t *optlen) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    getsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, void *optval, socklen_t *optlen) -> uint64_t {
       uint64_t Result = ::getsockopt(sockfd, level, optname, optval, optlen);
       SYSCALL_ERRNO();
     });

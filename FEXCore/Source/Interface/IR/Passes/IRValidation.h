@@ -8,28 +8,28 @@
 
 namespace FEXCore::IR::Validation {
 
-struct BlockInfo {
-  bool HasExit;
-  OrderedNode const *BlockNode;
+  struct BlockInfo {
+    bool HasExit;
+    OrderedNode const *BlockNode;
 
-  fextl::vector<OrderedNode*> Predecessors;
-  fextl::vector<OrderedNode*> Successors;
-};
+    fextl::vector<OrderedNode *> Predecessors;
+    fextl::vector<OrderedNode *> Successors;
+  };
 
-class RAValidation;
+  class RAValidation;
 
-class IRValidation final : public FEXCore::IR::Pass {
-public:
-  ~IRValidation();
-  bool Run(IREmitter *IREmit) override;
+  class IRValidation final : public FEXCore::IR::Pass {
+  public:
+    ~IRValidation();
+    bool Run(IREmitter *IREmit) override;
 
-private:
+  private:
 
-  BitSet<uint64_t> NodeIsLive;
-  OrderedNode *EntryBlock;
-  fextl::unordered_map<IR::NodeID, BlockInfo> OffsetToBlockMap;
-  size_t MaxNodes{};
+    BitSet<uint64_t> NodeIsLive;
+    OrderedNode *EntryBlock;
+    fextl::unordered_map<IR::NodeID, BlockInfo> OffsetToBlockMap;
+    size_t MaxNodes{};
 
-  friend class RAValidation;
-};
+    friend class RAValidation;
+  };
 }

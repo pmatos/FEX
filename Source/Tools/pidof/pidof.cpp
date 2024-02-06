@@ -11,64 +11,54 @@
 
 namespace Config {
 
-bool SingleShot{};
-bool SkipZombie{true};
-bool DoNotDisplay{};
-std::string Separator {" "};
-std::unordered_set<int64_t> OmitPids;
-std::unordered_set<std::string> Programs;
+  bool SingleShot{};
+  bool SkipZombie{true};
+  bool DoNotDisplay{};
+  std::string Separator{" "};
+  std::unordered_set<int64_t> OmitPids;
+  std::unordered_set<std::string> Programs;
 
-void LoadOptions(int argc, char **argv) {
-  optparse::OptionParser Parser{};
+  void LoadOptions(int argc, char **argv) {
+    optparse::OptionParser Parser{};
 
-  Parser.add_option("-s")
-    .help("Single shot - Only returns one pid")
-    .action("store_true")
-    .set_default(SingleShot);
+    Parser.add_option("-s").help("Single shot - Only returns one pid").action("store_true").set_default(SingleShot);
 
-  Parser.add_option("-q")
+    Parser.add_option("-q")
     .help("Do not display matched PIDs to stdout. Simply exit with status of true or false if a PID was found")
     .action("store_true")
     .set_default(DoNotDisplay);
 
-  Parser.add_option("-z")
-    .help("Try to detect zombie processes - Usually zombie processes are skipped")
-    .action("store_false")
-    .set_default(SkipZombie);
+    Parser.add_option("-z").help("Try to detect zombie processes - Usually zombie processes are skipped").action("store_false").set_default(SkipZombie);
 
-  Parser.add_option("-d")
-    .help("Use a different separator if more than one pid is show - Default is space")
-    .set_default(Separator);
+    Parser.add_option("-d").help("Use a different separator if more than one pid is show - Default is space").set_default(Separator);
 
-  Parser.add_option("-o")
-    .help("Ignore processes with matched pids")
-    .action("append");
+    Parser.add_option("-o").help("Ignore processes with matched pids").action("append");
 
-  optparse::Values Options = Parser.parse_args(argc, argv);
+    optparse::Values Options = Parser.parse_args(argc, argv);
 
-  SingleShot = Options.get("s");
-  DoNotDisplay = Options.get("q");
-  SkipZombie = Options.get("z");
-  Separator = Options["d"];
+    SingleShot = Options.get("s");
+    DoNotDisplay = Options.get("q");
+    SkipZombie = Options.get("z");
+    Separator = Options["d"];
 
-  for (const auto &Omit: Options.all("o")) {
-    std::istringstream ss{Omit};
-    std::string sub;
-    while (std::getline(ss, sub, ',')) {
-      int64_t pid;
-      auto ConvResult = std::from_chars(sub.data(), sub.data() + sub.size(), pid, 10);
+    for (const auto &Omit : Options.all("o")) {
+      std::istringstream ss{Omit};
+      std::string sub;
+      while (std::getline(ss, sub, ',')) {
+        int64_t pid;
+        auto ConvResult = std::from_chars(sub.data(), sub.data() + sub.size(), pid, 10);
 
-      // Invalid pid, skip.
-      if (ConvResult.ec == std::errc::invalid_argument) continue;
+        // Invalid pid, skip.
+        if (ConvResult.ec == std::errc::invalid_argument) continue;
 
-      OmitPids.emplace(pid);
+        OmitPids.emplace(pid);
+      }
+    }
+
+    for (const auto &Program : Parser.args()) {
+      Programs.emplace(Program);
     }
   }
-
-  for (const auto &Program : Parser.args()) {
-    Programs.emplace(Program);
-  }
-}
 }
 
 struct PIDInfo {
@@ -144,11 +134,11 @@ int main(int argc, char **argv) {
       }
     }
 
-    PIDs.emplace_back(PIDInfo {
-        .pid = pid,
-        .cmdline = CMDLineData.str(),
-        .exe_link = exe_link,
-        .State = State,
+    PIDs.emplace_back(PIDInfo{
+    .pid = pid,
+    .cmdline = CMDLineData.str(),
+    .exe_link = exe_link,
+    .State = State,
     });
   }
 
@@ -180,9 +170,7 @@ int main(int argc, char **argv) {
     bool Matched = false;
     for (const auto &CompareProgram : Config::Programs) {
       auto CompareProgramFilename = std::filesystem::path(CompareProgram).filename();
-      if (CompareProgram == Arg1Program ||
-          CompareProgram == Arg1 ||
-          CompareProgramFilename == Arg1Program) {
+      if (CompareProgram == Arg1Program || CompareProgram == Arg1 || CompareProgramFilename == Arg1Program) {
         MatchedPIDs.emplace(pid.pid);
         Matched = true;
         break;
@@ -200,8 +188,7 @@ int main(int argc, char **argv) {
       if (first) {
         fmt::print("{}", MatchedPID);
         first = false;
-      }
-      else {
+      } else {
         fmt::print("{}{}", Config::Separator, MatchedPID);
       }
     }

@@ -10,19 +10,19 @@ namespace FEXCore::Core {
 }
 
 namespace FEX::Windows {
-/**
+  /**
  * @brief Handles SMC and regular code invalidation
  */
-class InvalidationTracker {
-public:
-  void HandleMemoryProtectionNotification(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, uint64_t Size, ULONG Prot);
-  void InvalidateContainingSection(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, bool Free);
-  void InvalidateAlignedInterval(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, uint64_t Size, bool Free);
-  void ReprotectRWXIntervals(uint64_t Address, uint64_t Size);
-  bool HandleRWXAccessViolation(FEXCore::Core::InternalThreadState *Thread, uint64_t FaultAddress);
+  class InvalidationTracker {
+  public:
+    void HandleMemoryProtectionNotification(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, uint64_t Size, ULONG Prot);
+    void InvalidateContainingSection(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, bool Free);
+    void InvalidateAlignedInterval(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, uint64_t Size, bool Free);
+    void ReprotectRWXIntervals(uint64_t Address, uint64_t Size);
+    bool HandleRWXAccessViolation(FEXCore::Core::InternalThreadState *Thread, uint64_t FaultAddress);
 
-private:
-  IntervalList<uint64_t> RWXIntervals;
-  std::mutex RWXIntervalsLock;
-};
+  private:
+    IntervalList<uint64_t> RWXIntervals;
+    std::mutex RWXIntervalsLock;
+  };
 }

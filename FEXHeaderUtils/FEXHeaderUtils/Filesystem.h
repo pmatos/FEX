@@ -26,18 +26,12 @@ namespace FHU::Filesystem {
    *
    * @return True if the file exists, False if it doesn't.
    */
-  inline bool Exists(const char *Path) {
-    return access(Path, F_OK) == 0;
-  }
+  inline bool Exists(const char *Path) { return access(Path, F_OK) == 0; }
 
-  inline bool Exists(const fextl::string &Path) {
-    return access(Path.c_str(), F_OK) == 0;
-  }
+  inline bool Exists(const fextl::string &Path) { return access(Path.c_str(), F_OK) == 0; }
 
 #ifndef _WIN32
-  inline bool ExistsAt(int FD, const fextl::string &Path) {
-    return faccessat(FD, Path.c_str(), F_OK, 0) == 0;
-  }
+  inline bool ExistsAt(int FD, const fextl::string &Path) { return faccessat(FD, Path.c_str(), F_OK, 0) == 0; }
 #endif
 
   enum class CreateDirectoryResult {
@@ -64,9 +58,7 @@ namespace FHU::Filesystem {
       struct stat buf;
       if (stat(Path.c_str(), &buf) == 0) {
         // Check to see if the path is a file or folder. Following symlinks.
-        return S_ISDIR(buf.st_mode) ?
-          CreateDirectoryResult::EXISTS :
-          CreateDirectoryResult::ERROR;
+        return S_ISDIR(buf.st_mode) ? CreateDirectoryResult::EXISTS : CreateDirectoryResult::ERROR;
       }
     }
 
@@ -80,9 +72,7 @@ namespace FHU::Filesystem {
       return CreateDirectoryResult::EXISTS;
     }
 
-    return std::filesystem::create_directory(Path, ec) ?
-      CreateDirectoryResult::CREATED :
-      CreateDirectoryResult::ERROR;
+    return std::filesystem::create_directory(Path, ec) ? CreateDirectoryResult::CREATED : CreateDirectoryResult::ERROR;
   }
 #endif
 
@@ -100,7 +90,7 @@ namespace FHU::Filesystem {
     }
 
     // Walk the path in reverse and create paths as we go.
-    fextl::string TmpPath {Path.substr(0, Path.rfind('/', Path.size() - 1))};
+    fextl::string TmpPath{Path.substr(0, Path.rfind('/', Path.size() - 1))};
     if (!TmpPath.empty() && CreateDirectories(TmpPath)) {
       return CreateDirectory(Path) != CreateDirectoryResult::ERROR;
     }
@@ -152,13 +142,9 @@ namespace FHU::Filesystem {
     return SubString;
   }
 
-  inline bool IsRelative(const std::string_view Path) {
-    return !Path.starts_with('/');
-  }
+  inline bool IsRelative(const std::string_view Path) { return !Path.starts_with('/'); }
 
-  inline bool IsAbsolute(const std::string_view Path) {
-    return Path.starts_with('/');
-  }
+  inline bool IsAbsolute(const std::string_view Path) { return Path.starts_with('/'); }
 
   enum class CopyOptions {
     NONE,
@@ -230,8 +216,7 @@ namespace FHU::Filesystem {
     std::filesystem::copy_options options{};
     if (Options == CopyOptions::SKIP_EXISTING) {
       options = std::filesystem::copy_options::skip_existing;
-    }
-    else if (Options == CopyOptions::OVERWRITE_EXISTING) {
+    } else if (Options == CopyOptions::OVERWRITE_EXISTING) {
       options = std::filesystem::copy_options::overwrite_existing;
     }
 
@@ -267,10 +252,10 @@ namespace FHU::Filesystem {
     // The list is allocated on stack to be more optimal. The size is determined by the
     // maximum number of list objects (separator count plus 2) multiplied by the list
     // element size (32-bytes per element: the string_view itself and the prev/next pointers).
-    size_t DataSize = (sizeof(std::string_view) + sizeof(void*) * 2) * (SeparatorCount + 2);
+    size_t DataSize = (sizeof(std::string_view) + sizeof(void *) * 2) * (SeparatorCount + 2);
     void *Data = alloca(DataSize);
     fextl::pmr::fixed_size_monotonic_buffer_resource mbr(Data, DataSize);
-    std::pmr::polymorphic_allocator<std::byte>  pa {&mbr};
+    std::pmr::polymorphic_allocator<std::byte> pa{&mbr};
     std::pmr::list<std::string_view> Parts{pa};
 
     size_t CurrentOffset{};
@@ -322,8 +307,7 @@ namespace FHU::Filesystem {
             // Erasing the previous iterator, iterator distance has subtracted by one
             --CurrentIterDistance;
             Parts.erase(PreviousIter);
-          }
-          else if (*PreviousIter != "..") {
+          } else if (*PreviousIter != "..") {
             // Erasing the previous iterator, iterator distance has subtracted by one
             // Also erasing current iterator, which means iterator distance also doesn't increase by one.
             --CurrentIterDistance;
@@ -331,8 +315,7 @@ namespace FHU::Filesystem {
             iter = Parts.erase(iter);
             continue;
           }
-        }
-        else if (IsAbsolutePath) {
+        } else if (IsAbsolutePath) {
           // `..` at the base. Just remove this
           iter = Parts.erase(iter);
           continue;
@@ -347,16 +330,11 @@ namespace FHU::Filesystem {
 
     // Add a final separator unless the last element is ellipses.
     const bool NeedsFinalSeparator = EndsWithSeparator && (!Parts.empty() && Parts.back() != "." && Parts.back() != "..");
-    return fextl::fmt::format("{}{}{}",
-      IsAbsolutePath ? "/" : "",
-      fmt::join(Parts, "/"),
-      NeedsFinalSeparator ? "/" : "");
+    return fextl::fmt::format("{}{}{}", IsAbsolutePath ? "/" : "", fmt::join(Parts, "/"), NeedsFinalSeparator ? "/" : "");
   }
 
 #ifndef _WIN32
-  inline char *Absolute(const char *Path, char Fill[PATH_MAX]) {
-    return realpath(Path, Fill);
-  }
+  inline char *Absolute(const char *Path, char Fill[PATH_MAX]) { return realpath(Path, Fill); }
 #else
   inline char *Absolute(const char *Path, char Fill[PATH_MAX]) {
     std::error_code ec;

@@ -6,7 +6,7 @@
 namespace FEXCore::CPU {
   class CPUBackend;
 }
-namespace FEXCore::Context{
+namespace FEXCore::Context {
   class Context;
 }
 namespace FEXCore::Core {

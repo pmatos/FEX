@@ -52,70 +52,66 @@ namespace FHU::Syscalls {
 #endif
 
 #ifndef _WIN32
-inline int32_t getcpu(uint32_t *cpu, uint32_t *node) {
-  // Third argument is unused
+  inline int32_t getcpu(uint32_t *cpu, uint32_t *node) {
+    // Third argument is unused
 #if defined(HAS_SYSCALL_GETCPU) && HAS_SYSCALL_GETCPU
-  return ::getcpu(cpu, node);
+    return ::getcpu(cpu, node);
 #else
-  return ::syscall(SYS_getcpu, cpu, node, nullptr);
+    return ::syscall(SYS_getcpu, cpu, node, nullptr);
 #endif
-}
+  }
 
-inline int32_t gettid() {
+  inline int32_t gettid() {
 #if defined(HAS_SYSCALL_GETTID) && HAS_SYSCALL_GETTID
-  return ::gettid();
+    return ::gettid();
 #else
-  return ::syscall(SYS_gettid);
+    return ::syscall(SYS_gettid);
 #endif
-}
+  }
 
-inline int32_t tgkill(pid_t tgid, pid_t tid, int sig) {
+  inline int32_t tgkill(pid_t tgid, pid_t tid, int sig) {
 #if defined(HAS_SYSCALL_TGKILL) && HAS_SYSCALL_TGKILL
-  return ::tgkill(tgid, tid, sig);
+    return ::tgkill(tgid, tid, sig);
 #else
-  return ::syscall(SYS_tgkill, tgid, tid, sig);
+    return ::syscall(SYS_tgkill, tgid, tid, sig);
 #endif
-}
-
-inline int32_t statx(int dirfd, const char *pathname, int32_t flags, uint32_t mask, void *statxbuf) {
-#if defined(HAS_SYSCALL_STATX) && HAS_SYSCALL_STATX
-  return ::statx(dirfd, pathname, flags, mask, reinterpret_cast<struct statx *__restrict>(statxbuf));
-#else
-  return ::syscall(SYS_statx, dirfd, pathname, flags, mask, statxbuf);
-#endif
-}
-
-inline int32_t renameat2(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, unsigned int flags) {
-#if defined(HAS_SYSCALL_STATX) && HAS_SYSCALL_STATX
-  return ::renameat2(olddirfd, oldpath, newdirfd, newpath, flags);
-#else
-  return ::syscall(SYS_renameat2, olddirfd, oldpath, newdirfd, newpath, flags);
-#endif
-}
-
-inline int32_t pidfd_open(pid_t pid, unsigned int flags) {
-  return ::syscall(SYS_pidfd_open, pid, flags);
-}
-#else
-
-inline int32_t getcpu(uint32_t *cpu, uint32_t *node) {
-  if (cpu) {
-    *cpu = GetCurrentProcessorNumber();
   }
-  if (node) {
-    *node = 0;
+
+  inline int32_t statx(int dirfd, const char *pathname, int32_t flags, uint32_t mask, void *statxbuf) {
+#if defined(HAS_SYSCALL_STATX) && HAS_SYSCALL_STATX
+    return ::statx(dirfd, pathname, flags, mask, reinterpret_cast<struct statx * __restrict>(statxbuf));
+#else
+    return ::syscall(SYS_statx, dirfd, pathname, flags, mask, statxbuf);
+#endif
   }
-  return 0;
-}
 
-inline int32_t tgkill(pid_t tgid, pid_t tid, int sig) {
-  ERROR_AND_DIE_FMT("Unsupported");
-  return 0;
-}
+  inline int32_t renameat2(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, unsigned int flags) {
+#if defined(HAS_SYSCALL_STATX) && HAS_SYSCALL_STATX
+    return ::renameat2(olddirfd, oldpath, newdirfd, newpath, flags);
+#else
+    return ::syscall(SYS_renameat2, olddirfd, oldpath, newdirfd, newpath, flags);
+#endif
+  }
 
-inline int32_t gettid() {
-  return GetCurrentThreadId();
-}
+  inline int32_t pidfd_open(pid_t pid, unsigned int flags) { return ::syscall(SYS_pidfd_open, pid, flags); }
+#else
+
+  inline int32_t getcpu(uint32_t *cpu, uint32_t *node) {
+    if (cpu) {
+      *cpu = GetCurrentProcessorNumber();
+    }
+    if (node) {
+      *node = 0;
+    }
+    return 0;
+  }
+
+  inline int32_t tgkill(pid_t tgid, pid_t tid, int sig) {
+    ERROR_AND_DIE_FMT("Unsupported");
+    return 0;
+  }
+
+  inline int32_t gettid() { return GetCurrentThreadId(); }
 
 #endif
 

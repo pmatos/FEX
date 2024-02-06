@@ -30,7 +30,7 @@ namespace FEX::FormatCheck {
       return false;
     }
 
-    if (pread(fd, reinterpret_cast<char*>(&Header), sizeof(SquashFSHeader), 0) != sizeof(SquashFSHeader)) {
+    if (pread(fd, reinterpret_cast<char *>(&Header), sizeof(SquashFSHeader), 0) != sizeof(SquashFSHeader)) {
       close(fd);
       return false;
     }
@@ -69,7 +69,7 @@ namespace FEX::FormatCheck {
       return false;
     }
 
-    if (pread(fd, reinterpret_cast<char*>(&Header), sizeof(EroFSHeader), HEADER_OFFSET) != sizeof(EroFSHeader)) {
+    if (pread(fd, reinterpret_cast<char *>(&Header), sizeof(EroFSHeader), HEADER_OFFSET) != sizeof(EroFSHeader)) {
       close(fd);
       return false;
     }

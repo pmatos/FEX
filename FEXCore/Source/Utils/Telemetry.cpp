@@ -14,28 +14,28 @@
 
 namespace FEXCore::Telemetry {
 #ifndef FEX_DISABLE_TELEMETRY
-  static std::array<Value, FEXCore::Telemetry::TelemetryType::TYPE_LAST> TelemetryValues = {{ }};
-  const std::array<std::string_view, FEXCore::Telemetry::TelemetryType::TYPE_LAST> TelemetryNames {
-    "64byte Split Locks",
-    "16byte Split atomics",
-    "VEX instructions (AVX)",
-    "EVEX instructions (AVX512)",
-    "16bit CAS Tear",
-    "32bit CAS Tear",
-    "64bit CAS Tear",
-    "128bit CAS Tear",
-    "Crash mask",
-    "Write 32-bit Segment ES",
-    "Write 32-bit Segment SS",
-    "Write 32-bit Segment CS",
-    "Write 32-bit Segment DS",
-    "Uses 32-bit Segment ES",
-    "Uses 32-bit Segment SS",
-    "Uses 32-bit Segment CS",
-    "Uses 32-bit Segment DS",
+  static std::array<Value, FEXCore::Telemetry::TelemetryType::TYPE_LAST> TelemetryValues = {{}};
+  const std::array<std::string_view, FEXCore::Telemetry::TelemetryType::TYPE_LAST> TelemetryNames{
+  "64byte Split Locks",
+  "16byte Split atomics",
+  "VEX instructions (AVX)",
+  "EVEX instructions (AVX512)",
+  "16bit CAS Tear",
+  "32bit CAS Tear",
+  "64bit CAS Tear",
+  "128bit CAS Tear",
+  "Crash mask",
+  "Write 32-bit Segment ES",
+  "Write 32-bit Segment SS",
+  "Write 32-bit Segment CS",
+  "Write 32-bit Segment DS",
+  "Uses 32-bit Segment ES",
+  "Uses 32-bit Segment SS",
+  "Uses 32-bit Segment CS",
+  "Uses 32-bit Segment DS",
   };
 
-  static bool Enabled {true};
+  static bool Enabled{true};
   void Initialize() {
     FEX_CONFIG_OPT(DisableTelemetry, DISABLETELEMETRY);
     if (DisableTelemetry) {
@@ -47,8 +47,7 @@ namespace FEXCore::Telemetry {
     DataDirectory += "Telemetry/";
 
     // Ensure the folder structure is created for our configuration
-    if (!FHU::Filesystem::Exists(DataDirectory) &&
-        !FHU::Filesystem::CreateDirectories(DataDirectory)) {
+    if (!FHU::Filesystem::Exists(DataDirectory) && !FHU::Filesystem::CreateDirectories(DataDirectory)) {
       LogMan::Msg::IFmt("Couldn't create telemetry Folder");
     }
   }
@@ -67,10 +66,8 @@ namespace FEXCore::Telemetry {
       FHU::Filesystem::CopyFile(DataDirectory, Backup, FHU::Filesystem::CopyOptions::OVERWRITE_EXISTING);
     }
 
-    auto File = FEXCore::File::File(DataDirectory.c_str(),
-         FEXCore::File::FileModes::WRITE |
-         FEXCore::File::FileModes::CREATE |
-         FEXCore::File::FileModes::TRUNCATE);
+    auto File =
+    FEXCore::File::File(DataDirectory.c_str(), FEXCore::File::FileModes::WRITE | FEXCore::File::FileModes::CREATE | FEXCore::File::FileModes::TRUNCATE);
 
     if (File.IsValid()) {
       for (size_t i = 0; i < TelemetryType::TYPE_LAST; ++i) {
@@ -82,8 +79,6 @@ namespace FEXCore::Telemetry {
     }
   }
 
-  Value &GetTelemetryValue(TelemetryType Type) {
-    return TelemetryValues.at(Type);
-  }
+  Value &GetTelemetryValue(TelemetryType Type) { return TelemetryValues.at(Type); }
 #endif
 }

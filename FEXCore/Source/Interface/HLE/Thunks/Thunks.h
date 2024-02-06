@@ -24,16 +24,16 @@ namespace FEXCore::IR {
 }
 
 namespace FEXCore {
-    typedef void ThunkedFunction(void* ArgsRv);
+  typedef void ThunkedFunction(void* ArgsRv);
 
-    class ThunkHandler {
-    public:
-      virtual ThunkedFunction* LookupThunk(const IR::SHA256Sum &sha256) = 0;
-      virtual void RegisterTLSState(FEXCore::Core::InternalThreadState *Thread) = 0;
-      virtual ~ThunkHandler() { }
+  class ThunkHandler {
+  public:
+    virtual ThunkedFunction* LookupThunk(const IR::SHA256Sum& sha256) = 0;
+    virtual void RegisterTLSState(FEXCore::Core::InternalThreadState* Thread) = 0;
+    virtual ~ThunkHandler() {}
 
-      static fextl::unique_ptr<ThunkHandler> Create();
+    static fextl::unique_ptr<ThunkHandler> Create();
 
-      virtual void AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const& Definitions) = 0;
-    };
+    virtual void AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const& Definitions) = 0;
+  };
 };

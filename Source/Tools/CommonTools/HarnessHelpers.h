@@ -27,11 +27,7 @@
 #include <unistd.h>
 
 namespace FEX::HarnessHelper {
-  inline bool CompareStates(FEXCore::Core::CPUState const& State1,
-                            FEXCore::Core::CPUState const& State2,
-                            uint64_t MatchMask,
-                            bool OutputGPRs,
-                            bool SupportsAVX) {
+  inline bool CompareStates(FEXCore::Core::CPUState const& State1, FEXCore::Core::CPUState const& State2, uint64_t MatchMask, bool OutputGPRs, bool SupportsAVX) {
     bool Matches = true;
 
     const auto DumpGPRs = [OutputGPRs](const fextl::string& Name, uint64_t A, uint64_t B) {
@@ -42,10 +38,10 @@ namespace FEX::HarnessHelper {
         return;
       }
 
-      fextl::fmt::print("{}: 0x{:016x} {} 0x{:016x}\n", Name, A, A==B ? "==" : "!=", B);
+      fextl::fmt::print("{}: 0x{:016x} {} 0x{:016x}\n", Name, A, A == B ? "==" : "!=", B);
     };
 
-    const auto CheckGPRs = [&Matches, DumpGPRs](const fextl::string& Name, uint64_t A, uint64_t B){
+    const auto CheckGPRs = [&Matches, DumpGPRs](const fextl::string& Name, uint64_t A, uint64_t B) {
       DumpGPRs(Name, A, B);
       Matches &= A == B;
     };
@@ -97,7 +93,7 @@ namespace FEX::HarnessHelper {
 
   class ConfigLoader final {
   public:
-    void Init(fextl::string const &ConfigFilename) {
+    void Init(fextl::string const& ConfigFilename) {
       FEXCore::FileLoading::LoadFile(RawConfigFile, ConfigFilename);
       memcpy(&BaseConfig, RawConfigFile.data(), sizeof(ConfigStructBase));
       GetEnvironmentOptions();
@@ -126,115 +122,115 @@ namespace FEX::HarnessHelper {
 
       if (BaseConfig.OptionRegDataCount > 0) {
         static constexpr std::array<uint64_t, 44> OffsetArrayAVX = {{
-          offsetof(FEXCore::Core::CPUState, rip),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RAX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RCX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSI]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDI]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBP]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSP]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R8]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R9]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R10]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R11]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R12]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R13]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R14]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R15]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[0][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[1][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[2][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[3][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[4][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[5][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[6][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[7][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[8][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[9][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[10][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[11][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[12][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[13][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[14][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.avx.data[15][0]),
-          offsetof(FEXCore::Core::CPUState, gs_cached),
-          offsetof(FEXCore::Core::CPUState, fs_cached),
-          offsetof(FEXCore::Core::CPUState, mm[0][0]),
-          offsetof(FEXCore::Core::CPUState, mm[1][0]),
-          offsetof(FEXCore::Core::CPUState, mm[2][0]),
-          offsetof(FEXCore::Core::CPUState, mm[3][0]),
-          offsetof(FEXCore::Core::CPUState, mm[4][0]),
-          offsetof(FEXCore::Core::CPUState, mm[5][0]),
-          offsetof(FEXCore::Core::CPUState, mm[6][0]),
-          offsetof(FEXCore::Core::CPUState, mm[7][0]),
-          offsetof(FEXCore::Core::CPUState, mm[8][0]),
+        offsetof(FEXCore::Core::CPUState, rip),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RAX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RCX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSI]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDI]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBP]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSP]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R8]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R9]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R10]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R11]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R12]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R13]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R14]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R15]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[0][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[1][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[2][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[3][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[4][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[5][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[6][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[7][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[8][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[9][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[10][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[11][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[12][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[13][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[14][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.avx.data[15][0]),
+        offsetof(FEXCore::Core::CPUState, gs_cached),
+        offsetof(FEXCore::Core::CPUState, fs_cached),
+        offsetof(FEXCore::Core::CPUState, mm[0][0]),
+        offsetof(FEXCore::Core::CPUState, mm[1][0]),
+        offsetof(FEXCore::Core::CPUState, mm[2][0]),
+        offsetof(FEXCore::Core::CPUState, mm[3][0]),
+        offsetof(FEXCore::Core::CPUState, mm[4][0]),
+        offsetof(FEXCore::Core::CPUState, mm[5][0]),
+        offsetof(FEXCore::Core::CPUState, mm[6][0]),
+        offsetof(FEXCore::Core::CPUState, mm[7][0]),
+        offsetof(FEXCore::Core::CPUState, mm[8][0]),
         }};
         static constexpr std::array<uint64_t, 44> OffsetArraySSE = {{
-          offsetof(FEXCore::Core::CPUState, rip),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RAX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RCX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDX]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSI]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDI]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBP]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSP]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R8]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R9]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R10]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R11]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R12]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R13]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R14]),
-          offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R15]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[0][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[1][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[2][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[3][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[4][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[5][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[6][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[7][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[8][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[9][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[10][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[11][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[12][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[13][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[14][0]),
-          offsetof(FEXCore::Core::CPUState, xmm.sse.data[15][0]),
-          offsetof(FEXCore::Core::CPUState, gs_cached),
-          offsetof(FEXCore::Core::CPUState, fs_cached),
-          offsetof(FEXCore::Core::CPUState, mm[0][0]),
-          offsetof(FEXCore::Core::CPUState, mm[1][0]),
-          offsetof(FEXCore::Core::CPUState, mm[2][0]),
-          offsetof(FEXCore::Core::CPUState, mm[3][0]),
-          offsetof(FEXCore::Core::CPUState, mm[4][0]),
-          offsetof(FEXCore::Core::CPUState, mm[5][0]),
-          offsetof(FEXCore::Core::CPUState, mm[6][0]),
-          offsetof(FEXCore::Core::CPUState, mm[7][0]),
-          offsetof(FEXCore::Core::CPUState, mm[8][0]),
+        offsetof(FEXCore::Core::CPUState, rip),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RAX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RCX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDX]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSI]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RDI]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RBP]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_RSP]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R8]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R9]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R10]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R11]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R12]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R13]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R14]),
+        offsetof(FEXCore::Core::CPUState, gregs[FEXCore::X86State::REG_R15]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[0][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[1][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[2][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[3][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[4][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[5][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[6][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[7][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[8][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[9][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[10][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[11][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[12][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[13][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[14][0]),
+        offsetof(FEXCore::Core::CPUState, xmm.sse.data[15][0]),
+        offsetof(FEXCore::Core::CPUState, gs_cached),
+        offsetof(FEXCore::Core::CPUState, fs_cached),
+        offsetof(FEXCore::Core::CPUState, mm[0][0]),
+        offsetof(FEXCore::Core::CPUState, mm[1][0]),
+        offsetof(FEXCore::Core::CPUState, mm[2][0]),
+        offsetof(FEXCore::Core::CPUState, mm[3][0]),
+        offsetof(FEXCore::Core::CPUState, mm[4][0]),
+        offsetof(FEXCore::Core::CPUState, mm[5][0]),
+        offsetof(FEXCore::Core::CPUState, mm[6][0]),
+        offsetof(FEXCore::Core::CPUState, mm[7][0]),
+        offsetof(FEXCore::Core::CPUState, mm[8][0]),
         }};
 
         uintptr_t DataOffset = BaseConfig.OptionRegDataOffset;
         for (unsigned i = 0; i < BaseConfig.OptionRegDataCount; ++i) {
-          RegDataStructBase *RegData = reinterpret_cast<RegDataStructBase*>(RawConfigFile.data() + DataOffset);
+          RegDataStructBase* RegData = reinterpret_cast<RegDataStructBase*>(RawConfigFile.data() + DataOffset);
           [[maybe_unused]] std::bitset<64> RegFlags = RegData->RegKey;
-          assert(RegFlags.count() == 1  && "Must set reg data explicitly per register");
+          assert(RegFlags.count() == 1 && "Must set reg data explicitly per register");
 
           size_t NameIndex = FEXCore::FindFirstSetBit(RegData->RegKey) - 1;
           auto Offset = SupportsAVX ? OffsetArrayAVX[NameIndex] : OffsetArraySSE[NameIndex];
-          uint64_t *State1Data = reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(State1) + Offset);
-          uint64_t *State2Data = reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(State2) + Offset);
+          uint64_t* State1Data = reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(State1) + Offset);
+          uint64_t* State2Data = reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(State2) + Offset);
 
           const auto DumpGPRs = [this](const fextl::string& Name, uint64_t A, uint64_t B) {
             if (!ConfigDumpGPRs()) {
               return;
             }
 
-            fextl::fmt::print("{}: 0x{:016x} {} 0x{:016x} (Expected)\n", Name, A, A==B ? "==" : "!=", B);
+            fextl::fmt::print("{}: 0x{:016x} {} 0x{:016x} (Expected)\n", Name, A, A == B ? "==" : "!=", B);
           };
 
           const auto CheckGPRs = [&Matches, DumpGPRs](const fextl::string& Name, uint64_t A, uint64_t B) {
@@ -253,7 +249,7 @@ namespace FEX::HarnessHelper {
             else if (NameIndex == 33)
               Name = "gs";
             else if (NameIndex == 34)
-              Name ="fs";
+              Name = "fs";
             else if (NameIndex == 35)
               Name = "rflags";
             else if (NameIndex >= 36 && NameIndex < 45)
@@ -279,7 +275,7 @@ namespace FEX::HarnessHelper {
 
       uintptr_t DataOffset = BaseConfig.OptionMemoryRegionOffset;
       for (unsigned i = 0; i < BaseConfig.OptionMemoryRegionCount; ++i) {
-        MemoryRegionBase *Region = reinterpret_cast<MemoryRegionBase*>(RawConfigFile.data() + DataOffset);
+        MemoryRegionBase* Region = reinterpret_cast<MemoryRegionBase*>(RawConfigFile.data() + DataOffset);
         regions[Region->Region] = Region->Size;
 
         DataOffset += sizeof(MemoryRegionBase);
@@ -291,7 +287,7 @@ namespace FEX::HarnessHelper {
     void LoadMemory() {
       uintptr_t DataOffset = BaseConfig.OptionMemDataOffset;
       for (unsigned i = 0; i < BaseConfig.OptionMemDataCount; ++i) {
-        MemDataStructBase *MemData = reinterpret_cast<MemDataStructBase*>(RawConfigFile.data() + DataOffset);
+        MemDataStructBase* MemData = reinterpret_cast<MemDataStructBase*>(RawConfigFile.data() + DataOffset);
         memcpy(reinterpret_cast<void*>(MemData->address), &MemData->data, MemData->length);
         DataOffset += sizeof(MemDataStructBase) + MemData->length;
       }
@@ -300,31 +296,31 @@ namespace FEX::HarnessHelper {
     bool Is64BitMode() const { return BaseConfig.OptionMode == 1; }
 
     enum HostFeatures {
-      FEATURE_ANY    = 0,
-      FEATURE_3DNOW  = (1 << 0),
-      FEATURE_SSE4A  = (1 << 1),
-      FEATURE_AVX    = (1 << 2),
-      FEATURE_RAND   = (1 << 3),
-      FEATURE_SHA    = (1 << 4),
+      FEATURE_ANY = 0,
+      FEATURE_3DNOW = (1 << 0),
+      FEATURE_SSE4A = (1 << 1),
+      FEATURE_AVX = (1 << 2),
+      FEATURE_RAND = (1 << 3),
+      FEATURE_SHA = (1 << 4),
       FEATURE_CLZERO = (1 << 5),
-      FEATURE_BMI1   = (1 << 6),
-      FEATURE_BMI2   = (1 << 7),
-      FEATURE_CLWB   = (1 << 8),
-      FEATURE_LINUX  = (1 << 9),
-      FEATURE_AVX2   = (1 << 10),
+      FEATURE_BMI1 = (1 << 6),
+      FEATURE_BMI2 = (1 << 7),
+      FEATURE_CLWB = (1 << 8),
+      FEATURE_LINUX = (1 << 9),
+      FEATURE_AVX2 = (1 << 10),
     };
 
-    bool Requires3DNow()  const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_3DNOW; }
-    bool RequiresSSE4A()  const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_SSE4A; }
-    bool RequiresAVX()    const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_AVX; }
-    bool RequiresAVX2()   const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_AVX2; }
-    bool RequiresRAND()   const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_RAND; }
-    bool RequiresSHA()    const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_SHA; }
+    bool Requires3DNow() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_3DNOW; }
+    bool RequiresSSE4A() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_SSE4A; }
+    bool RequiresAVX() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_AVX; }
+    bool RequiresAVX2() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_AVX2; }
+    bool RequiresRAND() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_RAND; }
+    bool RequiresSHA() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_SHA; }
     bool RequiresCLZERO() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_CLZERO; }
-    bool RequiresBMI1()   const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_BMI1; }
-    bool RequiresBMI2()   const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_BMI2; }
-    bool RequiresCLWB()   const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_CLWB; }
-    bool RequiresLinux()  const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_LINUX; }
+    bool RequiresBMI1() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_BMI1; }
+    bool RequiresBMI2() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_BMI2; }
+    bool RequiresCLWB() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_CLWB; }
+    bool RequiresLinux() const { return BaseConfig.OptionHostFeatures & HostFeatures::FEATURE_LINUX; }
 
   private:
     FEX_CONFIG_OPT(ConfigDumpGPRs, DUMPGPRS);
@@ -345,7 +341,7 @@ namespace FEX::HarnessHelper {
       uint32_t OptionMemDataCount;
       uint32_t OptionEnvOptionOffset;
       uint32_t OptionEnvOptionCount;
-      uint8_t  AdditionalData[];
+      uint8_t AdditionalData[];
     } FEX_PACKED;
 
     struct MemoryRegionBase {
@@ -372,35 +368,30 @@ namespace FEX::HarnessHelper {
   class HarnessCodeLoader final : public FEXCore::CodeLoader {
   public:
 
-    HarnessCodeLoader(fextl::string const &Filename, fextl::string const &ConfigFilename) {
+    HarnessCodeLoader(fextl::string const& Filename, fextl::string const& ConfigFilename) {
       FEXCore::FileLoading::LoadFile(RawASMFile, Filename);
 
       Config.Init(ConfigFilename);
     }
 
-    uint64_t StackSize() const override {
-      return sysconf(_SC_PAGESIZE);
-    }
+    uint64_t StackSize() const override { return sysconf(_SC_PAGESIZE); }
 
     uint64_t GetStackPointer() override {
       if (Config.Is64BitMode()) {
         return reinterpret_cast<uint64_t>(FEXCore::Allocator::VirtualAlloc(StackSize())) + StackSize();
-      }
-      else {
+      } else {
         uint64_t Result = reinterpret_cast<uint64_t>(FEXCore::Allocator::VirtualAlloc(reinterpret_cast<void*>(STACK_OFFSET), StackSize()));
         LOGMAN_THROW_AA_FMT(Result != ~0ULL, "Stack Pointer mmap failed");
         return Result + StackSize();
       }
     }
 
-    uint64_t DefaultRIP() const override {
-      return RIP;
-    }
+    uint64_t DefaultRIP() const override { return RIP; }
 
     bool MapMemory() {
       bool LimitedSize = true;
       auto DoMMap = [](uint64_t Address, size_t Size) -> void* {
-        void *Result = FEXCore::Allocator::VirtualAlloc(reinterpret_cast<void*>(Address), Size, true);
+        void* Result = FEXCore::Allocator::VirtualAlloc(reinterpret_cast<void*>(Address), Size, true);
         LOGMAN_THROW_AA_FMT(Result == reinterpret_cast<void*>(Address), "Map Memory mmap failed");
         return Result;
       };
@@ -415,8 +406,7 @@ namespace FEX::HarnessHelper {
         // We test [120, 127] (Top)
         // Can fit in two pages
         DoMMap(0xe800'0000 - AllocPageSize, AllocPageSize * 2);
-      }
-      else {
+      } else {
         // This is scratch memory location and SIB8 location
         DoMMap(0xe000'0000, 0x1000'0000);
         // This is for large SIB 32bit displacement testing
@@ -451,32 +441,30 @@ namespace FEX::HarnessHelper {
       Config.LoadMemory();
     }
 
-    fextl::vector<std::pair<std::string_view, std::string_view>> GetEnvironmentOptions() {
-      return Config.GetEnvironmentOptions();
-    }
+    fextl::vector<std::pair<std::string_view, std::string_view>> GetEnvironmentOptions() { return Config.GetEnvironmentOptions(); }
 
     bool CompareStates(FEXCore::Core::CPUState const* State1, FEXCore::Core::CPUState const* State2, bool SupportsAVX) {
       return Config.CompareStates(State1, State2, SupportsAVX);
     }
 
     bool Is64BitMode() const { return Config.Is64BitMode(); }
-    bool Requires3DNow()  const { return Config.Requires3DNow(); }
-    bool RequiresSSE4A()  const { return Config.RequiresSSE4A(); }
-    bool RequiresAVX()    const { return Config.RequiresAVX(); }
-    bool RequiresAVX2()   const { return Config.RequiresAVX2(); }
-    bool RequiresRAND()   const { return Config.RequiresRAND(); }
-    bool RequiresSHA()    const { return Config.RequiresSHA(); }
+    bool Requires3DNow() const { return Config.Requires3DNow(); }
+    bool RequiresSSE4A() const { return Config.RequiresSSE4A(); }
+    bool RequiresAVX() const { return Config.RequiresAVX(); }
+    bool RequiresAVX2() const { return Config.RequiresAVX2(); }
+    bool RequiresRAND() const { return Config.RequiresRAND(); }
+    bool RequiresSHA() const { return Config.RequiresSHA(); }
     bool RequiresCLZERO() const { return Config.RequiresCLZERO(); }
-    bool RequiresBMI1()   const { return Config.RequiresBMI1(); }
-    bool RequiresBMI2()   const { return Config.RequiresBMI2(); }
-    bool RequiresCLWB()   const { return Config.RequiresCLWB(); }
-    bool RequiresLinux()  const { return Config.RequiresLinux(); }
+    bool RequiresBMI1() const { return Config.RequiresBMI1(); }
+    bool RequiresBMI2() const { return Config.RequiresBMI2(); }
+    bool RequiresCLWB() const { return Config.RequiresCLWB(); }
+    bool RequiresLinux() const { return Config.RequiresLinux(); }
 
   private:
     constexpr static uint64_t STACK_OFFSET = 0xc000'0000;
     // Zero is special case to know when we are done
     uint64_t Code_start_page = 0x1'0000;
-    uint64_t RIP {};
+    uint64_t RIP{};
 
     fextl::vector<char> RawASMFile;
     ConfigLoader Config;

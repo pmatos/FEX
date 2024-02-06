@@ -9,19 +9,17 @@
 
 #include <sys/mman.h>
 
-class TestDisassembler : public FEXCore::ARMEmitter::Emitter  {
+class TestDisassembler : public FEXCore::ARMEmitter::Emitter {
 public:
   TestDisassembler() {
     fp = tmpfile();
     Disasm = std::make_unique<vixl::aarch64::PrintDisassembler>(fp);
     // 2MB code size.
     const size_t CodeSize = 2 * 1024 * 1024;
-    SetBuffer(reinterpret_cast<uint8_t*>(mmap(nullptr, CodeSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0)), CodeSize);
-    BufferBegin = GetCursorAddress<const vixl::aarch64::Instruction*>();
+    SetBuffer(reinterpret_cast<uint8_t *>(mmap(nullptr, CodeSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0)), CodeSize);
+    BufferBegin = GetCursorAddress<const vixl::aarch64::Instruction *>();
   }
-  ~TestDisassembler() {
-    fclose(fp);
-  }
+  ~TestDisassembler() { fclose(fp); }
 
   fextl::string DisassembleSingle() {
     HandleDisasm();
@@ -38,7 +36,7 @@ public:
   }
 
   uint32_t DisassembleEncoding(size_t Offset = 0) {
-    const uint32_t *Values = reinterpret_cast<const uint32_t*>(GetBufferBase());
+    const uint32_t *Values = reinterpret_cast<const uint32_t *>(GetBufferBase());
     SetCursorOffset(0);
     ResetFP();
     return Values[Offset];
@@ -60,20 +58,16 @@ public:
   }
 private:
   void HandleDisasm() {
-    const auto BufferEnd = GetCursorAddress<const vixl::aarch64::Instruction*>();
+    const auto BufferEnd = GetCursorAddress<const vixl::aarch64::Instruction *>();
     Disasm->DisassembleBuffer(BufferBegin, BufferEnd);
     SetCursorOffset(0);
     fseek(fp, 0, SEEK_SET);
   }
-  void ResetFP() {
-    fseek(fp, 0, SEEK_SET);
-  }
+  void ResetFP() { fseek(fp, 0, SEEK_SET); }
   FILE *fp;
-  const vixl::aarch64::Instruction* BufferBegin;
+  const vixl::aarch64::Instruction *BufferBegin;
   std::unique_ptr<vixl::aarch64::PrintDisassembler> Disasm;
 };
 
 #define TEST_SINGLE(emit, expected) \
-{ \
-  CHECK((emit, DisassembleSingle()) == expected); \
-}
+  { CHECK((emit, DisassembleSingle()) == expected); }

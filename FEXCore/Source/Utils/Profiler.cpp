@@ -20,10 +20,7 @@
 #ifdef ENABLE_FEXCORE_PROFILER
 #if FEXCORE_PROFILER_BACKEND == BACKEND_GPUVIS
 namespace FEXCore::Profiler {
-  ProfilerBlock::ProfilerBlock(std::string_view const Format)
-    : DurationBegin {GetTime()}
-    , Format {Format} {
-    }
+  ProfilerBlock::ProfilerBlock(std::string_view const Format) : DurationBegin{GetTime()}, Format{Format} {}
 
   ProfilerBlock::~ProfilerBlock() {
     auto Duration = GetTime() - DurationBegin;
@@ -34,12 +31,12 @@ namespace FEXCore::Profiler {
 namespace GPUVis {
   // ftrace FD for writing trace data.
   // Needs to be a raw FD since we hold this open for the entire application execution.
-  static int TraceFD {-1};
+  static int TraceFD{-1};
 
   // Need to search the paths to find the real trace path
-  static std::array<char const*, 2> TraceFSDirectories {
-    "/sys/kernel/tracing",
-    "/sys/kernel/debug/tracing",
+  static std::array<char const*, 2> TraceFSDirectories{
+  "/sys/kernel/tracing",
+  "/sys/kernel/debug/tracing",
   };
 
   static bool IsTraceFS(char const* Path) {
@@ -114,7 +111,6 @@ namespace FEXCore::Profiler {
 #if FEXCORE_PROFILER_BACKEND == BACKEND_GPUVIS
     GPUVis::TraceObject(Format);
 #endif
-
   }
 #endif
 }

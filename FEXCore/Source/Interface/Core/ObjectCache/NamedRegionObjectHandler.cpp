@@ -24,7 +24,8 @@ namespace FEXCore::CodeSerialize {
     DefaultSerializationConfig.x87ReducedPrecision = ctx->Config.x87ReducedPrecision;
   }
 
-  void NamedRegionObjectHandler::AddNamedRegionObject(CodeRegionMapType::iterator Entry, const fextl::string &base_filename, const fextl::string &filename, bool Executable) {
+  void NamedRegionObjectHandler::AddNamedRegionObject(
+  CodeRegionMapType::iterator Entry, const fextl::string &base_filename, const fextl::string &filename, bool Executable) {
     // XXX: Add named region objects
 
     // XXX: Until entry loading is complete just claim it is loaded
@@ -45,7 +46,7 @@ namespace FEXCore::CodeSerialize {
 
       {
         // Lock the work queue mutex for a short moment and grab an item from the list
-        std::unique_lock lk {NamedWorkQueueMutex};
+        std::unique_lock lk{NamedWorkQueueMutex};
         size_t WorkItems = WorkQueue.size();
         if (WorkItems != 0) {
           WorkItem = std::move(WorkQueue.front());

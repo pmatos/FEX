@@ -46,12 +46,7 @@ struct FEX_PACKED X80SoftFloat {
   uint16_t Sign        : 1;
 
   X80SoftFloat() { memset(this, 0, sizeof(*this)); }
-  X80SoftFloat(uint16_t _Sign, uint16_t _Exponent, uint64_t _Significand)
-    : Significand {_Significand}
-    , Exponent {_Exponent}
-    , Sign {_Sign}
-    {
-  }
+  X80SoftFloat(uint16_t _Sign, uint16_t _Exponent, uint64_t _Significand) : Significand{_Significand}, Exponent{_Exponent}, Sign{_Sign} {}
 
   fextl::string str() const {
     fextl::ostringstream string;
@@ -67,16 +62,16 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FADD(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
     faddp;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -89,16 +84,16 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FSUB(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
     fsubp;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -111,16 +106,16 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FMUL(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
     fmulp;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -133,16 +128,16 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FDIV(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
     fdivp;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -155,7 +150,8 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FREM(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #if defined(DEBUG_X86_FLOAT)
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
@@ -163,9 +159,8 @@ struct FEX_PACKED X80SoftFloat {
     fstpt %[result];
     ffreep %%st(0);
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -178,7 +173,8 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FREM1(X80SoftFloat const &lhs, X80SoftFloat const &rhs) {
 #if defined(DEBUG_X86_FLOAT)
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
@@ -186,9 +182,8 @@ struct FEX_PACKED X80SoftFloat {
     fstpt %[result];
     ffreep %%st(0);
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -198,28 +193,25 @@ struct FEX_PACKED X80SoftFloat {
   }
 
   FEXCORE_PRESERVE_ALL_ATTR
-  static X80SoftFloat FRNDINT(X80SoftFloat const &lhs) {
-    return extF80_roundToInt(lhs, softfloat_roundingMode, false);
-  }
+  static X80SoftFloat FRNDINT(X80SoftFloat const &lhs) { return extF80_roundToInt(lhs, softfloat_roundingMode, false); }
 
   FEXCORE_PRESERVE_ALL_ATTR
-  static X80SoftFloat FRNDINT(X80SoftFloat const &lhs, uint_fast8_t RoundMode) {
-    return extF80_roundToInt(lhs, RoundMode, false);
-  }
+  static X80SoftFloat FRNDINT(X80SoftFloat const &lhs, uint_fast8_t RoundMode) { return extF80_roundToInt(lhs, RoundMode, false); }
 
   FEXCORE_PRESERVE_ALL_ATTR
   static X80SoftFloat FXTRACT_SIG(X80SoftFloat const &lhs) {
 #if defined(DEBUG_X86_FLOAT)
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fxtract;
     fstpt %[result];
     ffreep %%st(0);
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st", "st(1)");
 
     return Result;
@@ -235,15 +227,16 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FXTRACT_EXP(X80SoftFloat const &lhs) {
 #if defined(DEBUG_X86_FLOAT)
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fxtract;
     ffreep %%st(0);
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st", "st(1)");
 
     return Result;
@@ -265,7 +258,8 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FSCALE which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st1
     fldt %[lhs]; # st0
@@ -273,9 +267,8 @@ struct FEX_PACKED X80SoftFloat {
     fstpt %[result];
     ffreep %%st(0);
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -294,14 +287,15 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used F2XM1 which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     f2xm1; # st0 = 2^st(0) - 1
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st");
 
     return Result;
@@ -318,16 +312,16 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FYL2X which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[rhs]; # st(1)
     fldt %[lhs]; # st(0)
     fyl2x; # st(1) * log2l(st(0))
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -344,16 +338,16 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FATAN which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs];
     fldt %[rhs];
     fpatan;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
-    , [rhs] "m" (rhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs), [rhs] "m"(rhs)
     : "st", "st(1)");
 
     return Result;
@@ -370,15 +364,16 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FTAN which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fptan;
     ffreep %%st(0);
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st");
 
     return Result;
@@ -394,14 +389,15 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FSIN which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fsin;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st");
 
     return Result;
@@ -417,14 +413,15 @@ struct FEX_PACKED X80SoftFloat {
     WARN_ONCE_FMT("x87: Application used FCOS which may have accuracy problems");
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fcos;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st");
 
     return Result;
@@ -439,14 +436,15 @@ struct FEX_PACKED X80SoftFloat {
   static X80SoftFloat FSQRT(X80SoftFloat const &lhs) {
 #ifdef DEBUG_X86_FLOAT
     BIGFLOAT Result;
-    asm (R"(
+    asm(
+    R"(
     fninit;
     fldt %[lhs]; # st0
     fsqrt;
     fstpt %[result];
     )"
-    : [result] "=m" (Result)
-    : [lhs] "m" (lhs)
+    : [result] "=m"(Result)
+    : [lhs] "m"(lhs)
     : "st");
 
     return Result;
@@ -489,47 +487,27 @@ struct FEX_PACKED X80SoftFloat {
     }
   }
 
-  operator int32_t() const {
-    return extF80_to_i32(*this, softfloat_roundingMode, false);
-  }
+  operator int32_t() const { return extF80_to_i32(*this, softfloat_roundingMode, false); }
 
-  operator int64_t() const {
-    return extF80_to_i64(*this, softfloat_roundingMode, false);
-  }
+  operator int64_t() const { return extF80_to_i64(*this, softfloat_roundingMode, false); }
 
-  operator uint64_t() const {
-    return extF80_to_ui64(*this, softfloat_roundingMode, false);
-  }
+  operator uint64_t() const { return extF80_to_ui64(*this, softfloat_roundingMode, false); }
 
-  void operator=(const float rhs) {
-    *this = f32_to_extF80(FEXCore::BitCast<float32_t>(rhs));
-  }
+  void operator=(const float rhs) { *this = f32_to_extF80(FEXCore::BitCast<float32_t>(rhs)); }
 
-  void operator=(const double rhs) {
-    *this = f64_to_extF80(FEXCore::BitCast<float64_t>(rhs));
-  }
+  void operator=(const double rhs) { *this = f64_to_extF80(FEXCore::BitCast<float64_t>(rhs)); }
 
-  void operator=(const int16_t rhs) {
-    *this = i32_to_extF80(rhs);
-  }
+  void operator=(const int16_t rhs) { *this = i32_to_extF80(rhs); }
 
-  void operator=(const int32_t rhs) {
-    *this = i32_to_extF80(rhs);
-  }
+  void operator=(const int32_t rhs) { *this = i32_to_extF80(rhs); }
 
-  void operator=(const uint64_t rhs) {
-    *this = ui64_to_extF80(rhs);
-  }
+  void operator=(const uint64_t rhs) { *this = ui64_to_extF80(rhs); }
 
 #if BIGFLOATSIZE == 10
-  void operator=(const long double rhs) {
-    memcpy(this, &rhs, sizeof(rhs));
-  }
+  void operator=(const long double rhs) { memcpy(this, &rhs, sizeof(rhs)); }
 #endif
 
-  operator void*() {
-    return reinterpret_cast<void*>(this);
-  }
+  operator void *() { return reinterpret_cast<void *>(this); }
 
   X80SoftFloat(extFloat80_t rhs) {
     Significand = rhs.signif;
@@ -537,13 +515,9 @@ struct FEX_PACKED X80SoftFloat {
     Sign = rhs.signExp >> 15;
   }
 
-  X80SoftFloat(const float rhs) {
-    *this = f32_to_extF80(FEXCore::BitCast<float32_t>(rhs));
-  }
+  X80SoftFloat(const float rhs) { *this = f32_to_extF80(FEXCore::BitCast<float32_t>(rhs)); }
 
-  X80SoftFloat(const double rhs) {
-    *this = f64_to_extF80(FEXCore::BitCast<float64_t>(rhs));
-  }
+  X80SoftFloat(const double rhs) { *this = f64_to_extF80(FEXCore::BitCast<float64_t>(rhs)); }
 
 #ifndef _WIN32
   X80SoftFloat(BIGFLOAT rhs) {
@@ -555,13 +529,9 @@ struct FEX_PACKED X80SoftFloat {
   }
 #endif
 
-  X80SoftFloat(const int16_t rhs) {
-    *this = i32_to_extF80(rhs);
-  }
+  X80SoftFloat(const int16_t rhs) { *this = i32_to_extF80(rhs); }
 
-  X80SoftFloat(const int32_t rhs) {
-    *this = i32_to_extF80(rhs);
-  }
+  X80SoftFloat(const int32_t rhs) { *this = i32_to_extF80(rhs); }
 
   void operator=(extFloat80_t rhs) {
     Significand = rhs.signif;
@@ -577,14 +547,10 @@ struct FEX_PACKED X80SoftFloat {
   }
 
   static bool IsNan(X80SoftFloat const &lhs) {
-    return (lhs.Exponent == 0x7FFF) &&
-      (lhs.Significand & IntegerBit) &&
-      (lhs.Significand & Bottom62Significand);
+    return (lhs.Exponent == 0x7FFF) && (lhs.Significand & IntegerBit) && (lhs.Significand & Bottom62Significand);
   }
 
-  static bool SignBit(X80SoftFloat const &lhs) {
-    return lhs.Sign;
-  }
+  static bool SignBit(X80SoftFloat const &lhs) { return lhs.Sign; }
 
 private:
   static constexpr uint64_t IntegerBit = (1ULL << 63);

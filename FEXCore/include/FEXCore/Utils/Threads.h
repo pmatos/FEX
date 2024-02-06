@@ -5,7 +5,7 @@
 #include <functional>
 
 namespace FEXCore::Threads {
-  using ThreadFunc = void*(*)(void* user_ptr);
+  using ThreadFunc = void* (*)(void* user_ptr);
 
   class Thread;
   using CreateThreadFunc = std::function<fextl::unique_ptr<Thread>(ThreadFunc Func, void* Arg)>;
@@ -18,10 +18,10 @@ namespace FEXCore::Threads {
 
   // API
   class Thread {
-    public:
+  public:
     virtual ~Thread() = default;
     virtual bool joinable() = 0;
-    virtual bool join(void **ret) = 0;
+    virtual bool join(void** ret) = 0;
     virtual bool detach() = 0;
     virtual bool IsSelf() = 0;
 
@@ -29,16 +29,14 @@ namespace FEXCore::Threads {
      * @name Calls provided API functions
      * @{ */
 
-    static fextl::unique_ptr<Thread> Create(
-      ThreadFunc Func,
-      void* Arg);
+    static fextl::unique_ptr<Thread> Create(ThreadFunc Func, void* Arg);
 
     static void CleanupAfterFork();
 
     /**  @} */
 
     // Set API functions
-    static void SetInternalPointers(Pointers const &_Ptrs);
+    static void SetInternalPointers(Pointers const& _Ptrs);
   };
 
   /**
@@ -50,5 +48,5 @@ namespace FEXCore::Threads {
    */
   uint64_t SetSignalMask(uint64_t Mask);
 
-  void SetThreadName(const char *name);
+  void SetThreadName(const char* name);
 }

@@ -9,7 +9,7 @@
 
 namespace FEX::HLE::x32 {
 
-namespace msdos_fs {
+  namespace msdos_fs {
 #include "LinuxSyscalls/x32/Ioctl/msdos_fs.inl"
-}
+  }
 }

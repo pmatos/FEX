@@ -35,7 +35,7 @@ namespace Logging {
     write(STDOUT_FILENO, Output.c_str(), Output.size());
   }
 
-  void ClientMsgHandler(int FD, uint64_t Timestamp, uint32_t PID, uint32_t TID, uint32_t Level, const char* Msg) {
+  void ClientMsgHandler(int FD, uint64_t Timestamp, uint32_t PID, uint32_t TID, uint32_t Level, const char *Msg) {
     const auto Output = fmt::format("[{}][{}][{}.{}] {}\n", LogMan::DebugLevelStr(Level), Timestamp, PID, TID, Msg);
     write(STDERR_FILENO, Output.c_str(), Output.size());
   }
@@ -52,12 +52,11 @@ namespace {
     _exit(1);
   }
 
-  void ActionIgnore(int sig, siginfo_t *info, void *context) {
-  }
+  void ActionIgnore(int sig, siginfo_t *info, void *context) {}
 
   void SetupSignals() {
     // Setup our signal handlers now so we can capture some events
-    struct sigaction act{};
+    struct sigaction act {};
     act.sa_sigaction = ActionHandler;
     act.sa_flags = SA_SIGINFO;
 
@@ -97,7 +96,7 @@ namespace {
   }
 }
 
-int main(int argc, char **argv, char **const envp) {
+int main(int argc, char **argv, char ** const envp) {
   auto Options = FEXServer::Config::Load(argc, argv);
 
   SetupSignals();
@@ -115,12 +114,7 @@ int main(int argc, char **argv, char **const envp) {
     DeparentSelf();
   }
 
-  FEX::Config::LoadConfig(
-    true,
-    false,
-    argc, argv, envp,
-    false, {}
-  );
+  FEX::Config::LoadConfig(true, false, argc, argv, envp, false, {});
 
   // Reload the meta layer
   FEXCore::Config::ReloadMetaLayer();
@@ -139,7 +133,8 @@ int main(int argc, char **argv, char **const envp) {
         PollFD.events = POLLIN | POLLOUT | POLLRDHUP | POLLERR | POLLHUP | POLLNVAL;
 
         // Wait for a result on the pipe that isn't EINTR
-        while (poll(&PollFD, 1, -1) == -1 && errno == EINTR);
+        while (poll(&PollFD, 1, -1) == -1 && errno == EINTR)
+          ;
 
         LogMan::Msg::IFmt("[FEXServer] FEXServer shutdown");
       }

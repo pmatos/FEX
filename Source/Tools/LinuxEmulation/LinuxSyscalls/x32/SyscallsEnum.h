@@ -470,4 +470,3 @@ enum Syscalls_x86 {
   SYSCALL_x86_fchmodat2 = 452,
   SYSCALL_x86_MAX = 512,
 };
-

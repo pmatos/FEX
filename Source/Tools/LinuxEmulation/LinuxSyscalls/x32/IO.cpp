@@ -17,9 +17,11 @@ $end_info$
 
 namespace FEX::HLE::x32 {
   void RegisterIO(FEX::HLE::SyscallHandler *Handler) {
-    REGISTER_SYSCALL_IMPL_X32(io_getevents, [](FEXCore::Core::CpuStateFrame *Frame, aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec32 *timeout) -> uint64_t {
-      struct timespec* timeout_ptr{};
-      struct timespec tp64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    io_getevents,
+    [](FEXCore::Core::CpuStateFrame *Frame, aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec32 *timeout) -> uint64_t {
+      struct timespec *timeout_ptr{};
+      struct timespec tp64 {};
       if (timeout) {
         tp64 = *timeout;
         timeout_ptr = &tp64;
@@ -29,9 +31,13 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32(io_pgetevents, [](FEXCore::Core::CpuStateFrame *Frame, aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec32 *timeout, const struct io_sigset  *usig) -> uint64_t {
-      struct timespec* timeout_ptr{};
-      struct timespec tp64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    io_pgetevents,
+    [](
+    FEXCore::Core::CpuStateFrame *Frame, aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec32 *timeout,
+    const struct io_sigset *usig) -> uint64_t {
+      struct timespec *timeout_ptr{};
+      struct timespec tp64 {};
       if (timeout) {
         tp64 = *timeout;
         timeout_ptr = &tp64;
@@ -41,14 +47,11 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS(io_pgetevents_time64,
-      [](FEXCore::Core::CpuStateFrame *Frame,
-        aio_context_t ctx_id,
-        long min_nr,
-        long nr,
-        struct io_event *events,
-        struct timespec *timeout,
-        const struct io_sigset  *usig) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS(
+    io_pgetevents_time64,
+    [](
+    FEXCore::Core::CpuStateFrame *Frame, aio_context_t ctx_id, long min_nr, long nr, struct io_event *events, struct timespec *timeout,
+    const struct io_sigset *usig) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(io_pgetevents), ctx_id, min_nr, nr, events, timeout, usig);
       SYSCALL_ERRNO();
     });

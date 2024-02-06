@@ -7,15 +7,15 @@
 
 namespace FEX::HLE::x64 {
 
-namespace asound {
+  namespace asound {
 #ifndef SNDRV_TIMER_IOCTL_TREAD_OLD
-#define SNDRV_TIMER_IOCTL_TREAD_OLD	_IOW('T', 0x02, int)
+#define SNDRV_TIMER_IOCTL_TREAD_OLD _IOW('T', 0x02, int)
 #endif
 
 #ifndef SNDRV_TIMER_IOCTL_TREAD64
-#define SNDRV_TIMER_IOCTL_TREAD64	_IOW('T', 0xa4, int)
+#define SNDRV_TIMER_IOCTL_TREAD64 _IOW('T', 0xa4, int)
 #endif
 
 #include "LinuxSyscalls/x64/Ioctl/asound.inl"
-}
+  }
 }

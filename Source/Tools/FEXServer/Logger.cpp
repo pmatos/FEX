@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace Logging {
-  void ClientMsgHandler(int FD, uint64_t Timestamp, uint32_t PID, uint32_t TID, uint32_t Level, const char* Msg);
+  void ClientMsgHandler(int FD, uint64_t Timestamp, uint32_t PID, uint32_t TID, uint32_t Level, const char *Msg);
 }
 
 namespace Logger {
@@ -16,7 +16,7 @@ namespace Logger {
   std::mutex IncomingPollFDsLock{};
   std::vector<struct pollfd> IncomingPollFDs{};
   std::thread LogThread;
-  std::atomic<bool> ShouldShutdown {false};
+  std::atomic<bool> ShouldShutdown{false};
   std::atomic<int32_t> LoggerThreadTID{};
 
   void HandleLogData(int Socket) {
@@ -28,17 +28,14 @@ namespace Logger {
         CurrentRead += Read;
         if (CurrentRead == Data.size()) {
           Data.resize(Data.size() << 1);
-        }
-        else {
+        } else {
           // No more to read
           break;
         }
-      }
-      else {
+      } else {
         if (errno == EWOULDBLOCK) {
           // no error
-        }
-        else {
+        } else {
           perror("read");
         }
         break;
@@ -47,15 +44,14 @@ namespace Logger {
 
     size_t CurrentOffset{};
     while (CurrentOffset < CurrentRead) {
-      FEXServerClient::Logging::PacketHeader *Header = reinterpret_cast<FEXServerClient::Logging::PacketHeader*>(&Data[CurrentOffset]);
+      FEXServerClient::Logging::PacketHeader *Header = reinterpret_cast<FEXServerClient::Logging::PacketHeader *>(&Data[CurrentOffset]);
       if (Header->PacketType == FEXServerClient::Logging::PacketTypes::TYPE_MSG) {
-        FEXServerClient::Logging::PacketMsg *Msg = reinterpret_cast<FEXServerClient::Logging::PacketMsg*>(&Data[CurrentOffset]);
-        const char *MsgText = reinterpret_cast<const char*>(&Data[CurrentOffset + sizeof(FEXServerClient::Logging::PacketMsg)]);
+        FEXServerClient::Logging::PacketMsg *Msg = reinterpret_cast<FEXServerClient::Logging::PacketMsg *>(&Data[CurrentOffset]);
+        const char *MsgText = reinterpret_cast<const char *>(&Data[CurrentOffset + sizeof(FEXServerClient::Logging::PacketMsg)]);
         Logging::ClientMsgHandler(Socket, Msg->Header.Timestamp, Msg->Header.PID, Msg->Header.TID, Msg->Level, MsgText);
 
         CurrentOffset += sizeof(FEXServerClient::Logging::PacketMsg) + Msg->MessageLength;
-      }
-      else {
+      } else {
         CurrentOffset = CurrentRead;
       }
     }
@@ -65,29 +61,27 @@ namespace Logger {
     LoggerThreadTID = FHU::Syscalls::gettid();
 
     while (!ShouldShutdown) {
-      struct timespec ts{};
+      struct timespec ts {};
       ts.tv_sec = 5;
 
       {
-        std::unique_lock lk {IncomingPollFDsLock};
+        std::unique_lock lk{IncomingPollFDsLock};
         PollFDs.insert(PollFDs.end(), std::make_move_iterator(IncomingPollFDs.begin()), std::make_move_iterator(IncomingPollFDs.end()));
         IncomingPollFDs.clear();
       }
       if (PollFDs.size() == 0) {
         pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
-      }
-      else {
+      } else {
         int Result = ppoll(&PollFDs.at(0), PollFDs.size(), &ts, nullptr);
         if (Result > 0) {
           // Walk the FDs and see if we got any results
-          for (auto it = PollFDs.begin(); it != PollFDs.end(); ) {
+          for (auto it = PollFDs.begin(); it != PollFDs.end();) {
             bool Erase{};
             if (it->revents != 0) {
               if (it->revents & POLLIN) {
                 // Data from the socket
                 HandleLogData(it->fd);
-              }
-              else if (it->revents & (POLLHUP | POLLERR | POLLNVAL | POLLRDHUP)) {
+              } else if (it->revents & (POLLHUP | POLLERR | POLLNVAL | POLLRDHUP)) {
                 // Error or hangup, close the socket and erase it from our list
                 Erase = true;
                 close(it->fd);
@@ -99,8 +93,7 @@ namespace Logger {
 
             if (Erase) {
               it = PollFDs.erase(it);
-            }
-            else {
+            } else {
               ++it;
             }
 
@@ -114,17 +107,15 @@ namespace Logger {
     }
   }
 
-  void StartLogThread() {
-    LogThread = std::thread(LogThreadFunc);
-  }
+  void StartLogThread() { LogThread = std::thread(LogThreadFunc); }
 
   void AppendLogFD(int FD) {
     {
-      std::unique_lock lk {IncomingPollFDsLock};
-      IncomingPollFDs.emplace_back(pollfd {
-        .fd = FD,
-        .events = POLLIN,
-        .revents = 0,
+      std::unique_lock lk{IncomingPollFDsLock};
+      IncomingPollFDs.emplace_back(pollfd{
+      .fd = FD,
+      .events = POLLIN,
+      .revents = 0,
       });
     }
 
@@ -132,9 +123,7 @@ namespace Logger {
     FHU::Syscalls::tgkill(::getpid(), LoggerThreadTID, SIGUSR1);
   }
 
-  bool LogThreadRunning() {
-    return LogThread.joinable();
-  }
+  bool LogThreadRunning() { return LogThread.joinable(); }
 
   void Shutdown() {
     ShouldShutdown = true;

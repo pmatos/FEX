@@ -22,13 +22,9 @@ namespace FEXCore::Context {
     return fextl::make_unique<FEXCore::Context::ContextImpl>();
   }
 
-  void FEXCore::Context::ContextImpl::SetExitHandler(ExitHandler handler) {
-    CustomExitHandler = std::move(handler);
-  }
+  void FEXCore::Context::ContextImpl::SetExitHandler(ExitHandler handler) { CustomExitHandler = std::move(handler); }
 
-  ExitHandler FEXCore::Context::ContextImpl::GetExitHandler() const {
-    return CustomExitHandler;
-  }
+  ExitHandler FEXCore::Context::ContextImpl::GetExitHandler() const { return CustomExitHandler; }
 
   void FEXCore::Context::ContextImpl::CompileRIP(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP) {
     CompileBlock(Thread->CurrentFrame, GuestRIP);
@@ -38,13 +34,9 @@ namespace FEXCore::Context {
     CompileBlock(Thread->CurrentFrame, GuestRIP, MaxInst);
   }
 
-  void FEXCore::Context::ContextImpl::SetCustomCPUBackendFactory(CustomCPUFactoryType Factory) {
-    CustomCPUFactory = std::move(Factory);
-  }
+  void FEXCore::Context::ContextImpl::SetCustomCPUBackendFactory(CustomCPUFactoryType Factory) { CustomCPUFactory = std::move(Factory); }
 
-  HostFeatures FEXCore::Context::ContextImpl::GetHostFeatures() const {
-    return HostFeatures;
-  }
+  HostFeatures FEXCore::Context::ContextImpl::GetHostFeatures() const { return HostFeatures; }
 
   void FEXCore::Context::ContextImpl::SetSignalDelegator(FEXCore::SignalDelegator *_SignalDelegation) {
     SignalDelegation = _SignalDelegation;
@@ -59,9 +51,7 @@ namespace FEXCore::Context {
     return CPUID.RunFunction(Function, Leaf);
   }
 
-  FEXCore::CPUID::XCRResults FEXCore::Context::ContextImpl::RunXCRFunction(uint32_t Function) {
-    return CPUID.RunXCRFunction(Function);
-  }
+  FEXCore::CPUID::XCRResults FEXCore::Context::ContextImpl::RunXCRFunction(uint32_t Function) { return CPUID.RunXCRFunction(Function); }
 
   FEXCore::CPUID::FunctionResults FEXCore::Context::ContextImpl::RunCPUIDFunctionName(uint32_t Function, uint32_t Leaf, uint32_t CPU) {
     return CPUID.RunFunctionName(Function, Leaf, CPU);

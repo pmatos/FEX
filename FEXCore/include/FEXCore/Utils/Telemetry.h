@@ -37,19 +37,19 @@ namespace FEXCore::Telemetry {
   class Value;
 
   class Value final {
-    public:
-      Value() = default;
-      Value(uint64_t Default) : Data {Default} {}
+  public:
+    Value() = default;
+    Value(uint64_t Default) : Data{Default} {}
 
-      uint64_t operator*() const { return Data; }
-      void operator=(uint64_t Value) { Data = Value; }
-      void operator|=(uint64_t Value) { Data |= Value; }
-      void operator++(int) { Data++; }
+    uint64_t operator*() const { return Data; }
+    void operator=(uint64_t Value) { Data = Value; }
+    void operator|=(uint64_t Value) { Data |= Value; }
+    void operator++(int) { Data++; }
 
-      std::atomic<uint64_t> *GetAddr() { return &Data; }
+    std::atomic<uint64_t> *GetAddr() { return &Data; }
 
-    private:
-      std::atomic<uint64_t> Data;
+  private:
+    std::atomic<uint64_t> Data;
   };
 
   FEX_DEFAULT_VISIBILITY Value &GetTelemetryValue(TelemetryType Type);
@@ -61,7 +61,8 @@ namespace FEXCore::Telemetry {
 // This returns the internal structure to the telemetry data structures
 // One must be careful with placing these in the hot path of code execution
 // It can be fairly costly, especially in the static version where it puts barriers in the code
-#define FEXCORE_TELEMETRY_STATIC_INIT(Name, Type) static FEXCore::Telemetry::Value &Name = FEXCore::Telemetry::GetTelemetryValue(FEXCore::Telemetry::Type)
+#define FEXCORE_TELEMETRY_STATIC_INIT(Name, Type) \
+  static FEXCore::Telemetry::Value &Name = FEXCore::Telemetry::GetTelemetryValue(FEXCore::Telemetry::Type)
 #define FEXCORE_TELEMETRY_INIT(Name, Type) FEXCore::Telemetry::Value &Name = FEXCore::Telemetry::GetTelemetryValue(FEXCore::Telemetry::Type)
 // Telemetry ALU operations
 // These are typically 3-4 instructions depending on what you're doing
@@ -78,10 +79,18 @@ namespace FEXCore::Telemetry {
 
 #define FEXCORE_TELEMETRY_STATIC_INIT(Name, Type)
 #define FEXCORE_TELEMETRY_INIT(Name, Type)
-#define FEXCORE_TELEMETRY(Name, Value) do {} while(0)
-#define FEXCORE_TELEMETRY_SET(Name, Value) do {} while(0)
-#define FEXCORE_TELEMETRY_OR(Name, Value) do {} while(0)
-#define FEXCORE_TELEMETRY_INC(Name) do {} while(0)
-#define FEXCORE_TELEMETRY_Addr(Name) reinterpret_cast<std::atomic<uint64_t>*>(nullptr)
+#define FEXCORE_TELEMETRY(Name, Value) \
+  do { \
+  } while (0)
+#define FEXCORE_TELEMETRY_SET(Name, Value) \
+  do { \
+  } while (0)
+#define FEXCORE_TELEMETRY_OR(Name, Value) \
+  do { \
+  } while (0)
+#define FEXCORE_TELEMETRY_INC(Name) \
+  do { \
+  } while (0)
+#define FEXCORE_TELEMETRY_Addr(Name) reinterpret_cast<std::atomic<uint64_t> *>(nullptr)
 #endif
 }

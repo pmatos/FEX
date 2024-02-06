@@ -11,7 +11,7 @@
 
 namespace FEX::HLE::x32 {
 
-namespace ext_fs {
+  namespace ext_fs {
 #include "LinuxSyscalls/x32/Ioctl/ext_fs.inl"
-}
+  }
 }

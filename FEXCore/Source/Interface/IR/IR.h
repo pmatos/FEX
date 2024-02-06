@@ -9,11 +9,11 @@
 
 namespace FEXCore::IR {
 
-class RegisterAllocationData;
+  class RegisterAllocationData;
 
-class IRListView;
-class IREmitter;
+  class IRListView;
+  class IREmitter;
 
-void Dump(fextl::stringstream *out, IRListView const* IR, IR::RegisterAllocationData *RAData);
-fextl::unique_ptr<IREmitter> Parse(FEXCore::Utils::IntrusivePooledAllocator &ThreadAllocator, fextl::stringstream &MapsStream);
+  void Dump(fextl::stringstream *out, IRListView const *IR, IR::RegisterAllocationData *RAData);
+  fextl::unique_ptr<IREmitter> Parse(FEXCore::Utils::IntrusivePooledAllocator &ThreadAllocator, fextl::stringstream &MapsStream);
 }

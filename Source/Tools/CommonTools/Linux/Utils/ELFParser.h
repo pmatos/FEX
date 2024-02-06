@@ -19,10 +19,10 @@
 struct ELFParser {
   Elf64_Ehdr ehdr;
   fextl::vector<Elf64_Phdr> phdrs;
-  ::ELFLoader::ELFContainer::ELFType type {::ELFLoader::ELFContainer::TYPE_NONE};
+  ::ELFLoader::ELFContainer::ELFType type{::ELFLoader::ELFContainer::TYPE_NONE};
 
   fextl::string InterpreterElf;
-  int fd {-1};
+  int fd{-1};
 
   bool ReadElf(int NewFD) {
     Closefd();
@@ -85,7 +85,7 @@ struct ELFParser {
       for (int i = 0; i < EI_NIDENT; i++)
         ehdr.e_ident[i] = hdr32.e_ident[i];
 
-      #define COPY(name) ehdr.name = hdr32.name
+#define COPY(name) ehdr.name = hdr32.name
       COPY(e_type);
       COPY(e_machine);
       COPY(e_version);
@@ -99,7 +99,7 @@ struct ELFParser {
       COPY(e_shentsize);
       COPY(e_shnum);
       COPY(e_shstrndx);
-      #undef COPY
+#undef COPY
 
       if (ehdr.e_machine != EM_386) {
         LogMan::Msg::EFmt("Invalid e_machine from '{}'", fd);
@@ -157,7 +157,7 @@ struct ELFParser {
       phdrs.resize(ehdr.e_phnum);
 
       for (int i = 0; i < ehdr.e_phnum; i++) {
-        #define COPY(name) phdrs[i].name = phdrs32[i].name
+#define COPY(name) phdrs[i].name = phdrs32[i].name
 
         COPY(p_type);
         COPY(p_offset);
@@ -168,7 +168,7 @@ struct ELFParser {
         COPY(p_flags);
         COPY(p_align);
 
-        #undef COPY
+#undef COPY
       }
     } else {
       phdrs.resize(ehdr.e_phnum);
@@ -236,7 +236,5 @@ struct ELFParser {
     }
   }
 
-  ~ELFParser() {
-    Closefd();
-  }
+  ~ELFParser() { Closefd(); }
 };

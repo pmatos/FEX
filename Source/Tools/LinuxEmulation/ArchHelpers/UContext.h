@@ -13,9 +13,9 @@ namespace FEXCore {
   namespace x86_64 {
     // uc_flags flags
     ///< Has extended FP state
-    constexpr uint64_t UC_FP_XSTATE         = (1ULL << 0);
+    constexpr uint64_t UC_FP_XSTATE = (1ULL << 0);
     ///< Set when kernel saves SS register from 64bit code
-    constexpr uint64_t UC_SIGCONTEXT_SS     = (1ULL << 1);
+    constexpr uint64_t UC_SIGCONTEXT_SS = (1ULL << 1);
     ///< Set when kernel will strictly restore the SS
     constexpr uint64_t UC_STRICT_RESTORE_SS = (1ULL << 2);
 
@@ -38,34 +38,30 @@ namespace FEXCore {
       static constexpr uint32_t FP_XSTATE_MAGIC = 0x46505853;
 
       enum FeatureFlag : uint32_t {
-        FEATURE_FP         = 1U << 0,
-        FEATURE_SSE        = 1U << 1,
-        FEATURE_YMM        = 1U << 2,
-        FEATURE_BNDREGS    = 1U << 3,
-        FEATURE_BNDCSR     = 1U << 4,
-        FEATURE_OPMASK     = 1U << 5,
-        FEATURE_ZMM_Hi256  = 1U << 6,
-        FEATURE_Hi16_ZMM   = 1U << 7,
-        FEATURE_PT_UNIMPL  = 1U << 8,
-        FEATURE_PKRU       = 1U << 9,
-        FEATURE_PASID      = 1U << 10,
+        FEATURE_FP = 1U << 0,
+        FEATURE_SSE = 1U << 1,
+        FEATURE_YMM = 1U << 2,
+        FEATURE_BNDREGS = 1U << 3,
+        FEATURE_BNDCSR = 1U << 4,
+        FEATURE_OPMASK = 1U << 5,
+        FEATURE_ZMM_Hi256 = 1U << 6,
+        FEATURE_Hi16_ZMM = 1U << 7,
+        FEATURE_PT_UNIMPL = 1U << 8,
+        FEATURE_PKRU = 1U << 9,
+        FEATURE_PASID = 1U << 10,
         FEATURE_RESERVED11 = 1U << 11,
         FEATURE_RESERVED12 = 1U << 12,
         FEATURE_RESERVED13 = 1U << 13,
         FEATURE_RESERVED14 = 1U << 14,
-        FEATURE_LBR        = 1U << 15,
+        FEATURE_LBR = 1U << 15,
         FEATURE_RESERVED16 = 1U << 16,
-        FEATURE_XTILE_CFG  = 1U << 17,
+        FEATURE_XTILE_CFG = 1U << 17,
         FEATURE_XTILE_DATA = 1U << 18,
       };
 
-      bool HasExtendedContext() const {
-        return magic1 == FP_XSTATE_MAGIC;
-      }
+      bool HasExtendedContext() const { return magic1 == FP_XSTATE_MAGIC; }
 
-      bool HasYMMH() const {
-        return (xfeatures & FEATURE_YMM) != 0;
-      }
+      bool HasYMMH() const { return (xfeatures & FEATURE_YMM) != 0; }
 
       // If magic1 is set to FP_XSTATE_MAGIC, then the encompassing
       // frame is an xstate frame. If 0, then it's a legacy frame.
@@ -185,7 +181,7 @@ namespace FEXCore {
   namespace x86 {
     // uc_flags flags
     ///< Has extended FP state
-    constexpr uint64_t UC_FP_XSTATE         = (1ULL << 0);
+    constexpr uint64_t UC_FP_XSTATE = (1ULL << 0);
 
     ///< The order of these must match the GNU ordering
     enum ContextRegs {

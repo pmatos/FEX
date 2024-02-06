@@ -30,6 +30,5 @@
 
 namespace FEXCore::Assert {
   // This function can not be inlined
-  [[noreturn]]
-  FEX_DEFAULT_VISIBILITY void ForcedAssert();
+  [[noreturn]] FEX_DEFAULT_VISIBILITY void ForcedAssert();
 }

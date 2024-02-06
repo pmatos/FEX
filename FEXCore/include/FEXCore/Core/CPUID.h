@@ -11,4 +11,3 @@ namespace FEXCore::CPUID {
     uint32_t eax, edx;
   };
 }
-

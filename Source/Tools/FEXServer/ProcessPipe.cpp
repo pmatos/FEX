@@ -17,11 +17,11 @@
 
 namespace ProcessPipe {
   constexpr int USER_PERMS = S_IRWXU | S_IRWXG | S_IRWXO;
-  int ServerLockFD {-1};
+  int ServerLockFD{-1};
   int ServerSocketFD{-1};
-  std::atomic<bool> ShouldShutdown {false};
-  time_t RequestTimeout {10};
-  bool Foreground {false};
+  std::atomic<bool> ShouldShutdown{false};
+  time_t RequestTimeout{10};
+  bool Foreground{false};
   std::vector<struct pollfd> PollFDs{};
 
   // FD count watching
@@ -70,8 +70,7 @@ namespace ProcessPipe {
 
     if (setrlimit(RLIMIT_NOFILE, &NewLimit) != 0) {
       fprintf(stderr, "[FEXMountDaemon] Couldn't raise FD limit to %zd even though our hard limit is %zd\n", NewLimit.rlim_cur, NewLimit.rlim_max);
-    }
-    else {
+    } else {
       // Set the new limit
       MaxFDs = NewLimit;
     }
@@ -112,42 +111,38 @@ namespace ProcessPipe {
       ServerLockFD = open(ServerLockPath.c_str(), O_RDWR | O_CLOEXEC, USER_PERMS);
       if (ServerLockFD != -1) {
         // Now that we have opened the file, try to get a write lock.
-        flock lk {
-          .l_type = F_WRLCK,
-          .l_whence = SEEK_SET,
-          .l_start = 0,
-          .l_len = 0,
+        flock lk{
+        .l_type = F_WRLCK,
+        .l_whence = SEEK_SET,
+        .l_start = 0,
+        .l_len = 0,
         };
         Ret = fcntl(ServerLockFD, F_SETLK, &lk);
 
         if (Ret != -1) {
           // Write lock was gained, we can now continue onward.
-        }
-        else {
+        } else {
           // We couldn't get a write lock, this means that another process already owns a lock on the lock
           close(ServerLockFD);
           ServerLockFD = -1;
           return false;
         }
-      }
-      else {
+      } else {
         // File couldn't get opened even though it existed?
         // Must have raced something here.
         return false;
       }
-    }
-    else if (Ret == -1) {
+    } else if (Ret == -1) {
       // Unhandled error.
       LogMan::Msg::EFmt("Unable to create FEXServer named lock file at: {} {} {}", ServerLockPath, errno, strerror(errno));
       return false;
-    }
-    else {
+    } else {
       // FIFO file was created. Try to get a write lock
-      flock lk {
-        .l_type = F_WRLCK,
-        .l_whence = SEEK_SET,
-        .l_start = 0,
-        .l_len = 0,
+      flock lk{
+      .l_type = F_WRLCK,
+      .l_whence = SEEK_SET,
+      .l_start = 0,
+      .l_len = 0,
       };
       Ret = fcntl(ServerLockFD, F_SETLK, &lk);
 
@@ -160,11 +155,11 @@ namespace ProcessPipe {
     }
 
     // Now that a write lock is held, downgrade it to a read lock
-    flock lk {
-      .l_type = F_RDLCK,
-      .l_whence = SEEK_SET,
-      .l_start = 0,
-      .l_len = 0,
+    flock lk{
+    .l_type = F_RDLCK,
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0,
     };
     Ret = fcntl(ServerLockFD, F_SETLK, &lk);
 
@@ -189,7 +184,7 @@ namespace ProcessPipe {
       return false;
     }
 
-    struct sockaddr_un addr{};
+    struct sockaddr_un addr {};
     addr.sun_family = AF_UNIX;
     size_t SizeOfSocketString = std::min(ServerSocketName.size() + 1, sizeof(addr.sun_path) - 1);
     addr.sun_path[0] = 0; // Abstract AF_UNIX sockets start with \0
@@ -198,7 +193,7 @@ namespace ProcessPipe {
     size_t SizeOfAddr = sizeof(addr.sun_family) + SizeOfSocketString;
 
     // Bind the socket to the path
-    int Result = bind(ServerSocketFD, reinterpret_cast<struct sockaddr*>(&addr), SizeOfAddr);
+    int Result = bind(ServerSocketFD, reinterpret_cast<struct sockaddr *>(&addr), SizeOfAddr);
     if (Result == -1) {
       LogMan::Msg::EFmt("Couldn't bind AF_UNIX socket '{}': {} {}\n", addr.sun_path, errno, strerror(errno));
       close(ServerSocketFD);
@@ -207,54 +202,46 @@ namespace ProcessPipe {
     }
 
     listen(ServerSocketFD, 16);
-    PollFDs.emplace_back(pollfd {
-      .fd = ServerSocketFD,
-      .events = POLLIN,
-      .revents = 0,
+    PollFDs.emplace_back(pollfd{
+    .fd = ServerSocketFD,
+    .events = POLLIN,
+    .revents = 0,
     });
 
     return true;
   }
 
   void SendEmptyErrorPacket(int Socket) {
-    FEXServerClient::FEXServerResultPacket Res {
-      .Header {
-        .Type = FEXServerClient::PacketType::TYPE_ERROR,
-      },
+    FEXServerClient::FEXServerResultPacket Res{
+    .Header{
+    .Type = FEXServerClient::PacketType::TYPE_ERROR,
+    },
     };
 
     struct iovec iov {
-      .iov_base = &Res,
-      .iov_len = sizeof(Res),
+      .iov_base = &Res, .iov_len = sizeof(Res),
     };
 
     struct msghdr msg {
-      .msg_name = nullptr,
-      .msg_namelen = 0,
-      .msg_iov = &iov,
-      .msg_iovlen = 1,
+      .msg_name = nullptr, .msg_namelen = 0, .msg_iov = &iov, .msg_iovlen = 1,
     };
 
     sendmsg(Socket, &msg, 0);
   }
 
   void SendFDSuccessPacket(int Socket, int FD) {
-    FEXServerClient::FEXServerResultPacket Res {
-      .Header {
-        .Type = FEXServerClient::PacketType::TYPE_SUCCESS,
-      },
+    FEXServerClient::FEXServerResultPacket Res{
+    .Header{
+    .Type = FEXServerClient::PacketType::TYPE_SUCCESS,
+    },
     };
 
     struct iovec iov {
-      .iov_base = &Res,
-      .iov_len = sizeof(Res),
+      .iov_base = &Res, .iov_len = sizeof(Res),
     };
 
     struct msghdr msg {
-      .msg_name = nullptr,
-      .msg_namelen = 0,
-      .msg_iov = &iov,
-      .msg_iovlen = 1,
+      .msg_name = nullptr, .msg_namelen = 0, .msg_iov = &iov, .msg_iovlen = 1,
     };
 
     // Setup the ancillary buffer. This is where we will be getting pipe FDs
@@ -291,15 +278,11 @@ namespace ProcessPipe {
 
     while (true) {
       struct iovec iov {
-        .iov_base = &Data.at(CurrentRead),
-        .iov_len = Data.size() - CurrentRead,
+        .iov_base = &Data.at(CurrentRead), .iov_len = Data.size() - CurrentRead,
       };
 
       struct msghdr msg {
-        .msg_name = nullptr,
-        .msg_namelen = 0,
-        .msg_iov = &iov,
-        .msg_iovlen = 1,
+        .msg_name = nullptr, .msg_namelen = 0, .msg_iov = &iov, .msg_iovlen = 1,
       };
 
       ssize_t Read = recvmsg(Socket, &msg, 0);
@@ -307,17 +290,14 @@ namespace ProcessPipe {
         CurrentRead += Read;
         if (CurrentRead == Data.size()) {
           Data.resize(Data.size() << 1);
-        }
-        else {
+        } else {
           // No more to read
           break;
         }
-      }
-      else {
+      } else {
         if (errno == EWOULDBLOCK) {
           // no error
-        }
-        else {
+        } else {
           perror("read");
         }
         break;
@@ -328,113 +308,108 @@ namespace ProcessPipe {
     while (CurrentOffset < CurrentRead) {
       FEXServerClient::FEXServerRequestPacket *Req = reinterpret_cast<FEXServerClient::FEXServerRequestPacket *>(&Data[CurrentOffset]);
       switch (Req->Header.Type) {
-        case FEXServerClient::PacketType::TYPE_KILL:
-          ShouldShutdown = true;
-          CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::BasicRequest);
-          break;
-        case FEXServerClient::PacketType::TYPE_GET_LOG_FD: {
-          if (Logger::LogThreadRunning()) {
-            int fds[2]{};
-            pipe2(fds, 0);
-            // 0 = Read
-            // 1 = Write
-            Logger::AppendLogFD(fds[0]);
+      case FEXServerClient::PacketType::TYPE_KILL:
+        ShouldShutdown = true;
+        CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::BasicRequest);
+        break;
+      case FEXServerClient::PacketType::TYPE_GET_LOG_FD: {
+        if (Logger::LogThreadRunning()) {
+          int fds[2]{};
+          pipe2(fds, 0);
+          // 0 = Read
+          // 1 = Write
+          Logger::AppendLogFD(fds[0]);
 
-            SendFDSuccessPacket(Socket, fds[1]);
+          SendFDSuccessPacket(Socket, fds[1]);
 
-            // Close the write side now, doesn't matter to us
-            close(fds[1]);
+          // Close the write side now, doesn't matter to us
+          close(fds[1]);
 
-            // Check if we need to increase the FD limit.
-            ++NumFilesOpened;
-            CheckRaiseFDLimit();
-          }
-          else {
-            // Log thread isn't running. Let FEXInterpreter know it can't have one.
-            SendEmptyErrorPacket(Socket);
-          }
-
-          CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::Header);
-          break;
+          // Check if we need to increase the FD limit.
+          ++NumFilesOpened;
+          CheckRaiseFDLimit();
+        } else {
+          // Log thread isn't running. Let FEXInterpreter know it can't have one.
+          SendEmptyErrorPacket(Socket);
         }
-        case FEXServerClient::PacketType::TYPE_GET_ROOTFS_PATH: {
-          fextl::string MountFolder = SquashFS::GetMountFolder();
 
-          FEXServerClient::FEXServerResultPacket Res {
-            .MountPath {
-              .Header {
-                .Type = FEXServerClient::PacketType::TYPE_GET_ROOTFS_PATH,
-              },
-              .Length = MountFolder.size() + 1,
-            },
-          };
+        CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::Header);
+        break;
+      }
+      case FEXServerClient::PacketType::TYPE_GET_ROOTFS_PATH: {
+        fextl::string MountFolder = SquashFS::GetMountFolder();
 
-          char Null{};
+        FEXServerClient::FEXServerResultPacket Res{
+        .MountPath{
+        .Header{
+        .Type = FEXServerClient::PacketType::TYPE_GET_ROOTFS_PATH,
+        },
+        .Length = MountFolder.size() + 1,
+        },
+        };
 
-          iovec iov[3] {
-            {
-              .iov_base = &Res,
-              .iov_len = sizeof(Res),
-            },
-            {
-              .iov_base = MountFolder.data(),
-              .iov_len = MountFolder.size(),
-            },
-            {
-              .iov_base = &Null,
-              .iov_len = 1,
-            },
-          };
+        char Null{};
 
-          struct msghdr msg {
-            .msg_name = nullptr,
-            .msg_namelen = 0,
-            .msg_iov = iov,
-            .msg_iovlen = 3,
-          };
+        iovec iov[3]{
+        {
+        .iov_base = &Res,
+        .iov_len = sizeof(Res),
+        },
+        {
+        .iov_base = MountFolder.data(),
+        .iov_len = MountFolder.size(),
+        },
+        {
+        .iov_base = &Null,
+        .iov_len = 1,
+        },
+        };
 
-          sendmsg(Socket, &msg, 0);
+        struct msghdr msg {
+          .msg_name = nullptr, .msg_namelen = 0, .msg_iov = iov, .msg_iovlen = 3,
+        };
 
-          CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::BasicRequest);
-          break;
+        sendmsg(Socket, &msg, 0);
+
+        CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::BasicRequest);
+        break;
+      }
+      case FEXServerClient::PacketType::TYPE_GET_PID_FD: {
+        int FD = FHU::Syscalls::pidfd_open(::getpid(), 0);
+
+        if (FD < 0) {
+          // Couldn't get PIDFD due to too old of kernel.
+          // Return a pipe to track the same information.
+          //
+          int fds[2];
+          pipe2(fds, O_CLOEXEC);
+          SendFDSuccessPacket(Socket, fds[0]);
+
+          // Close the read side now, doesn't matter to us
+          close(fds[0]);
+
+          // Check if we need to increase the FD limit.
+          ++NumFilesOpened;
+          CheckRaiseFDLimit();
+
+          // Write side will naturally close on process exit, letting the other process know we have exited.
+        } else {
+          SendFDSuccessPacket(Socket, FD);
+
+          // Close the FD now since we've sent it
+          close(FD);
         }
-        case FEXServerClient::PacketType::TYPE_GET_PID_FD: {
-          int FD = FHU::Syscalls::pidfd_open(::getpid(), 0);
 
-          if (FD < 0) {
-            // Couldn't get PIDFD due to too old of kernel.
-            // Return a pipe to track the same information.
-            //
-            int fds[2];
-            pipe2(fds, O_CLOEXEC);
-            SendFDSuccessPacket(Socket, fds[0]);
-
-            // Close the read side now, doesn't matter to us
-            close(fds[0]);
-
-            // Check if we need to increase the FD limit.
-            ++NumFilesOpened;
-            CheckRaiseFDLimit();
-
-            // Write side will naturally close on process exit, letting the other process know we have exited.
-          }
-          else {
-            SendFDSuccessPacket(Socket, FD);
-
-            // Close the FD now since we've sent it
-            close(FD);
-          }
-
-          CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::Header);
-          break;
-        }
-          // Invalid
-        case FEXServerClient::PacketType::TYPE_ERROR:
-        default:
-          // Something sent us an invalid packet. To ensure we don't spin infinitely, consume all the data.
-          LogMan::Msg::EFmt("[FEXServer] InvalidPacket size received 0x{:x} bytes", CurrentRead - CurrentOffset);
-          CurrentOffset = CurrentRead;
-          break;
+        CurrentOffset += sizeof(FEXServerClient::FEXServerRequestPacket::Header);
+        break;
+      }
+        // Invalid
+      case FEXServerClient::PacketType::TYPE_ERROR:
+      default:
+        // Something sent us an invalid packet. To ensure we don't spin infinitely, consume all the data.
+        LogMan::Msg::EFmt("[FEXServer] InvalidPacket size received 0x{:x} bytes", CurrentRead - CurrentOffset);
+        CurrentOffset = CurrentRead;
+        break;
       }
     }
   }
@@ -442,7 +417,7 @@ namespace ProcessPipe {
   void CloseConnections() {
     // Close the server pipe so new processes will know to spin up a new FEXServer.
     // This one is closing
-    close (ServerLockFD);
+    close(ServerLockFD);
 
     // Close the server socket so no more connections can be started
     close(ServerSocketFD);
@@ -452,7 +427,7 @@ namespace ProcessPipe {
     auto LastDataTime = std::chrono::system_clock::now();
 
     while (!ShouldShutdown) {
-      struct timespec ts{};
+      struct timespec ts {};
       ts.tv_sec = RequestTimeout;
 
       int Result = ppoll(&PollFDs.at(0), PollFDs.size(), &ts, nullptr);
@@ -460,7 +435,7 @@ namespace ProcessPipe {
 
       if (Result > 0) {
         // Walk the FDs and see if we got any results
-        for (auto it = PollFDs.begin(); it != PollFDs.end(); ) {
+        for (auto it = PollFDs.begin(); it != PollFDs.end();) {
           auto &Event = *it;
           bool Erase{};
 
@@ -468,23 +443,21 @@ namespace ProcessPipe {
             if (Event.fd == ServerSocketFD) {
               if (Event.revents & POLLIN) {
                 // If it is the listen socket then we have a new connection
-                struct sockaddr_storage Addr{};
+                struct sockaddr_storage Addr {};
                 socklen_t AddrSize{};
-                int NewFD = accept(ServerSocketFD, reinterpret_cast<struct sockaddr*>(&Addr), &AddrSize);
+                int NewFD = accept(ServerSocketFD, reinterpret_cast<struct sockaddr *>(&Addr), &AddrSize);
 
                 // Add the new client to the temporary array
-                NewPollFDs.emplace_back(pollfd {
-                  .fd = NewFD,
-                  .events = POLLIN | POLLPRI | POLLRDHUP,
-                  .revents = 0,
+                NewPollFDs.emplace_back(pollfd{
+                .fd = NewFD,
+                .events = POLLIN | POLLPRI | POLLRDHUP,
+                .revents = 0,
                 });
-              }
-              else if (Event.revents & (POLLHUP | POLLERR | POLLNVAL)) {
+              } else if (Event.revents & (POLLHUP | POLLERR | POLLNVAL)) {
                 // Listen socket error or shutting down
                 break;
               }
-            }
-            else {
+            } else {
               if (Event.revents & POLLIN) {
                 // Data from the socket
                 HandleSocketData(Event.fd);
@@ -503,8 +476,7 @@ namespace ProcessPipe {
 
           if (Erase) {
             it = PollFDs.erase(it);
-          }
-          else {
+          } else {
             ++it;
           }
 
@@ -518,13 +490,10 @@ namespace ProcessPipe {
         PollFDs.insert(PollFDs.begin(), NewPollFDs.begin(), NewPollFDs.end());
 
         LastDataTime = std::chrono::system_clock::now();
-      }
-      else {
+      } else {
         auto Now = std::chrono::system_clock::now();
         auto Diff = Now - LastDataTime;
-        if (Diff >= std::chrono::seconds(RequestTimeout) &&
-            !Foreground &&
-            PollFDs.size() == 1) {
+        if (Diff >= std::chrono::seconds(RequestTimeout) && !Foreground && PollFDs.size() == 1) {
           // If we aren't running in the foreground and we have no connections after a timeout
           // Then we can just go ahead and leave
           ShouldShutdown = true;
@@ -541,9 +510,5 @@ namespace ProcessPipe {
     ProcessPipe::RequestTimeout = PersistentTimeout;
   }
 
-  void Shutdown() {
-    ShouldShutdown = true;
-  }
+  void Shutdown() { ShouldShutdown = true; }
 }
-
-

@@ -35,36 +35,36 @@
 #include <queue>
 
 namespace FEXCore {
-class CodeLoader;
-class ThunkHandler;
+  class CodeLoader;
+  class ThunkHandler;
 
-namespace CodeSerialize {
-  class CodeObjectSerializeService;
-}
+  namespace CodeSerialize {
+    class CodeObjectSerializeService;
+  }
 
-namespace CPU {
-  class Arm64JITCore;
-  class Dispatcher;
-}
-namespace HLE {
-struct SyscallArguments;
-class SyscallHandler;
-class SourcecodeResolver;
-struct SourcecodeMap;
-}
+  namespace CPU {
+    class Arm64JITCore;
+    class Dispatcher;
+  }
+  namespace HLE {
+    struct SyscallArguments;
+    class SyscallHandler;
+    class SourcecodeResolver;
+    struct SourcecodeMap;
+  }
 }
 
 namespace FEXCore::IR {
   class RegisterAllocationData;
   class IRListView;
-namespace Validation {
-  class IRValidation;
-}
+  namespace Validation {
+    class IRValidation;
+  }
 }
 
 namespace FEXCore::Context {
   enum CoreRunningMode {
-    MODE_RUN        = 0,
+    MODE_RUN = 0,
     MODE_SINGLESTEP = 1,
   };
 
@@ -73,34 +73,34 @@ namespace FEXCore::Context {
     uint64_t GuestRIP;
   };
 
-  using BlockDelinkerFunc = void(*)(FEXCore::Core::CpuStateFrame *Frame, FEXCore::Context::ExitFunctionLinkData *Record);
+  using BlockDelinkerFunc = void (*)(FEXCore::Core::CpuStateFrame *Frame, FEXCore::Context::ExitFunctionLinkData *Record);
 
   class ContextImpl final : public FEXCore::Context::Context {
-    public:
-      // Context base class implementation.
-      bool InitCore() override;
+  public:
+    // Context base class implementation.
+    bool InitCore() override;
 
-      void SetExitHandler(ExitHandler handler) override;
-      ExitHandler GetExitHandler() const override;
+    void SetExitHandler(ExitHandler handler) override;
+    ExitHandler GetExitHandler() const override;
 
-      ExitReason RunUntilExit(FEXCore::Core::InternalThreadState *Thread) override;
+    ExitReason RunUntilExit(FEXCore::Core::InternalThreadState *Thread) override;
 
-      void ExecuteThread(FEXCore::Core::InternalThreadState *Thread) override;
+    void ExecuteThread(FEXCore::Core::InternalThreadState *Thread) override;
 
-      void CompileRIP(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP) override;
-      void CompileRIPCount(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, uint64_t MaxInst) override;
+    void CompileRIP(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP) override;
+    void CompileRIPCount(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, uint64_t MaxInst) override;
 
-      void SetCustomCPUBackendFactory(CustomCPUFactoryType Factory) override;
+    void SetCustomCPUBackendFactory(CustomCPUFactoryType Factory) override;
 
-      HostFeatures GetHostFeatures() const override;
+    HostFeatures GetHostFeatures() const override;
 
-      void HandleCallback(FEXCore::Core::InternalThreadState *Thread, uint64_t RIP) override;
+    void HandleCallback(FEXCore::Core::InternalThreadState *Thread, uint64_t RIP) override;
 
-      uint64_t RestoreRIPFromHostPC(FEXCore::Core::InternalThreadState *Thread, uint64_t HostPC) override;
-      uint32_t ReconstructCompactedEFLAGS(FEXCore::Core::InternalThreadState *Thread, bool WasInJIT, uint64_t *HostGPRs, uint64_t PSTATE) override;
-      void SetFlagsFromCompactedEFLAGS(FEXCore::Core::InternalThreadState *Thread, uint32_t EFLAGS) override;
+    uint64_t RestoreRIPFromHostPC(FEXCore::Core::InternalThreadState *Thread, uint64_t HostPC) override;
+    uint32_t ReconstructCompactedEFLAGS(FEXCore::Core::InternalThreadState *Thread, bool WasInJIT, uint64_t *HostGPRs, uint64_t PSTATE) override;
+    void SetFlagsFromCompactedEFLAGS(FEXCore::Core::InternalThreadState *Thread, uint32_t EFLAGS) override;
 
-      /**
+    /**
        * @brief Used to create FEX thread objects in preparation for creating a true OS thread. Does set a TID or PID.
        *
        * @param InitialRIP The starting RIP of this thread
@@ -128,77 +128,68 @@ namespace FEXCore::Context {
        *    - HandleCallback(Thread, RIP);
        */
 
-      FEXCore::Core::InternalThreadState* CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) override;
+    FEXCore::Core::InternalThreadState *
+    CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) override;
 
-      // Public for threading
-      void ExecutionThread(FEXCore::Core::InternalThreadState *Thread) override;
+    // Public for threading
+    void ExecutionThread(FEXCore::Core::InternalThreadState *Thread) override;
 
-      /**
+    /**
        * @brief Destroys this FEX thread object and stops tracking it internally
        *
        * @param Thread The internal FEX thread state object
        */
-      void DestroyThread(FEXCore::Core::InternalThreadState *Thread, bool NeedsTLSUninstall) override;
+    void DestroyThread(FEXCore::Core::InternalThreadState *Thread, bool NeedsTLSUninstall) override;
 
 #ifndef _WIN32
-      void LockBeforeFork(FEXCore::Core::InternalThreadState *Thread) override;
-      void UnlockAfterFork(FEXCore::Core::InternalThreadState *Thread, bool Child) override;
+    void LockBeforeFork(FEXCore::Core::InternalThreadState *Thread) override;
+    void UnlockAfterFork(FEXCore::Core::InternalThreadState *Thread, bool Child) override;
 #endif
-      void SetSignalDelegator(FEXCore::SignalDelegator *SignalDelegation) override;
-      void SetSyscallHandler(FEXCore::HLE::SyscallHandler *Handler) override;
+    void SetSignalDelegator(FEXCore::SignalDelegator *SignalDelegation) override;
+    void SetSyscallHandler(FEXCore::HLE::SyscallHandler *Handler) override;
 
-      FEXCore::CPUID::FunctionResults RunCPUIDFunction(uint32_t Function, uint32_t Leaf) override;
-      FEXCore::CPUID::XCRResults RunXCRFunction(uint32_t Function) override;
-      FEXCore::CPUID::FunctionResults RunCPUIDFunctionName(uint32_t Function, uint32_t Leaf, uint32_t CPU) override;
+    FEXCore::CPUID::FunctionResults RunCPUIDFunction(uint32_t Function, uint32_t Leaf) override;
+    FEXCore::CPUID::XCRResults RunXCRFunction(uint32_t Function) override;
+    FEXCore::CPUID::FunctionResults RunCPUIDFunctionName(uint32_t Function, uint32_t Leaf, uint32_t CPU) override;
 
-      FEXCore::IR::AOTIRCacheEntry *LoadAOTIRCacheEntry(const fextl::string& Name) override;
-      void UnloadAOTIRCacheEntry(FEXCore::IR::AOTIRCacheEntry *Entry) override;
+    FEXCore::IR::AOTIRCacheEntry *LoadAOTIRCacheEntry(const fextl::string &Name) override;
+    void UnloadAOTIRCacheEntry(FEXCore::IR::AOTIRCacheEntry *Entry) override;
 
-      void SetAOTIRLoader(AOTIRLoaderCBFn CacheReader) override {
-        IRCaptureCache.SetAOTIRLoader(std::move(CacheReader));
-      }
-      void SetAOTIRWriter(AOTIRWriterCBFn CacheWriter) override {
-        IRCaptureCache.SetAOTIRWriter(std::move(CacheWriter));
-      }
-      void SetAOTIRRenamer(AOTIRRenamerCBFn CacheRenamer) override {
-        IRCaptureCache.SetAOTIRRenamer(std::move(CacheRenamer));
-      }
+    void SetAOTIRLoader(AOTIRLoaderCBFn CacheReader) override { IRCaptureCache.SetAOTIRLoader(std::move(CacheReader)); }
+    void SetAOTIRWriter(AOTIRWriterCBFn CacheWriter) override { IRCaptureCache.SetAOTIRWriter(std::move(CacheWriter)); }
+    void SetAOTIRRenamer(AOTIRRenamerCBFn CacheRenamer) override { IRCaptureCache.SetAOTIRRenamer(std::move(CacheRenamer)); }
 
-      void FinalizeAOTIRCache() override {
-        IRCaptureCache.FinalizeAOTIRCache();
-      }
-      void WriteFilesWithCode(AOTIRCodeFileWriterFn Writer) override {
-        IRCaptureCache.WriteFilesWithCode(Writer);
-      }
+    void FinalizeAOTIRCache() override { IRCaptureCache.FinalizeAOTIRCache(); }
+    void WriteFilesWithCode(AOTIRCodeFileWriterFn Writer) override { IRCaptureCache.WriteFilesWithCode(Writer); }
 
-      void ClearCodeCache(FEXCore::Core::InternalThreadState *Thread) override;
-      void InvalidateGuestCodeRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length) override;
-      void InvalidateGuestCodeRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length, CodeRangeInvalidationFn callback) override;
-      void MarkMemoryShared(FEXCore::Core::InternalThreadState *Thread) override;
+    void ClearCodeCache(FEXCore::Core::InternalThreadState *Thread) override;
+    void InvalidateGuestCodeRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length) override;
+    void InvalidateGuestCodeRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length, CodeRangeInvalidationFn callback) override;
+    void MarkMemoryShared(FEXCore::Core::InternalThreadState *Thread) override;
 
-      void ConfigureAOTGen(FEXCore::Core::InternalThreadState *Thread, fextl::set<uint64_t> *ExternalBranches, uint64_t SectionMaxAddress) override;
-      // returns false if a handler was already registered
-      CustomIRResult AddCustomIREntrypoint(uintptr_t Entrypoint, CustomIREntrypointHandler Handler, void *Creator = nullptr, void *Data = nullptr);
+    void ConfigureAOTGen(FEXCore::Core::InternalThreadState *Thread, fextl::set<uint64_t> *ExternalBranches, uint64_t SectionMaxAddress) override;
+    // returns false if a handler was already registered
+    CustomIRResult AddCustomIREntrypoint(uintptr_t Entrypoint, CustomIREntrypointHandler Handler, void *Creator = nullptr, void *Data = nullptr);
 
-      void AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const& Definitions) override;
+    void AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const &Definitions) override;
 
-    public:
+  public:
     friend class FEXCore::HLE::SyscallHandler;
-  #ifdef JIT_ARM64
+#ifdef JIT_ARM64
     friend class FEXCore::CPU::Arm64JITCore;
-  #endif
+#endif
 
     friend class FEXCore::IR::Validation::IRValidation;
 
     struct {
-      CoreRunningMode RunningMode {CoreRunningMode::MODE_RUN};
+      CoreRunningMode RunningMode{CoreRunningMode::MODE_RUN};
       uint64_t VirtualMemSize{1ULL << 36};
 
       // this is for internal use
-      bool ValidateIRarser { false };
+      bool ValidateIRarser{false};
 
       // Used if the JIT needs to have its interrupt fault code emitted.
-      bool NeedsPendingInterruptFaultCheck { false };
+      bool NeedsPendingInterruptFaultCheck{false};
 
       FEX_CONFIG_OPT(Multiblock, MULTIBLOCK);
       FEX_CONFIG_OPT(SingleStepConfig, SINGLESTEP);
@@ -255,12 +246,13 @@ namespace FEXCore::Context {
     ~ContextImpl();
 
     static void ThreadRemoveCodeEntry(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP);
-    static void ThreadAddBlockLink(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestDestination, FEXCore::Context::ExitFunctionLinkData *HostLink, const BlockDelinkerFunc &delinker);
+    static void ThreadAddBlockLink(
+    FEXCore::Core::InternalThreadState *Thread, uint64_t GuestDestination, FEXCore::Context::ExitFunctionLinkData *HostLink,
+    const BlockDelinkerFunc &delinker);
 
-    template<auto Fn>
-    static uint64_t ThreadExitFunctionLink(FEXCore::Core::CpuStateFrame *Frame, ExitFunctionLinkData *Record) {
+    template<auto Fn> static uint64_t ThreadExitFunctionLink(FEXCore::Core::CpuStateFrame *Frame, ExitFunctionLinkData *Record) {
       auto Thread = Frame->Thread;
-      auto lk = GuardSignalDeferringSection<std::shared_lock>(static_cast<ContextImpl*>(Thread->CTX)->CodeInvalidationMutex, Thread);
+      auto lk = GuardSignalDeferringSection<std::shared_lock>(static_cast<ContextImpl *>(Thread->CTX)->CodeInvalidationMutex, Thread);
 
       return Fn(Frame, Record);
     }
@@ -270,8 +262,10 @@ namespace FEXCore::Context {
     static void ThreadRemoveCodeEntryFromJit(FEXCore::Core::CpuStateFrame *Frame, uint64_t GuestRIP) {
       auto Thread = Frame->Thread;
 
-      LogMan::Throw::AFmt(Thread->ThreadManager.GetTID() == FHU::Syscalls::gettid(), "Must be called from owning thread {}, not {}", Thread->ThreadManager.GetTID(), FHU::Syscalls::gettid());
-      auto lk = GuardSignalDeferringSection(static_cast<ContextImpl*>(Thread->CTX)->CodeInvalidationMutex, Thread);
+      LogMan::Throw::AFmt(
+      Thread->ThreadManager.GetTID() == FHU::Syscalls::gettid(), "Must be called from owning thread {}, not {}",
+      Thread->ThreadManager.GetTID(), FHU::Syscalls::gettid());
+      auto lk = GuardSignalDeferringSection(static_cast<ContextImpl *>(Thread->CTX)->CodeInvalidationMutex, Thread);
 
       ThreadRemoveCodeEntry(Thread, GuestRIP);
     }
@@ -279,7 +273,7 @@ namespace FEXCore::Context {
     void RemoveCustomIREntrypoint(uintptr_t Entrypoint);
 
     struct GenerateIRResult {
-      FEXCore::IR::IRListView* IRList;
+      FEXCore::IR::IRListView *IRList;
       FEXCore::IR::RegisterAllocationData::UniquePtr RAData;
       uint64_t TotalInstructions;
       uint64_t TotalInstructionsLength;
@@ -289,9 +283,9 @@ namespace FEXCore::Context {
     [[nodiscard]] GenerateIRResult GenerateIR(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, bool ExtendedDebugInfo, uint64_t MaxInst);
 
     struct CompileCodeResult {
-      void* CompiledCode;
-      FEXCore::IR::IRListView* IRData;
-      FEXCore::Core::DebugData* DebugData;
+      void *CompiledCode;
+      FEXCore::IR::IRListView *IRData;
+      FEXCore::Core::DebugData *DebugData;
       FEXCore::IR::RegisterAllocationData::UniquePtr RAData;
       bool GeneratedIR;
       uint64_t StartAddr;
@@ -316,11 +310,11 @@ namespace FEXCore::Context {
 
     void GetVDSOSigReturn(VDSOSigReturn *VDSOPointers) override {
       if (VDSOPointers->VDSO_kernel_sigreturn == nullptr) {
-        VDSOPointers->VDSO_kernel_sigreturn = reinterpret_cast<void*>(X86CodeGen.sigreturn_32);
+        VDSOPointers->VDSO_kernel_sigreturn = reinterpret_cast<void *>(X86CodeGen.sigreturn_32);
       }
 
       if (VDSOPointers->VDSO_kernel_rt_sigreturn == nullptr) {
-        VDSOPointers->VDSO_kernel_rt_sigreturn = reinterpret_cast<void*>(X86CodeGen.rt_sigreturn_32);
+        VDSOPointers->VDSO_kernel_rt_sigreturn = reinterpret_cast<void *>(X86CodeGen.rt_sigreturn_32);
       }
     }
 
@@ -360,8 +354,7 @@ namespace FEXCore::Context {
       if (SupportsHardwareTSO) {
         // If the hardware supports TSO then we don't need to emulate it through atomics.
         AtomicTSOEmulationEnabled = false;
-      }
-      else {
+      } else {
         // Atomic TSO emulation only enabled if the config option is enabled.
         AtomicTSOEmulationEnabled = (IsMemoryShared || !Config.TSOAutoMigration) && Config.TSOEnabled;
       }
@@ -375,7 +368,7 @@ namespace FEXCore::Context {
      *
      * InitializeCompiler is called inside of CreateThread, so you likely don't need this
      */
-    void InitializeCompiler(FEXCore::Core::InternalThreadState* Thread);
+    void InitializeCompiler(FEXCore::Core::InternalThreadState *Thread);
 
     void AddBlockMapping(FEXCore::Core::InternalThreadState *Thread, uint64_t Address, void *Ptr);
 

@@ -10,199 +10,194 @@
 #include <utility>
 
 namespace FEXCore {
-namespace Context {
-  class ContextImpl;
-}
-
-// Debugging define to switch what family of CPU we execute as.
-// Might be useful if an application makes an assumption about a CPU.
-// #define CPUID_AMD
-class CPUIDEmu final {
-private:
-  constexpr static uint32_t CPUID_VENDOR_INTEL1 = 0x756E6547; // "Genu"
-  constexpr static uint32_t CPUID_VENDOR_INTEL2 = 0x49656E69; // "ineI"
-  constexpr static uint32_t CPUID_VENDOR_INTEL3 = 0x6C65746E; // "ntel"
-
-  constexpr static uint32_t CPUID_VENDOR_AMD1 = 0x68747541; // "Auth"
-  constexpr static uint32_t CPUID_VENDOR_AMD2 = 0x69746E65; // "enti"
-  constexpr static uint32_t CPUID_VENDOR_AMD3 = 0x444D4163; // "cAMD"
-
-public:
-  CPUIDEmu(FEXCore::Context::ContextImpl const *ctx);
-
-  // X86 cacheline size effectively has to be hardcoded to 64
-  // if we report anything differently then applications are likely to break
-  constexpr static uint64_t CACHELINE_SIZE = 64;
-
-  FEXCore::CPUID::FunctionResults RunFunction(uint32_t Function, uint32_t Leaf) const {
-    if (Function < Primary.size()) {
-      const auto Handler = Primary[Function];
-      return (this->*Handler)(Leaf);
-    }
-
-    constexpr uint32_t HypervisorBase = 0x4000'0000;
-    if (Function >= HypervisorBase && Function < (HypervisorBase + Hypervisor.size())) {
-      const auto Handler = Hypervisor[Function - HypervisorBase];
-      return (this->*Handler)(Leaf);
-    }
-
-    constexpr uint32_t ExtendedBase = 0x8000'0000;
-    if (Function >= ExtendedBase && Function < (ExtendedBase + Extended.size())) {
-      const auto Handler = Extended[Function - ExtendedBase];
-      return (this->*Handler)(Leaf);
-    }
-
-    return Function_Reserved(Leaf);
+  namespace Context {
+    class ContextImpl;
   }
 
-  FEXCore::CPUID::FunctionResults RunFunctionName(uint32_t Function, uint32_t Leaf, uint32_t CPU) const {
-    if (Function == 0x8000'0002U)
-      return Function_8000_0002h(Leaf, CPU % PerCPUData.size());
-    else if (Function == 0x8000'0003U)
-      return Function_8000_0003h(Leaf, CPU % PerCPUData.size());
-    else
-      return Function_8000_0004h(Leaf, CPU % PerCPUData.size());
-  }
+  // Debugging define to switch what family of CPU we execute as.
+  // Might be useful if an application makes an assumption about a CPU.
+  // #define CPUID_AMD
+  class CPUIDEmu final {
+  private:
+    constexpr static uint32_t CPUID_VENDOR_INTEL1 = 0x756E6547; // "Genu"
+    constexpr static uint32_t CPUID_VENDOR_INTEL2 = 0x49656E69; // "ineI"
+    constexpr static uint32_t CPUID_VENDOR_INTEL3 = 0x6C65746E; // "ntel"
 
-  FEXCore::CPUID::XCRResults RunXCRFunction(uint32_t Function) const {
-    if (Function >= 1) {
-      // XCR function 1 is not yet supported.
-      return {};
+    constexpr static uint32_t CPUID_VENDOR_AMD1 = 0x68747541; // "Auth"
+    constexpr static uint32_t CPUID_VENDOR_AMD2 = 0x69746E65; // "enti"
+    constexpr static uint32_t CPUID_VENDOR_AMD3 = 0x444D4163; // "cAMD"
+
+  public:
+    CPUIDEmu(FEXCore::Context::ContextImpl const *ctx);
+
+    // X86 cacheline size effectively has to be hardcoded to 64
+    // if we report anything differently then applications are likely to break
+    constexpr static uint64_t CACHELINE_SIZE = 64;
+
+    FEXCore::CPUID::FunctionResults RunFunction(uint32_t Function, uint32_t Leaf) const {
+      if (Function < Primary.size()) {
+        const auto Handler = Primary[Function];
+        return (this->*Handler)(Leaf);
+      }
+
+      constexpr uint32_t HypervisorBase = 0x4000'0000;
+      if (Function >= HypervisorBase && Function < (HypervisorBase + Hypervisor.size())) {
+        const auto Handler = Hypervisor[Function - HypervisorBase];
+        return (this->*Handler)(Leaf);
+      }
+
+      constexpr uint32_t ExtendedBase = 0x8000'0000;
+      if (Function >= ExtendedBase && Function < (ExtendedBase + Extended.size())) {
+        const auto Handler = Extended[Function - ExtendedBase];
+        return (this->*Handler)(Leaf);
+      }
+
+      return Function_Reserved(Leaf);
     }
 
-    return XCRFunction_0h();
-  }
-
-  bool DoesXCRFunctionReportConstantData(uint32_t Function) const {
-    // Every function currently returns constant data.
-    return true;
-  }
-
-  enum class SupportsConstant {
-    CONSTANT,
-    NONCONSTANT,
-  };
-  enum class NeedsLeafConstant {
-    NEEDSLEAFCONSTANT,
-    NOLEAFCONSTANT,
-  };
-  struct FunctionConstant {
-    SupportsConstant SupportsConstantFunction;
-    NeedsLeafConstant NeedsLeaf;
-  };
-
-  static constexpr FunctionConstant DoesFunctionReportConstantData(uint32_t Function) {
-    if (Function < Primary.size()) {
-      return Primary_Constant[Function];
+    FEXCore::CPUID::FunctionResults RunFunctionName(uint32_t Function, uint32_t Leaf, uint32_t CPU) const {
+      if (Function == 0x8000'0002U)
+        return Function_8000_0002h(Leaf, CPU % PerCPUData.size());
+      else if (Function == 0x8000'0003U)
+        return Function_8000_0003h(Leaf, CPU % PerCPUData.size());
+      else
+        return Function_8000_0004h(Leaf, CPU % PerCPUData.size());
     }
 
-    constexpr uint32_t HypervisorBase = 0x4000'0000;
-    if (Function >= HypervisorBase && Function < (HypervisorBase + Hypervisor.size())) {
-      return Hypervisor_Constant[Function - HypervisorBase];
+    FEXCore::CPUID::XCRResults RunXCRFunction(uint32_t Function) const {
+      if (Function >= 1) {
+        // XCR function 1 is not yet supported.
+        return {};
+      }
+
+      return XCRFunction_0h();
     }
 
-    constexpr uint32_t ExtendedBase = 0x8000'0000;
-    if (Function >= ExtendedBase && Function < (ExtendedBase + Extended.size())) {
-      return Extended_Constant[Function - ExtendedBase];
+    bool DoesXCRFunctionReportConstantData(uint32_t Function) const {
+      // Every function currently returns constant data.
+      return true;
     }
 
-    // Anything unsupported is known constant return of reserved data.
-    return {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT};
-  }
+    enum class SupportsConstant {
+      CONSTANT,
+      NONCONSTANT,
+    };
+    enum class NeedsLeafConstant {
+      NEEDSLEAFCONSTANT,
+      NOLEAFCONSTANT,
+    };
+    struct FunctionConstant {
+      SupportsConstant SupportsConstantFunction;
+      NeedsLeafConstant NeedsLeaf;
+    };
 
-private:
-  FEXCore::Context::ContextImpl const *CTX;
-  bool Hybrid{};
-  uint32_t Cores{};
-  FEX_CONFIG_OPT(HideHypervisorBit, HIDEHYPERVISORBIT);
+    static constexpr FunctionConstant DoesFunctionReportConstantData(uint32_t Function) {
+      if (Function < Primary.size()) {
+        return Primary_Constant[Function];
+      }
 
-  // XFEATURE_ENABLED_MASK
-  // Mask that configures what features are enabled on the CPU.
-  // Affects XSAVE and XRSTOR when modified.
-  // Bit layout is as follows.
-  // [0]     - x87 enabled
-  // [1]     - SSE enabled
-  // [2]     - YMM enabled (256-bit SSE)
-  // [8:3]   - Reserved. MBZ.
-  // [9]     - MPK
-  // [10]    - Reserved. MBZ.
-  // [11]    - CET_U
-  // [12]    - CET_S
-  // [61:13] - Reserved. MBZ.
-  // [62]    - LWP (Lightweight profiling)
-  // [63]    - Reserved for XCR bit vector expansion. MBZ.
-  // Always enable x87 and SSE by default.
-  constexpr static uint64_t XCR0_X87 = 1ULL << 0;
-  constexpr static uint64_t XCR0_SSE = 1ULL << 1;
-  constexpr static uint64_t XCR0_AVX = 1ULL << 2;
+      constexpr uint32_t HypervisorBase = 0x4000'0000;
+      if (Function >= HypervisorBase && Function < (HypervisorBase + Hypervisor.size())) {
+        return Hypervisor_Constant[Function - HypervisorBase];
+      }
 
-  struct FeaturesConfig {
-    uint64_t SHA  : 1;
-    uint64_t _pad : 63;
-  };
+      constexpr uint32_t ExtendedBase = 0x8000'0000;
+      if (Function >= ExtendedBase && Function < (ExtendedBase + Extended.size())) {
+        return Extended_Constant[Function - ExtendedBase];
+      }
 
-  FeaturesConfig Features {
+      // Anything unsupported is known constant return of reserved data.
+      return {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT};
+    }
+
+  private:
+    FEXCore::Context::ContextImpl const *CTX;
+    bool Hybrid{};
+    uint32_t Cores{};
+    FEX_CONFIG_OPT(HideHypervisorBit, HIDEHYPERVISORBIT);
+
+    // XFEATURE_ENABLED_MASK
+    // Mask that configures what features are enabled on the CPU.
+    // Affects XSAVE and XRSTOR when modified.
+    // Bit layout is as follows.
+    // [0]     - x87 enabled
+    // [1]     - SSE enabled
+    // [2]     - YMM enabled (256-bit SSE)
+    // [8:3]   - Reserved. MBZ.
+    // [9]     - MPK
+    // [10]    - Reserved. MBZ.
+    // [11]    - CET_U
+    // [12]    - CET_S
+    // [61:13] - Reserved. MBZ.
+    // [62]    - LWP (Lightweight profiling)
+    // [63]    - Reserved for XCR bit vector expansion. MBZ.
+    // Always enable x87 and SSE by default.
+    constexpr static uint64_t XCR0_X87 = 1ULL << 0;
+    constexpr static uint64_t XCR0_SSE = 1ULL << 1;
+    constexpr static uint64_t XCR0_AVX = 1ULL << 2;
+
+    struct FeaturesConfig {
+      uint64_t SHA  : 1;
+      uint64_t _pad : 63;
+    };
+
+    FeaturesConfig Features{
     .SHA = 1,
-  };
+    };
 
-  uint64_t XCR0 {
-    XCR0_X87 |
-    XCR0_SSE
-  };
+    uint64_t XCR0{XCR0_X87 | XCR0_SSE};
 
-  uint32_t SupportsAVX() const {
-    return (XCR0 & XCR0_AVX) ? 1 : 0;
-  }
+    uint32_t SupportsAVX() const { return (XCR0 & XCR0_AVX) ? 1 : 0; }
 
-  using FunctionHandler = FEXCore::CPUID::FunctionResults (CPUIDEmu::*)(uint32_t Leaf) const;
+    using FunctionHandler = FEXCore::CPUID::FunctionResults (CPUIDEmu::*)(uint32_t Leaf) const;
 
-  struct CPUData {
-    const char *ProductName{};
+    struct CPUData {
+      const char *ProductName{};
 #ifdef _M_ARM_64
-    uint32_t MIDR{};
+      uint32_t MIDR{};
 #endif
-    bool IsBig{};
-  };
-  fextl::vector<CPUData> PerCPUData{};
+      bool IsBig{};
+    };
+    fextl::vector<CPUData> PerCPUData{};
 
-  // Functions
-  FEXCore::CPUID::FunctionResults Function_0h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_01h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_02h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_04h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_06h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_07h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_0Dh(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_15h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_1Ah(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_4000_0000h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_4000_0001h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0000h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0001h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0002h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0003h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0004h(uint32_t Leaf) const;
+    // Functions
+    FEXCore::CPUID::FunctionResults Function_0h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_01h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_02h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_04h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_06h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_07h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_0Dh(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_15h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_1Ah(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_4000_0000h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_4000_0001h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0000h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0001h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0002h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0003h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0004h(uint32_t Leaf) const;
 
-  FEXCore::CPUID::FunctionResults Function_8000_0002h(uint32_t Leaf, uint32_t CPU) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0003h(uint32_t Leaf, uint32_t CPU) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0004h(uint32_t Leaf, uint32_t CPU) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0002h(uint32_t Leaf, uint32_t CPU) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0003h(uint32_t Leaf, uint32_t CPU) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0004h(uint32_t Leaf, uint32_t CPU) const;
 
-  FEXCore::CPUID::FunctionResults Function_8000_0005h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0006h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0007h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0008h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_0019h(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_8000_001Dh(uint32_t Leaf) const;
-  FEXCore::CPUID::FunctionResults Function_Reserved(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0005h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0006h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0007h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0008h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_0019h(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_8000_001Dh(uint32_t Leaf) const;
+    FEXCore::CPUID::FunctionResults Function_Reserved(uint32_t Leaf) const;
 
-  FEXCore::CPUID::XCRResults XCRFunction_0h() const;
+    FEXCore::CPUID::XCRResults XCRFunction_0h() const;
 
-  void SetupHostHybridFlag();
-  void SetupFeatures();
-  static constexpr size_t PRIMARY_FUNCTION_COUNT = 27;
-  static constexpr size_t HYPERVISOR_FUNCTION_COUNT = 2;
-  static constexpr size_t EXTENDED_FUNCTION_COUNT = 32;
-  static constexpr std::array<FunctionHandler, PRIMARY_FUNCTION_COUNT> Primary = {
+    void SetupHostHybridFlag();
+    void SetupFeatures();
+    static constexpr size_t PRIMARY_FUNCTION_COUNT = 27;
+    static constexpr size_t HYPERVISOR_FUNCTION_COUNT = 2;
+    static constexpr size_t EXTENDED_FUNCTION_COUNT = 32;
+    static constexpr std::array<FunctionHandler, PRIMARY_FUNCTION_COUNT> Primary = {
     // 0: Highest function parameter and ID
     &CPUIDEmu::Function_0h,
     // 1: Processor info
@@ -270,96 +265,96 @@ private:
 #else
     &CPUIDEmu::Function_Reserved,
 #endif
-  };
+    };
 
-  static constexpr std::array<FunctionConstant, PRIMARY_FUNCTION_COUNT> Primary_Constant = {{
+    static constexpr std::array<FunctionConstant, PRIMARY_FUNCTION_COUNT> Primary_Constant = {{
     // 0: Highest function parameter and ID
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 1: Processor info
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 2: Cache and TLB info
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 3: Serial Number(previously), now reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #ifndef CPUID_AMD
     // 4: Deterministic cache parameters for each level
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT},
 #else
     // 4: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #endif
     // 5: Monitor/mwait
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 6: Thermal and power management
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 7: Extended feature flags
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT},
     // 0x08: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 9: Direct Cache Access information
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x0A: Architectural performance monitoring
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x0B: Extended topology enumeration
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x0C: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x0D: Processor extended state enumeration
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT},
     // 0x0E: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x0F: Intel RDT monitoring
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x10: Intel RDT allocation enumeration
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x12: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x12: Intel SGX capability enumeration
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x13: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x14: Intel Processor trace
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #ifndef CPUID_AMD
     // 0x15: Timestamp counter information
     // Doesn't exist on AMD hardware
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #else
     // 0x15: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #endif
     // 0x16: Processor frequency information
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x17: SoC vendor attribute enumeration
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x18: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x19: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #ifndef CPUID_AMD
     // 0x1A: Hybrid Information Sub-leaf
-    { SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #else
     // 0x1A: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #endif
-  }};
+    }};
 
-  static constexpr std::array<FunctionHandler, HYPERVISOR_FUNCTION_COUNT> Hypervisor = {
+    static constexpr std::array<FunctionHandler, HYPERVISOR_FUNCTION_COUNT> Hypervisor = {
     // Hypervisor CPUID information leaf
     &CPUIDEmu::Function_4000_0000h,
     // FEX-Emu specific leaf
     &CPUIDEmu::Function_4000_0001h,
-  };
+    };
 
-  static constexpr std::array<FunctionConstant, HYPERVISOR_FUNCTION_COUNT> Hypervisor_Constant = {{
+    static constexpr std::array<FunctionConstant, HYPERVISOR_FUNCTION_COUNT> Hypervisor_Constant = {{
     // Hypervisor CPUID information leaf
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // FEX-Emu specific leaf
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT },
-  }};
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT},
+    }};
 
-  static constexpr std::array<FunctionHandler, EXTENDED_FUNCTION_COUNT> Extended = {
+    static constexpr std::array<FunctionHandler, EXTENDED_FUNCTION_COUNT> Extended = {
     // Largest extended function number
     &CPUIDEmu::Function_8000_0000h,
     // Processor vendor
@@ -432,83 +427,83 @@ private:
     &CPUIDEmu::Function_Reserved,
     // 0x8000'001F: AMD Secure Encryption
     &CPUIDEmu::Function_Reserved,
-  };
+    };
 
-  static constexpr std::array<FunctionConstant, EXTENDED_FUNCTION_COUNT> Extended_Constant = {{
+    static constexpr std::array<FunctionConstant, EXTENDED_FUNCTION_COUNT> Extended_Constant = {{
     // Largest extended function number
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // Processor vendor
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // Processor brand string
-    { SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // Processor brand string continued
-    { SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // Processor brand string continued
-    { SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::NONCONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #ifdef CPUID_AMD
     // 0x8000'0005: L1 Cache and TLB identifiers
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #else
     // 0x8000'0005: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #endif
     // 0x8000'0006: L2 Cache identifiers
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0007: Advanced power management information
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0008: Virtual and physical address sizes
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0009: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000A: SVM Revision
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000B: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000C: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000D: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000E: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'000F: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0010: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0011: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0012: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0013: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0014: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0015: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0016: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0017: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0018: Reserved?
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'0019: TLB 1GB page identifiers
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'001A: Performance optimization identifiers
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'001B: Instruction based sampling identifiers
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'001C: Lightweight profiling capabilities
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #ifdef CPUID_AMD
     // 0x8000'001D: Cache properties
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NEEDSLEAFCONSTANT},
 #else
     // 0x8000'001D: Reserved
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
 #endif
     // 0x8000'001E: Extended APIC ID
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
     // 0x8000'001F: AMD Secure Encryption
-    { SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT },
-  }};
-};
+    {SupportsConstant::CONSTANT, NeedsLeafConstant::NOLEAFCONSTANT},
+    }};
+  };
 }

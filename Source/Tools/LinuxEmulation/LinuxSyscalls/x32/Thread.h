@@ -9,7 +9,7 @@ $end_info$
 #include <stdint.h>
 
 namespace FEXCore::Core {
-struct CpuStateFrame;
+  struct CpuStateFrame;
 }
 
 namespace FEX::HLE::x32 {

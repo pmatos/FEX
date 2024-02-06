@@ -21,12 +21,11 @@
 namespace FEX::GUI {
 
   using TupleReturn = std::tuple<SDL_Window*, SDL_GLContext>;
-  static TupleReturn SetupIMGui(const char *Name, const fextl::string &Config) {
+  static TupleReturn SetupIMGui(const char* Name, const fextl::string& Config) {
     // Setup SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
-    {
-        printf("Error: %s\n", SDL_GetError());
-        return TupleReturn{};
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+      printf("Error: %s\n", SDL_GetError());
+      return TupleReturn{};
     }
 
     // Create window with graphics context
@@ -78,9 +77,9 @@ namespace FEX::GUI {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
     io.IniFilename = &Config.at(0);
 
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
@@ -90,20 +89,18 @@ namespace FEX::GUI {
 
   static std::chrono::time_point<std::chrono::high_resolution_clock> LastUpdate{};
   constexpr auto UpdateTimeout = std::chrono::seconds(2);
-  void DrawUI(SDL_Window *window, std::function<bool()> DrawFunction) {
-    bool Running {true};
+  void DrawUI(SDL_Window* window, std::function<bool()> DrawFunction) {
+    bool Running{true};
     ImGuiIO& io = ImGui::GetIO();
     while (Running) {
       SDL_Event event;
       auto Now = std::chrono::high_resolution_clock::now();
       auto Dur = Now - LastUpdate;
 
-      if (Dur < UpdateTimeout || SDL_WaitEvent(nullptr))
-      {
+      if (Dur < UpdateTimeout || SDL_WaitEvent(nullptr)) {
         while (SDL_PollEvent(&event)) {
           ImGui_ImplSDL2_ProcessEvent(&event);
-          if (event.type == SDL_QUIT)
-            Running = false;
+          if (event.type == SDL_QUIT) Running = false;
           if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
             Running = false;
         }
@@ -117,8 +114,7 @@ namespace FEX::GUI {
       glClear(GL_COLOR_BUFFER_BIT);
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-      if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-      {
+      if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
         SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
         ImGui::UpdatePlatformWindows();
@@ -130,7 +126,7 @@ namespace FEX::GUI {
     }
   }
 
-  void Shutdown(SDL_Window *window, SDL_GLContext gl_context) {
+  void Shutdown(SDL_Window* window, SDL_GLContext gl_context) {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -147,6 +143,5 @@ namespace FEX::GUI {
     SDL_Event Event{};
     Event.type = SDL_USEREVENT;
     SDL_PushEvent(&Event);
-
   }
 }

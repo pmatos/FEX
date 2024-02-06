@@ -29,48 +29,44 @@ namespace FEX::HLE::x64 {
     return 0;
   }
 
-  void AdjustRipForNewThread(FEXCore::Core::CpuStateFrame *Frame) {
-    Frame->State.rip += 2;
-  }
+  void AdjustRipForNewThread(FEXCore::Core::CpuStateFrame *Frame) { Frame->State.rip += 2; }
 
   void RegisterThread(FEX::HLE::SyscallHandler *Handler) {
     using namespace FEXCore::IR;
 
-    REGISTER_SYSCALL_IMPL_X64_FLAGS(clone, SyscallFlags::DEFAULT,
-      ([](FEXCore::Core::CpuStateFrame *Frame, uint32_t flags, void *stack, pid_t *parent_tid, pid_t *child_tid, void *tls) -> uint64_t {
-      FEX::HLE::clone3_args args {
-        .Type = TypeOfClone::TYPE_CLONE2,
-        .args = {
-          .flags = flags, // CSIGNAL is contained in here
-          .pidfd = 0, // For clone, pidfd is duplicated here
-          .child_tid = reinterpret_cast<uint64_t>(child_tid),
-          .parent_tid = reinterpret_cast<uint64_t>(parent_tid),
-          .exit_signal = flags & CSIGNAL,
-          .stack = reinterpret_cast<uint64_t>(stack),
-          .stack_size = 0, // This syscall isn't able to see the stack size
-          .tls = reinterpret_cast<uint64_t>(tls),
-          .set_tid = 0, // This syscall isn't able to select TIDs
-          .set_tid_size = 0,
-          .cgroup = 0, // This syscall can't select cgroups
-        },
+    REGISTER_SYSCALL_IMPL_X64_FLAGS(
+    clone, SyscallFlags::DEFAULT,
+    ([](FEXCore::Core::CpuStateFrame *Frame, uint32_t flags, void *stack, pid_t *parent_tid, pid_t *child_tid, void *tls) -> uint64_t {
+      FEX::HLE::clone3_args args{
+      .Type = TypeOfClone::TYPE_CLONE2,
+      .args =
+      {
+      .flags = flags, // CSIGNAL is contained in here
+      .pidfd = 0, // For clone, pidfd is duplicated here
+      .child_tid = reinterpret_cast<uint64_t>(child_tid),
+      .parent_tid = reinterpret_cast<uint64_t>(parent_tid),
+      .exit_signal = flags & CSIGNAL,
+      .stack = reinterpret_cast<uint64_t>(stack),
+      .stack_size = 0, // This syscall isn't able to see the stack size
+      .tls = reinterpret_cast<uint64_t>(tls),
+      .set_tid = 0, // This syscall isn't able to select TIDs
+      .set_tid_size = 0,
+      .cgroup = 0, // This syscall can't select cgroups
+      },
       };
       return CloneHandler(Frame, &args);
     }));
 
-    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(futex, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-      [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const struct timespec *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
-      uint64_t Result = syscall(SYSCALL_DEF(futex),
-        uaddr,
-        futex_op,
-        val,
-        timeout,
-        uaddr2,
-        val3);
+    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(
+    futex, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+    [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const struct timespec *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
+      uint64_t Result = syscall(SYSCALL_DEF(futex), uaddr, futex_op, val, timeout, uaddr2, val3);
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_FLAGS(set_robust_list, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-      [](FEXCore::Core::CpuStateFrame *Frame, struct robust_list_head *head, size_t len) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_FLAGS(
+    set_robust_list, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+    [](FEXCore::Core::CpuStateFrame *Frame, struct robust_list_head *head, size_t len) -> uint64_t {
       auto Thread = Frame->Thread;
       Thread->ThreadManager.robust_list_head = reinterpret_cast<uint64_t>(head);
 #ifdef TERMUX_BUILD
@@ -85,8 +81,9 @@ namespace FEX::HLE::x64 {
 #endif
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(get_robust_list, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-      [](FEXCore::Core::CpuStateFrame *Frame, int pid, struct robust_list_head **head, size_t *len_ptr) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(
+    get_robust_list, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+    [](FEXCore::Core::CpuStateFrame *Frame, int pid, struct robust_list_head **head, size_t *len_ptr) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(get_robust_list), pid, head, len_ptr);
       SYSCALL_ERRNO();
     });
@@ -97,10 +94,10 @@ namespace FEX::HLE::x64 {
 
     // launch a new process under fex
     // currently does not propagate argv[0] correctly
-    REGISTER_SYSCALL_IMPL_X64_FLAGS(execve, SyscallFlags::DEFAULT,
-      [](FEXCore::Core::CpuStateFrame *Frame, const char *pathname, char *const argv[], char *const envp[]) -> uint64_t {
-      fextl::vector<const char*> Args;
-      fextl::vector<const char*> Envp;
+    REGISTER_SYSCALL_IMPL_X64_FLAGS(
+    execve, SyscallFlags::DEFAULT, [](FEXCore::Core::CpuStateFrame *Frame, const char *pathname, char * const argv[], char * const envp[]) -> uint64_t {
+      fextl::vector<const char *> Args;
+      fextl::vector<const char *> Envp;
 
       if (argv) {
         for (int i = 0; argv[i]; i++) {
@@ -118,18 +115,19 @@ namespace FEX::HLE::x64 {
         Envp.push_back(nullptr);
       }
 
-      auto* const* ArgsPtr = argv ? const_cast<char* const*>(Args.data()) : nullptr;
-      auto* const* EnvpPtr = envp ? const_cast<char* const*>(Envp.data()) : nullptr;
+      auto * const *ArgsPtr = argv ? const_cast<char * const *>(Args.data()) : nullptr;
+      auto * const *EnvpPtr = envp ? const_cast<char * const *>(Envp.data()) : nullptr;
 
       FEX::HLE::ExecveAtArgs AtArgs = FEX::HLE::ExecveAtArgs::Empty();
 
       return FEX::HLE::ExecveHandler(pathname, ArgsPtr, EnvpPtr, AtArgs);
     });
 
-    REGISTER_SYSCALL_IMPL_X64_FLAGS(execveat, SyscallFlags::DEFAULT,
-      ([](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, char *const argv[], char *const envp[], int flags) -> uint64_t {
-      fextl::vector<const char*> Args;
-      fextl::vector<const char*> Envp;
+    REGISTER_SYSCALL_IMPL_X64_FLAGS(
+    execveat, SyscallFlags::DEFAULT,
+    ([](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, char * const argv[], char * const envp[], int flags) -> uint64_t {
+      fextl::vector<const char *> Args;
+      fextl::vector<const char *> Envp;
 
       if (argv) {
         for (int i = 0; argv[i]; i++) {
@@ -147,24 +145,26 @@ namespace FEX::HLE::x64 {
         Envp.push_back(nullptr);
       }
 
-      FEX::HLE::ExecveAtArgs AtArgs {
-        .dirfd = dirfd,
-        .flags = flags,
+      FEX::HLE::ExecveAtArgs AtArgs{
+      .dirfd = dirfd,
+      .flags = flags,
       };
 
-      auto* const* ArgsPtr = argv ? const_cast<char* const*>(Args.data()) : nullptr;
-      auto* const* EnvpPtr = envp ? const_cast<char* const*>(Envp.data()) : nullptr;
+      auto * const *ArgsPtr = argv ? const_cast<char * const *>(Args.data()) : nullptr;
+      auto * const *EnvpPtr = envp ? const_cast<char * const *>(Envp.data()) : nullptr;
       return FEX::HLE::ExecveHandler(pathname, ArgsPtr, EnvpPtr, AtArgs);
     }));
 
-    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(wait4, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-      [](FEXCore::Core::CpuStateFrame *Frame, pid_t pid, int *wstatus, int options, struct rusage *rusage) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(
+    wait4, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+    [](FEXCore::Core::CpuStateFrame *Frame, pid_t pid, int *wstatus, int options, struct rusage *rusage) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(wait4), pid, wstatus, options, rusage);
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(waitid, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-      [](FEXCore::Core::CpuStateFrame *Frame, int which, pid_t upid, siginfo_t *infop, int options, struct rusage *rusage) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(
+    waitid, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+    [](FEXCore::Core::CpuStateFrame *Frame, int which, pid_t upid, siginfo_t *infop, int options, struct rusage *rusage) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(waitid), which, upid, infop, options, rusage);
       SYSCALL_ERRNO();
     });

@@ -6,8 +6,8 @@
 #include <sys/ioctl.h>
 
 namespace FEX::HLE::x64 {
-namespace wireless {
+  namespace wireless {
 #include "LinuxSyscalls/x64/Ioctl/wireless.inl"
-}
+  }
 
 }

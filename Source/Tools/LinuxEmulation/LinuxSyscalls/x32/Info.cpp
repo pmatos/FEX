@@ -48,22 +48,20 @@ namespace FEX::HLE::x32 {
 
   void RegisterInfo(FEX::HLE::SyscallHandler *Handler) {
     REGISTER_SYSCALL_IMPL_X32(oldolduname, [](FEXCore::Core::CpuStateFrame *Frame, struct oldold_utsname *buf) -> uint64_t {
-      struct utsname Local{};
+      struct utsname Local {};
 
       memset(buf, 0, sizeof(*buf));
       if (::uname(&Local) == 0) {
         memcpy(buf->nodename, Local.nodename, __OLD_UTS_LEN);
-      }
-      else {
+      } else {
         strncpy(buf->nodename, "FEXCore", __OLD_UTS_LEN);
         LogMan::Msg::EFmt("Couldn't determine host nodename. Defaulting to '{}'", buf->nodename);
       }
       strncpy(buf->sysname, "Linux", __OLD_UTS_LEN);
       uint32_t GuestVersion = FEX::HLE::_SyscallHandler->GetGuestKernelVersion();
-      snprintf(buf->release, __OLD_UTS_LEN, "%d.%d.%d",
-        FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelMinor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
+      snprintf(
+      buf->release, __OLD_UTS_LEN, "%d.%d.%d", FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
+      FEX::HLE::SyscallHandler::KernelMinor(GuestVersion), FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
 
       const char version[] = "#" GIT_DESCRIBE_STRING " SMP " __DATE__ " " __TIME__;
       strncpy(buf->version, version, __OLD_UTS_LEN);
@@ -73,22 +71,20 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(olduname, [](FEXCore::Core::CpuStateFrame *Frame, struct old_utsname *buf) -> uint64_t {
-      struct utsname Local{};
+      struct utsname Local {};
 
       memset(buf, 0, sizeof(*buf));
       if (::uname(&Local) == 0) {
         memcpy(buf->nodename, Local.nodename, __NEW_UTS_LEN);
-      }
-      else {
+      } else {
         strncpy(buf->nodename, "FEXCore", __NEW_UTS_LEN);
         LogMan::Msg::EFmt("Couldn't determine host nodename. Defaulting to '{}'", buf->nodename);
       }
       strncpy(buf->sysname, "Linux", __NEW_UTS_LEN);
       uint32_t GuestVersion = FEX::HLE::_SyscallHandler->GetGuestKernelVersion();
-      snprintf(buf->release, __NEW_UTS_LEN, "%d.%d.%d",
-        FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelMinor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
+      snprintf(
+      buf->release, __NEW_UTS_LEN, "%d.%d.%d", FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
+      FEX::HLE::SyscallHandler::KernelMinor(GuestVersion), FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
 
       const char version[] = "#" GIT_DESCRIBE_STRING " SMP " __DATE__ " " __TIME__;
       strncpy(buf->version, version, __NEW_UTS_LEN);
@@ -98,31 +94,32 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(getrlimit, [](FEXCore::Core::CpuStateFrame *Frame, int resource, compat_ptr<FEX::HLE::x32::rlimit32<true>> rlim) -> uint64_t {
-      struct rlimit rlim64{};
+      struct rlimit rlim64 {};
       uint64_t Result = ::getrlimit(resource, &rlim64);
       *rlim = rlim64;
       SYSCALL_ERRNO();
     });
 
     REGISTER_SYSCALL_IMPL_X32(ugetrlimit, [](FEXCore::Core::CpuStateFrame *Frame, int resource, compat_ptr<FEX::HLE::x32::rlimit32<false>> rlim) -> uint64_t {
-      struct rlimit rlim64{};
+      struct rlimit rlim64 {};
       uint64_t Result = ::getrlimit(resource, &rlim64);
       *rlim = rlim64;
       SYSCALL_ERRNO();
     });
 
     REGISTER_SYSCALL_IMPL_X32(setrlimit, [](FEXCore::Core::CpuStateFrame *Frame, int resource, const compat_ptr<FEX::HLE::x32::rlimit32<false>> rlim) -> uint64_t {
-      struct rlimit rlim64{};
+      struct rlimit rlim64 {};
       rlim64 = *rlim;
       uint64_t Result = ::setrlimit(resource, &rlim64);
       SYSCALL_ERRNO();
     });
 
     REGISTER_SYSCALL_IMPL_X32(sysinfo, [](FEXCore::Core::CpuStateFrame *Frame, struct sysinfo32 *info) -> uint64_t {
-      struct sysinfo Host{};
+      struct sysinfo Host {};
       uint64_t Result = ::sysinfo(&Host);
       if (Result != -1) {
-#define Copy(x) info->x = static_cast<decltype(info->x)>(std::min(Host.x, static_cast<decltype(Host.x)>(std::numeric_limits<decltype(info->x)>::max())));
+#define Copy(x) \
+  info->x = static_cast<decltype(info->x)>(std::min(Host.x, static_cast<decltype(Host.x)>(std::numeric_limits<decltype(info->x)>::max())));
         Copy(uptime);
         Copy(procs);
 #define CopyShift(x) info->x = static_cast<decltype(info->x)>(Host.x >> ShiftAmount);
@@ -134,8 +131,7 @@ namespace FEX::HLE::x32 {
         // If any result can't fit in to a uint32_t then we need to shift the mem_unit and all the members
         // Set the mem_unit to the pagesize
         uint32_t ShiftAmount{};
-        if ((Host.totalram >> 32) != 0 ||
-            (Host.totalswap >> 32) != 0) {
+        if ((Host.totalram >> 32) != 0 || (Host.totalswap >> 32) != 0) {
 
           while (Host.mem_unit < 4096) {
             Host.mem_unit <<= 1;

@@ -20,20 +20,14 @@ namespace FEXCore::CodeSerialize {
 
     if (!BaseFilename.empty()) {
       // Create a new entry that once set up will be put in to our section object map
-      auto Entry = fextl::make_unique<CodeRegionEntry>(
-        Base,
-        Size,
-        Offset,
-        filename,
-        NamedRegionHandler->DefaultCodeHeader(Base, Offset)
-      );
+      auto Entry = fextl::make_unique<CodeRegionEntry>(Base, Size, Offset, filename, NamedRegionHandler->DefaultCodeHeader(Base, Offset));
 
       // Lock the job ref counter so we can block anything attempting to use the entry before it is loaded
       Entry->NamedJobRefCountMutex.lock();
 
       CodeRegionMapType::iterator EntryIterator;
       {
-        std::unique_lock lk {CodeObjectCacheService->GetEntryMapMutex()};
+        std::unique_lock lk{CodeObjectCacheService->GetEntryMapMutex()};
 
         auto &EntryMap = CodeObjectCacheService->GetEntryMap();
 
@@ -53,15 +47,14 @@ namespace FEXCore::CodeSerialize {
 
           // Remove this entry from the unrelocated map as well
           {
-            std::unique_lock lk2 {CodeObjectCacheService->GetUnrelocatedEntryMapMutex()};
+            std::unique_lock lk2{CodeObjectCacheService->GetUnrelocatedEntryMapMutex()};
             CodeObjectCacheService->GetUnrelocatedEntryMap().erase(it.first->second->EntryHeader.OriginalBase);
           }
 
           // Now overwrite the entry in the map
           it = EntryMap.insert_or_assign(Base, std::move(Entry));
           EntryIterator = it.first;
-        }
-        else {
+        } else {
           // No overwrite, just insert
           EntryIterator = it.first;
         }
@@ -86,7 +79,7 @@ namespace FEXCore::CodeSerialize {
     // We need to find the entry that we are deleting first
     fextl::unique_ptr<CodeRegionEntry> EntryPointer;
     {
-      std::unique_lock lk {CodeObjectCacheService->GetEntryMapMutex()};
+      std::unique_lock lk{CodeObjectCacheService->GetEntryMapMutex()};
 
       auto &EntryMap = CodeObjectCacheService->GetEntryMap();
       auto it = EntryMap.find(Base);
@@ -106,11 +99,10 @@ namespace FEXCore::CodeSerialize {
 
         // Remove this entry from the unrelocated map as well
         {
-          std::unique_lock lk2 {CodeObjectCacheService->GetUnrelocatedEntryMapMutex()};
+          std::unique_lock lk2{CodeObjectCacheService->GetUnrelocatedEntryMapMutex()};
           CodeObjectCacheService->GetUnrelocatedEntryMap().erase(EntryPointer->EntryHeader.OriginalBase);
         }
-      }
-      else {
+      } else {
         // Tried to remove something that wasn't in our code object tracking
         return;
       }

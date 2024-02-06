@@ -31,7 +31,7 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(utime, [](FEXCore::Core::CpuStateFrame *Frame, char* filename, const struct utimbuf* times) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(utime, [](FEXCore::Core::CpuStateFrame *Frame, char *filename, const struct utimbuf *times) -> uint64_t {
       uint64_t Result = ::utime(filename, times);
       SYSCALL_ERRNO();
     });
@@ -56,7 +56,9 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(clock_nanosleep, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const struct timespec *request, struct timespec *remain) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    clock_nanosleep,
+    [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const struct timespec *request, struct timespec *remain) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(clock_nanosleep), clockid, flags, request, remain);
       SYSCALL_ERRNO();
     });
@@ -81,12 +83,15 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(setitimer, [](FEXCore::Core::CpuStateFrame *Frame, int which, const struct itimerval *new_value, struct itimerval *old_value) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    setitimer, [](FEXCore::Core::CpuStateFrame *Frame, int which, const struct itimerval *new_value, struct itimerval *old_value) -> uint64_t {
       uint64_t Result = ::setitimer(which, new_value, old_value);
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(timer_settime, [](FEXCore::Core::CpuStateFrame *Frame, kernel_timer_t timerid, int flags, const struct itimerspec *new_value, struct itimerspec *old_value) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    timer_settime,
+    [](FEXCore::Core::CpuStateFrame *Frame, kernel_timer_t timerid, int flags, const struct itimerspec *new_value, struct itimerspec *old_value) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(timer_settime), timerid, flags, new_value, old_value);
       SYSCALL_ERRNO();
     });
@@ -106,10 +111,10 @@ namespace FEX::HLE::x64 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X64_PASS(timer_create, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, struct sigevent *sevp, kernel_timer_t *timerid) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64_PASS(
+    timer_create, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, struct sigevent *sevp, kernel_timer_t *timerid) -> uint64_t {
       uint64_t Result = ::syscall(SYSCALL_DEF(timer_create), clockid, sevp, timerid);
       SYSCALL_ERRNO();
     });
   }
 }
-

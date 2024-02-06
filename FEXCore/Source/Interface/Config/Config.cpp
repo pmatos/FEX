@@ -33,14 +33,14 @@ namespace FEXCore::Context {
 }
 
 namespace FEXCore::Config {
-namespace DefaultValues {
+  namespace DefaultValues {
 #define P(x) x
 #define OPT_BASE(type, group, enum, json, default) const P(type) P(enum) = P(default);
 #define OPT_STR(group, enum, json, default) const std::string_view P(enum) = P(default);
 #define OPT_STRARRAY(group, enum, json, default) OPT_STR(group, enum, json, default)
 #define OPT_STRENUM(group, enum, json, default) const uint64_t P(enum) = FEXCore::ToUnderlying(P(default));
 #include <FEXCore/Config/ConfigValues.inl>
-}
+  }
 
   enum Paths {
     PATH_DATA_DIR = 0,
@@ -52,36 +52,22 @@ namespace DefaultValues {
   };
   static std::array<fextl::string, Paths::PATH_LAST> Paths;
 
-  void SetDataDirectory(const std::string_view Path) {
-    Paths[PATH_DATA_DIR] = Path;
-  }
+  void SetDataDirectory(const std::string_view Path) { Paths[PATH_DATA_DIR] = Path; }
 
-  void SetConfigDirectory(const std::string_view Path, bool Global) {
-    Paths[PATH_CONFIG_DIR_LOCAL + Global] = Path;
-  }
+  void SetConfigDirectory(const std::string_view Path, bool Global) { Paths[PATH_CONFIG_DIR_LOCAL + Global] = Path; }
 
-  void SetConfigFileLocation(const std::string_view Path, bool Global) {
-    Paths[PATH_CONFIG_FILE_LOCAL + Global] = Path;
-  }
+  void SetConfigFileLocation(const std::string_view Path, bool Global) { Paths[PATH_CONFIG_FILE_LOCAL + Global] = Path; }
 
-  fextl::string const& GetDataDirectory() {
-    return Paths[PATH_DATA_DIR];
-  }
+  fextl::string const &GetDataDirectory() { return Paths[PATH_DATA_DIR]; }
 
-  fextl::string const& GetConfigDirectory(bool Global) {
-    return Paths[PATH_CONFIG_DIR_LOCAL + Global];
-  }
+  fextl::string const &GetConfigDirectory(bool Global) { return Paths[PATH_CONFIG_DIR_LOCAL + Global]; }
 
-  fextl::string const& GetConfigFileLocation(bool Global) {
-    return Paths[PATH_CONFIG_FILE_LOCAL + Global];
-  }
+  fextl::string const &GetConfigFileLocation(bool Global) { return Paths[PATH_CONFIG_FILE_LOCAL + Global]; }
 
   fextl::string GetApplicationConfig(const std::string_view Program, bool Global) {
     fextl::string ConfigFile = GetConfigDirectory(Global);
 
-    if (!Global &&
-        !FHU::Filesystem::Exists(ConfigFile) &&
-        !FHU::Filesystem::CreateDirectories(ConfigFile)) {
+    if (!Global && !FHU::Filesystem::Exists(ConfigFile) && !FHU::Filesystem::CreateDirectories(ConfigFile)) {
       LogMan::Msg::DFmt("Couldn't create config directory: '{}'", ConfigFile);
       // Let's go local in this case
       return fextl::fmt::format("./{}.json", Program);
@@ -90,9 +76,7 @@ namespace DefaultValues {
     ConfigFile += "AppConfig/";
 
     // Attempt to create the local folder if it doesn't exist
-    if (!Global &&
-        !FHU::Filesystem::Exists(ConfigFile) &&
-        !FHU::Filesystem::CreateDirectories(ConfigFile)) {
+    if (!Global && !FHU::Filesystem::Exists(ConfigFile) && !FHU::Filesystem::CreateDirectories(ConfigFile)) {
       // Let's go local in this case
       return fextl::fmt::format("./{}.json", Program);
     }
@@ -100,45 +84,34 @@ namespace DefaultValues {
     return fextl::fmt::format("{}{}.json", ConfigFile, Program);
   }
 
-  void SetConfig(FEXCore::Context::Context *CTX, ConfigOption Option, uint64_t Config) {
-  }
+  void SetConfig(FEXCore::Context::Context *CTX, ConfigOption Option, uint64_t Config) {}
 
-  void SetConfig(FEXCore::Context::Context *CTX, ConfigOption Option, fextl::string const &Config) {
-  }
+  void SetConfig(FEXCore::Context::Context *CTX, ConfigOption Option, fextl::string const &Config) {}
 
-  uint64_t GetConfig(FEXCore::Context::Context *CTX, ConfigOption Option) {
-    return 0;
-  }
+  uint64_t GetConfig(FEXCore::Context::Context *CTX, ConfigOption Option) { return 0; }
 
   static fextl::map<FEXCore::Config::LayerType, fextl::unique_ptr<FEXCore::Config::Layer>> ConfigLayers;
   static FEXCore::Config::Layer *Meta{};
 
   constexpr std::array<FEXCore::Config::LayerType, 9> LoadOrder = {
-    FEXCore::Config::LayerType::LAYER_GLOBAL_MAIN,
-    FEXCore::Config::LayerType::LAYER_MAIN,
-    FEXCore::Config::LayerType::LAYER_GLOBAL_STEAM_APP,
-    FEXCore::Config::LayerType::LAYER_GLOBAL_APP,
-    FEXCore::Config::LayerType::LAYER_LOCAL_STEAM_APP,
-    FEXCore::Config::LayerType::LAYER_LOCAL_APP,
-    FEXCore::Config::LayerType::LAYER_ARGUMENTS,
-    FEXCore::Config::LayerType::LAYER_ENVIRONMENT,
-    FEXCore::Config::LayerType::LAYER_TOP
-  };
+  FEXCore::Config::LayerType::LAYER_GLOBAL_MAIN,
+  FEXCore::Config::LayerType::LAYER_MAIN,
+  FEXCore::Config::LayerType::LAYER_GLOBAL_STEAM_APP,
+  FEXCore::Config::LayerType::LAYER_GLOBAL_APP,
+  FEXCore::Config::LayerType::LAYER_LOCAL_STEAM_APP,
+  FEXCore::Config::LayerType::LAYER_LOCAL_APP,
+  FEXCore::Config::LayerType::LAYER_ARGUMENTS,
+  FEXCore::Config::LayerType::LAYER_ENVIRONMENT,
+  FEXCore::Config::LayerType::LAYER_TOP};
 
-  Layer::Layer(const LayerType _Type)
-    : Type {_Type} {
-  }
+  Layer::Layer(const LayerType _Type) : Type{_Type} {}
 
-  Layer::~Layer() {
-  }
+  Layer::~Layer() {}
 
   class MetaLayer final : public FEXCore::Config::Layer {
   public:
-    MetaLayer(const LayerType _Type)
-      : FEXCore::Config::Layer (_Type) {
-    }
-    ~MetaLayer() {
-    }
+    MetaLayer(const LayerType _Type) : FEXCore::Config::Layer(_Type) {}
+    ~MetaLayer() {}
     void Load();
 
   private:
@@ -202,11 +175,9 @@ namespace DefaultValues {
   void MetaLayer::MergeConfigMap(const LayerOptions &Options) {
     // Insert this layer's options, overlaying previous options that exist here
     for (auto &it : Options) {
-      if (it.first == FEXCore::Config::ConfigOption::CONFIG_ENV ||
-          it.first == FEXCore::Config::ConfigOption::CONFIG_HOSTENV) {
+      if (it.first == FEXCore::Config::ConfigOption::CONFIG_ENV || it.first == FEXCore::Config::ConfigOption::CONFIG_HOSTENV) {
         MergeEnvironmentVariables(it.first, it.second);
-      }
-      else {
+      } else {
         OptionMap.insert_or_assign(it.first, it.second);
       }
     }
@@ -258,8 +229,7 @@ namespace DefaultValues {
       if (FHU::Filesystem::Exists(PathName)) {
         return PathName;
       }
-    }
-    else {
+    } else {
       // If the containerprefix and pathname isn't empty
       // Then we check if the pathname exists in our current namespace
       // If the path DOESN'T exist but DOES exist with the prefix applied
@@ -340,7 +310,7 @@ namespace DefaultValues {
       FEX_CONFIG_OPT(Core, CORE);
     }
 
-    fextl::string ContainerPrefix { FindContainerPrefix() };
+    fextl::string ContainerPrefix{FindContainerPrefix()};
     auto ExpandPathIfExists = [&ContainerPrefix](FEXCore::Config::ConfigOption Config, fextl::string PathName) {
       auto NewPath = ExpandPath(ContainerPrefix, PathName);
       if (!NewPath.empty()) {
@@ -350,12 +320,11 @@ namespace DefaultValues {
 
     if (FEXCore::Config::Exists(FEXCore::Config::CONFIG_ROOTFS)) {
       FEX_CONFIG_OPT(PathName, ROOTFS);
-      auto ExpandedString = ExpandPath(ContainerPrefix,PathName());
+      auto ExpandedString = ExpandPath(ContainerPrefix, PathName());
       if (!ExpandedString.empty()) {
         // Adjust the path if it ended up being relative
         FEXCore::Config::EraseSet(FEXCore::Config::CONFIG_ROOTFS, ExpandedString);
-      }
-      else if (!PathName().empty()) {
+      } else if (!PathName().empty()) {
         // If the filesystem doesn't exist then let's see if it exists in the fex-emu folder
         fextl::string NamedRootFS = GetDataDirectory() + "RootFS/" + PathName();
         if (FHU::Filesystem::Exists(NamedRootFS)) {
@@ -377,8 +346,7 @@ namespace DefaultValues {
       if (!ExpandedString.empty()) {
         // Adjust the path if it ended up being relative
         FEXCore::Config::EraseSet(FEXCore::Config::CONFIG_THUNKCONFIG, ExpandedString);
-      }
-      else if (!PathName().empty()) {
+      } else if (!PathName().empty()) {
         // If the filesystem doesn't exist then let's see if it exists in the fex-emu folder
         fextl::string NamedConfig = GetDataDirectory() + "ThunkConfigs/" + PathName();
         if (FHU::Filesystem::Exists(NamedConfig)) {
@@ -393,12 +361,13 @@ namespace DefaultValues {
       }
     }
 
-    if (FEXCore::Config::Exists(FEXCore::Config::CONFIG_DUMPIR) &&
-        !FEXCore::Config::Exists(FEXCore::Config::CONFIG_PASSMANAGERDUMPIR)) {
+    if (FEXCore::Config::Exists(FEXCore::Config::CONFIG_DUMPIR) && !FEXCore::Config::Exists(FEXCore::Config::CONFIG_PASSMANAGERDUMPIR)) {
       // If DumpIR is set but no PassManagerDumpIR configuration is set, then default to `afteropt`
       FEX_CONFIG_OPT(PathName, DUMPIR);
       if (PathName() != "no") {
-        EraseSet(FEXCore::Config::ConfigOption::CONFIG_PASSMANAGERDUMPIR, fextl::fmt::format("{}", static_cast<uint64_t>(FEXCore::Config::PassManagerDumpIR::AFTEROPT)));
+        EraseSet(
+        FEXCore::Config::ConfigOption::CONFIG_PASSMANAGERDUMPIR,
+        fextl::fmt::format("{}", static_cast<uint64_t>(FEXCore::Config::PassManagerDumpIR::AFTEROPT)));
       }
     }
 
@@ -408,36 +377,21 @@ namespace DefaultValues {
     }
   }
 
-  void AddLayer(fextl::unique_ptr<FEXCore::Config::Layer> _Layer) {
-    ConfigLayers.emplace(_Layer->GetLayerType(), std::move(_Layer));
-  }
+  void AddLayer(fextl::unique_ptr<FEXCore::Config::Layer> _Layer) { ConfigLayers.emplace(_Layer->GetLayerType(), std::move(_Layer)); }
 
-  bool Exists(ConfigOption Option) {
-    return Meta->OptionExists(Option);
-  }
+  bool Exists(ConfigOption Option) { return Meta->OptionExists(Option); }
 
-  std::optional<LayerValue*> All(ConfigOption Option) {
-    return Meta->All(Option);
-  }
+  std::optional<LayerValue *> All(ConfigOption Option) { return Meta->All(Option); }
 
-  std::optional<fextl::string*> Get(ConfigOption Option) {
-    return Meta->Get(Option);
-  }
+  std::optional<fextl::string *> Get(ConfigOption Option) { return Meta->Get(Option); }
 
-  void Set(ConfigOption Option, std::string_view Data) {
-    Meta->Set(Option, Data);
-  }
+  void Set(ConfigOption Option, std::string_view Data) { Meta->Set(Option, Data); }
 
-  void Erase(ConfigOption Option) {
-    Meta->Erase(Option);
-  }
+  void Erase(ConfigOption Option) { Meta->Erase(Option); }
 
-  void EraseSet(ConfigOption Option, std::string_view Data) {
-    Meta->EraseSet(Option, Data);
-  }
+  void EraseSet(ConfigOption Option, std::string_view Data) { Meta->EraseSet(Option, Data); }
 
-  template<typename T>
-  T Value<T>::Get(FEXCore::Config::ConfigOption Option) {
+  template<typename T> T Value<T>::Get(FEXCore::Config::ConfigOption Option) {
     T Result;
     auto Value = FEXCore::Config::Get(Option);
 
@@ -447,49 +401,43 @@ namespace DefaultValues {
     return Result;
   }
 
-  template<typename T>
-  T Value<T>::GetIfExists(FEXCore::Config::ConfigOption Option, T Default) {
+  template<typename T> T Value<T>::GetIfExists(FEXCore::Config::ConfigOption Option, T Default) {
     T Result;
     auto Value = FEXCore::Config::Get(Option);
 
     if (Value && FEXCore::StrConv::Conv(**Value, &Result)) {
       return Result;
-    }
-    else {
+    } else {
       return Default;
     }
   }
 
-  template<>
-  fextl::string Value<fextl::string>::GetIfExists(FEXCore::Config::ConfigOption Option, fextl::string Default) {
+  template<> fextl::string Value<fextl::string>::GetIfExists(FEXCore::Config::ConfigOption Option, fextl::string Default) {
     auto Value = FEXCore::Config::Get(Option);
     if (Value) {
       return **Value;
-    }
-    else {
+    } else {
       return Default;
     }
   }
 
-  template<>
-  fextl::string Value<fextl::string>::GetIfExists(FEXCore::Config::ConfigOption Option, std::string_view Default) {
+  template<> fextl::string Value<fextl::string>::GetIfExists(FEXCore::Config::ConfigOption Option, std::string_view Default) {
     auto Value = FEXCore::Config::Get(Option);
     if (Value) {
       return **Value;
-    }
-    else {
+    } else {
       return fextl::string(Default);
     }
   }
 
-  template bool     Value<bool>::GetIfExists(FEXCore::Config::ConfigOption Option, bool Default);
-  template int8_t   Value<int8_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int8_t Default);
-  template uint8_t  Value<uint8_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint8_t Default);
-  template int16_t   Value<int16_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int16_t Default);
-  template uint16_t  Value<uint16_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint16_t Default);
-  template int32_t  Value<int32_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int32_t Default);
+  template bool Value<bool>::GetIfExists(FEXCore::Config::ConfigOption Option, bool Default);
+  template int8_t Value<int8_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int8_t Default);
+  template uint8_t Value<uint8_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint8_t Default);
+  template int16_t Value<int16_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int16_t Default);
+  template uint16_t Value<uint16_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint16_t Default);
+  template int32_t Value<int32_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int32_t Default);
   template uint32_t Value<uint32_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint32_t Default);
-  template int64_t  Value<int64_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int64_t Default);
+  template int64_t Value<int64_t>::GetIfExists(FEXCore::Config::ConfigOption Option, int64_t Default);
   template uint64_t Value<uint64_t>::GetIfExists(FEXCore::Config::ConfigOption Option, uint64_t Default);
 
   // Constructor
@@ -498,8 +446,7 @@ namespace DefaultValues {
   template Value<uint8_t>::Value(FEXCore::Config::ConfigOption _Option, uint8_t Default);
   template Value<uint64_t>::Value(FEXCore::Config::ConfigOption _Option, uint64_t Default);
 
-  template<typename T>
-  void Value<T>::GetListIfExists(FEXCore::Config::ConfigOption Option, fextl::list<fextl::string> *List) {
+  template<typename T> void Value<T>::GetListIfExists(FEXCore::Config::ConfigOption Option, fextl::list<fextl::string> *List) {
     auto Value = FEXCore::Config::All(Option);
     List->clear();
     if (Value) {
@@ -508,4 +455,3 @@ namespace DefaultValues {
   }
   template void Value<fextl::string>::GetListIfExists(FEXCore::Config::ConfigOption Option, fextl::list<fextl::string> *List);
 }
-

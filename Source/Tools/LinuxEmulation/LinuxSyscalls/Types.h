@@ -9,9 +9,9 @@
 #include <type_traits>
 
 namespace FEX::HLE {
-using key_serial_t = int32_t;
-using kernel_timer_t = int32_t;
-using mqd_t = int32_t;
+  using key_serial_t = int32_t;
+  using kernel_timer_t = int32_t;
+  using mqd_t = int32_t;
 
 #ifndef GETPID
 #define GETPID 11
@@ -53,56 +53,56 @@ using mqd_t = int32_t;
 #define SEM_STAT_ANY 20
 #endif
 
-struct FEX_PACKED epoll_event_x86 {
-  uint32_t events;
-  epoll_data_t data;
+  struct FEX_PACKED epoll_event_x86 {
+    uint32_t events;
+    epoll_data_t data;
 
-  epoll_event_x86() = delete;
+    epoll_event_x86() = delete;
 
-  operator struct epoll_event() const {
-    epoll_event event{};
-    event.events = events;
-    event.data = data;
-    return event;
-  }
+    operator struct epoll_event() const {
+      epoll_event event{};
+      event.events = events;
+      event.data = data;
+      return event;
+    }
 
-  epoll_event_x86(struct epoll_event event) {
-    events = event.events;
-    data = event.data;
-  }
-};
-static_assert(std::is_trivial<epoll_event_x86>::value, "Needs to be trivial");
-static_assert(sizeof(epoll_event_x86) == 12, "Incorrect size");
+    epoll_event_x86(struct epoll_event event) {
+      events = event.events;
+      data = event.data;
+    }
+  };
+  static_assert(std::is_trivial<epoll_event_x86>::value, "Needs to be trivial");
+  static_assert(sizeof(epoll_event_x86) == 12, "Incorrect size");
 
-// This directly matches the Linux `struct seminfo` structure
-// Due to the way this definition cyclic depends inside of includes, redefine it
-// This works around some terrible compile errors on some platforms
-struct fex_seminfo {
-	int32_t semmap;
-	int32_t semmni;
-	int32_t semmns;
-	int32_t semmnu;
-	int32_t semmsl;
-	int32_t semopm;
-	int32_t semume;
-	int32_t semusz;
-	int32_t semvmx;
-	int32_t semaem;
-};
+  // This directly matches the Linux `struct seminfo` structure
+  // Due to the way this definition cyclic depends inside of includes, redefine it
+  // This works around some terrible compile errors on some platforms
+  struct fex_seminfo {
+    int32_t semmap;
+    int32_t semmni;
+    int32_t semmns;
+    int32_t semmnu;
+    int32_t semmsl;
+    int32_t semopm;
+    int32_t semume;
+    int32_t semusz;
+    int32_t semvmx;
+    int32_t semaem;
+  };
 
-struct FEX_PACKED GuestSAMask {
-  uint64_t Val;
-};
+  struct FEX_PACKED GuestSAMask {
+    uint64_t Val;
+  };
 
-struct FEX_PACKED GuestSigAction {
-  union {
-    void (*handler)(int);
-    void (*sigaction)(int, siginfo_t *, void*);
-  } sigaction_handler;
+  struct FEX_PACKED GuestSigAction {
+    union {
+      void (*handler)(int);
+      void (*sigaction)(int, siginfo_t *, void *);
+    } sigaction_handler;
 
-  uint64_t sa_flags;
-  void (*restorer)(void);
-  GuestSAMask sa_mask;
-};
+    uint64_t sa_flags;
+    void (*restorer)(void);
+    GuestSAMask sa_mask;
+  };
 
 }

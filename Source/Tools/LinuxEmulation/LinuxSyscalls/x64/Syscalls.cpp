@@ -28,7 +28,7 @@ namespace FEX::HLE::x64 {
   void RegisterNotImplemented(FEX::HLE::SyscallHandler *Handler);
 
   x64SyscallHandler::x64SyscallHandler(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *_SignalDelegation)
-    : SyscallHandler {ctx, _SignalDelegation} {
+    : SyscallHandler{ctx, _SignalDelegation} {
     OSABI = FEXCore::HLE::SyscallOSABI::OS_LINUX64;
 
     RegisterSyscallHandlers();
@@ -44,9 +44,11 @@ namespace FEX::HLE::x64 {
       return raw.raw;
     };
 
-    Definitions.resize(FEX::HLE::x64::SYSCALL_x64_MAX, SyscallFunctionDefinition {
-      .NumArgs = 255,
-      .Ptr = cvt(&UnimplementedSyscall),
+    Definitions.resize(
+    FEX::HLE::x64::SYSCALL_x64_MAX,
+    SyscallFunctionDefinition{
+    .NumArgs = 255,
+    .Ptr = cvt(&UnimplementedSyscall),
     });
 
     FEX::HLE::RegisterEpoll(this);
@@ -106,7 +108,7 @@ namespace FEX::HLE::x64 {
     }
 
 #if PRINT_MISSING_SYSCALLS
-    for (auto &Syscall: SyscallNames) {
+    for (auto &Syscall : SyscallNames) {
       if (Definitions[Syscall.first].Ptr == cvt(&UnimplementedSyscall)) {
         LogMan::Msg::DFmt("Unimplemented syscall: {}", Syscall.second);
       }

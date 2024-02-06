@@ -52,12 +52,9 @@ namespace FEXCore::HLE {
   class SourcecodeResolver;
 
   struct AOTIRCacheEntryLookupResult {
-    AOTIRCacheEntryLookupResult(FEXCore::IR::AOTIRCacheEntry *Entry, uintptr_t VAFileStart)
-      : Entry(Entry), VAFileStart(VAFileStart) {
+    AOTIRCacheEntryLookupResult(FEXCore::IR::AOTIRCacheEntry *Entry, uintptr_t VAFileStart) : Entry(Entry), VAFileStart(VAFileStart) {}
 
-    }
-
-    AOTIRCacheEntryLookupResult(AOTIRCacheEntryLookupResult&&) = default;
+    AOTIRCacheEntryLookupResult(AOTIRCacheEntryLookupResult &&) = default;
 
     FEXCore::IR::AOTIRCacheEntry *Entry;
     uintptr_t VAFileStart;
@@ -75,7 +72,7 @@ namespace FEXCore::HLE {
 
     SyscallOSABI GetOSABI() const { return OSABI; }
     virtual FEXCore::CodeLoader *GetCodeLoader() const { return nullptr; }
-    virtual void MarkGuestExecutableRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length) { }
+    virtual void MarkGuestExecutableRange(FEXCore::Core::InternalThreadState *Thread, uint64_t Start, uint64_t Length) {}
     virtual AOTIRCacheEntryLookupResult LookupAOTIRCacheEntry(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestAddr) = 0;
 
     virtual SourcecodeResolver *GetSourcecodeResolver() { return nullptr; }

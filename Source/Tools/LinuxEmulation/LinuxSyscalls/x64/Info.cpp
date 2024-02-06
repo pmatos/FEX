@@ -39,13 +39,13 @@ namespace FEX::HLE::x64 {
     });
 
     if (Handler->IsHostKernelVersionAtLeast(6, 6, 0)) {
-      REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(map_shadow_stack, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
-        [](FEXCore::Core::CpuStateFrame *Frame, uint64_t addr, uint64_t size, uint32_t flags) -> uint64_t {
+      REGISTER_SYSCALL_IMPL_X64_PASS_FLAGS(
+      map_shadow_stack, SyscallFlags::OPTIMIZETHROUGH | SyscallFlags::NOSYNCSTATEONENTRY,
+      [](FEXCore::Core::CpuStateFrame *Frame, uint64_t addr, uint64_t size, uint32_t flags) -> uint64_t {
         // Claim that shadow stack isn't supported.
         return -EOPNOTSUPP;
       });
-    }
-    else {
+    } else {
       REGISTER_SYSCALL_IMPL_X64(map_shadow_stack, UnimplementedSyscallSafe);
     }
   }

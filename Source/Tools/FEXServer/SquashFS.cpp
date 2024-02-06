@@ -15,7 +15,7 @@
 namespace SquashFS {
 
   constexpr int USER_PERMS = S_IRWXU | S_IRWXG | S_IRWXO;
-  int ServerRootFSLockFD {-1};
+  int ServerRootFSLockFD{-1};
   int FuseMountPID{};
   fextl::string MountFolder{};
 
@@ -36,42 +36,38 @@ namespace SquashFS {
       ServerRootFSLockFD = open(RootFSLockFile.c_str(), O_RDWR | O_CLOEXEC, USER_PERMS);
       if (ServerRootFSLockFD != -1) {
         // Now that we have opened the file, try to get a write lock.
-        flock lk {
-          .l_type = F_WRLCK,
-          .l_whence = SEEK_SET,
-          .l_start = 0,
-          .l_len = 0,
+        flock lk{
+        .l_type = F_WRLCK,
+        .l_whence = SEEK_SET,
+        .l_start = 0,
+        .l_len = 0,
         };
         Ret = fcntl(ServerRootFSLockFD, F_SETLK, &lk);
 
         if (Ret != -1) {
           // Write lock was gained, we can now continue onward.
-        }
-        else {
+        } else {
           // We couldn't get a write lock, this means that another process already owns a lock on the fifo
           close(ServerRootFSLockFD);
           ServerRootFSLockFD = -1;
           return false;
         }
-      }
-      else {
+      } else {
         // File couldn't get opened even though it existed?
         // Must have raced something here.
         return false;
       }
-    }
-    else if (Ret == -1) {
+    } else if (Ret == -1) {
       // Unhandled error.
       LogMan::Msg::EFmt("[FEXServer] Unable to create FEXServer RootFS lock file at: {} {} {}", RootFSLockFile, errno, strerror(errno));
       return false;
-    }
-    else {
+    } else {
       // FIFO file was created. Try to get a write lock
-      flock lk {
-        .l_type = F_WRLCK,
-        .l_whence = SEEK_SET,
-        .l_start = 0,
-        .l_len = 0,
+      flock lk{
+      .l_type = F_WRLCK,
+      .l_whence = SEEK_SET,
+      .l_start = 0,
+      .l_len = 0,
       };
       Ret = fcntl(ServerRootFSLockFD, F_SETLK, &lk);
 
@@ -87,11 +83,11 @@ namespace SquashFS {
   }
 
   bool DowngradeRootFSPipeToReadLock() {
-    flock lk {
-      .l_type = F_RDLCK,
-      .l_whence = SEEK_SET,
-      .l_start = 0,
-      .l_len = 0,
+    flock lk{
+    .l_type = F_RDLCK,
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0,
     };
     int Ret = fcntl(ServerRootFSLockFD, F_SETLK, &lk);
 
@@ -139,7 +135,7 @@ namespace SquashFS {
       argv[3] = nullptr;
 
       // Try and execute {erofsfuse, squashfuse} to mount our rootfs
-      if (execvpe(argv[0], (char * const*)argv, environ) == -1) {
+      if (execvpe(argv[0], (char * const *)argv, environ) == -1) {
         // Give a hopefully helpful error message for users
         LogMan::Msg::EFmt("[FEXServer] '{}' Couldn't execute for some reason: {} {}\n", argv[0], errno, strerror(errno));
         LogMan::Msg::EFmt("[FEXServer] To mount squashfs rootfs files you need {} installed\n", argv[0]);
@@ -152,13 +148,13 @@ namespace SquashFS {
         // End the child
         exit(1);
       }
-    }
-    else {
+    } else {
       FuseMountPID = pid;
       // Parent
       // Wait for the child to exit
       // This will happen with execvpe of squashmount or exit on failure
-      while (waitpid(pid, nullptr, 0) == -1 && errno == EINTR);
+      while (waitpid(pid, nullptr, 0) == -1 && errno == EINTR)
+        ;
 
       // Check the child pipe for messages
       pollfd PollFD;
@@ -210,15 +206,15 @@ namespace SquashFS {
       argv[3] = MountFolder.c_str();
       argv[4] = nullptr;
 
-      if (execvp(argv[0], (char * const*)argv) == -1) {
+      if (execvp(argv[0], (char * const *)argv) == -1) {
         fprintf(stderr, "fusermount failed to execute. You may have an mount living at '%s' to clean up now\n", MountFolder.c_str());
         fprintf(stderr, "Try `%s %s %s %s`\n", argv[0], argv[1], argv[2], argv[3]);
         exit(1);
       }
-    }
-    else {
+    } else {
       // Wait for fusermount to leave
-      while (waitpid(pid, nullptr, 0) == -1 && errno == EINTR);
+      while (waitpid(pid, nullptr, 0) == -1 && errno == EINTR)
+        ;
 
       // Remove the mount path
       rmdir(MountFolder.c_str());
@@ -234,8 +230,8 @@ namespace SquashFS {
 
     MountFolder = LDPath();
 
-    bool IsSquashFS {false};
-    bool IsEroFS {false};
+    bool IsSquashFS{false};
+    bool IsEroFS{false};
 
     // Check if the image is an EroFS
     IsEroFS = FEX::FormatCheck::IsEroFS(MountFolder);
@@ -269,7 +265,5 @@ namespace SquashFS {
     return true;
   }
 
-  fextl::string GetMountFolder() {
-    return MountFolder;
-  }
+  fextl::string GetMountFolder() { return MountFolder; }
 }

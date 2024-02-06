@@ -19,12 +19,12 @@ $end_info$
 
 namespace FEXCore::IR {
 
-class DeadFlagCalculationEliminination final : public FEXCore::IR::Pass {
-public:
-  bool Run(IREmitter *IREmit) override;
-};
+  class DeadFlagCalculationEliminination final : public FEXCore::IR::Pass {
+  public:
+    bool Run(IREmitter *IREmit) override;
+  };
 
-/**
+  /**
  * @brief (UNSAFE) This pass removes flag calculations that will otherwise be unused INSIDE of that block
  *
  * Compilers don't really do any form of cross-block flag allocation like they do RA with GPRs.
@@ -35,43 +35,42 @@ public:
  * This may be more interesting with full function level recompilation since flags definitely won't be used across function boundaries.
  *
  */
-bool DeadFlagCalculationEliminination::Run(IREmitter *IREmit) {
-  FEXCORE_PROFILE_SCOPED("PassManager::DFE");
+  bool DeadFlagCalculationEliminination::Run(IREmitter *IREmit) {
+    FEXCORE_PROFILE_SCOPED("PassManager::DFE");
 
-  std::array<OrderedNode*, 32> LastValidFlagStores{};
+    std::array<OrderedNode *, 32> LastValidFlagStores{};
 
-  bool Changed = false;
-  auto CurrentIR = IREmit->ViewIR();
+    bool Changed = false;
+    auto CurrentIR = IREmit->ViewIR();
 
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      if (IROp->Op == OP_STOREFLAG) {
-        auto Op = IROp->CW<IR::IROp_StoreFlag>();
-        // Set this node as the last one valid for this flag
-        LastValidFlagStores[Op->Flag] = CodeNode;
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        if (IROp->Op == OP_STOREFLAG) {
+          auto Op = IROp->CW<IR::IROp_StoreFlag>();
+          // Set this node as the last one valid for this flag
+          LastValidFlagStores[Op->Flag] = CodeNode;
+        } else if (IROp->Op == OP_LOADFLAG) {
+          auto Op = IROp->CW<IR::IROp_LoadFlag>();
+          LastValidFlagStores[Op->Flag] = nullptr;
+        }
       }
-      else if (IROp->Op == OP_LOADFLAG) {
-        auto Op = IROp->CW<IR::IROp_LoadFlag>();
-        LastValidFlagStores[Op->Flag] = nullptr;
+
+      // If any flags are stored but not loaded by the end of the block, then erase them
+      for (auto &Flag : LastValidFlagStores) {
+        if (Flag != nullptr) {
+          IREmit->Remove(Flag);
+          Changed = true;
+        }
       }
+
+      LastValidFlagStores.fill(nullptr);
     }
 
-    // If any flags are stored but not loaded by the end of the block, then erase them
-    for (auto &Flag : LastValidFlagStores) {
-      if (Flag != nullptr) {
-        IREmit->Remove(Flag);
-        Changed = true;
-      }
-    }
-
-    LastValidFlagStores.fill(nullptr);
+    return Changed;
   }
 
-  return Changed;
-}
-
-fextl::unique_ptr<FEXCore::IR::Pass> CreateDeadFlagCalculationEliminination() {
-  return fextl::make_unique<DeadFlagCalculationEliminination>();
-}
+  fextl::unique_ptr<FEXCore::IR::Pass> CreateDeadFlagCalculationEliminination() {
+    return fextl::make_unique<DeadFlagCalculationEliminination>();
+  }
 
 }

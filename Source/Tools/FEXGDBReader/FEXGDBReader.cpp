@@ -13,7 +13,7 @@ GDB_DECLARE_GPL_COMPATIBLE_READER;
 
 extern "C" {
 static enum gdb_status read_debug_info(struct gdb_reader_funcs *self, struct gdb_symbol_callbacks *cbs, void *memory, long memory_sz) {
-  
+
   info_t *info = (info_t *)memory;
   blocks_t *blocks = (blocks_t *)(info->blocks_ofs + (long)memory);
   gdb_line_mapping *lines = (gdb_line_mapping *)(info->lines_ofs + (long)memory);

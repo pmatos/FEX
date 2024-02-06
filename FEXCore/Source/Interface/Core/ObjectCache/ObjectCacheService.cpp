@@ -6,8 +6,8 @@
 #include <FEXCore/Utils/Threads.h>
 
 namespace {
-  static void* ThreadHandler(void *Arg) {
-    FEXCore::CodeSerialize::CodeObjectSerializeService *This = reinterpret_cast<FEXCore::CodeSerialize::CodeObjectSerializeService*>(Arg);
+  static void *ThreadHandler(void *Arg) {
+    FEXCore::CodeSerialize::CodeObjectSerializeService *This = reinterpret_cast<FEXCore::CodeSerialize::CodeObjectSerializeService *>(Arg);
     This->ExecutionThread();
     return nullptr;
   }
@@ -15,9 +15,9 @@ namespace {
 
 namespace FEXCore::CodeSerialize {
   CodeObjectSerializeService::CodeObjectSerializeService(FEXCore::Context::ContextImpl *ctx)
-    : CTX {ctx}
-    , AsyncHandler { &NamedRegionHandler , this }
-    , NamedRegionHandler { ctx } {
+    : CTX{ctx},
+      AsyncHandler{&NamedRegionHandler, this},
+      NamedRegionHandler{ctx} {
     Initialize();
   }
 

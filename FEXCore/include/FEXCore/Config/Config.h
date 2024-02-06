@@ -17,38 +17,37 @@
 #include <stdint.h>
 
 namespace FEXCore::Config {
-namespace Handler {
-  static inline std::optional<fextl::string> CoreHandler(std::string_view Value) {
-    if (Value == "irjit")
-      return "0";
+  namespace Handler {
+    static inline std::optional<fextl::string> CoreHandler(std::string_view Value) {
+      if (Value == "irjit") return "0";
 #ifdef _M_X86_64
-    else if (Value == "host")
-      return "1";
+      else if (Value == "host")
+        return "1";
 #endif
-    return "0";
-  }
+      return "0";
+    }
 
-  static inline std::optional<fextl::string> SMCCheckHandler(std::string_view Value) {
-    if (Value == "none")
+    static inline std::optional<fextl::string> SMCCheckHandler(std::string_view Value) {
+      if (Value == "none")
+        return "0";
+      else if (Value == "mtrack")
+        return "1";
+      else if (Value == "full")
+        return "2";
+      else if (Value == "mman")
+        return "3";
       return "0";
-    else if (Value == "mtrack")
-      return "1";
-    else if (Value == "full")
-      return "2";
-    else if (Value == "mman")
-      return "3";
-    return "0";
-  }
-  static inline std::optional<fextl::string> CacheObjectCodeHandler(std::string_view Value) {
-    if (Value == "none")
+    }
+    static inline std::optional<fextl::string> CacheObjectCodeHandler(std::string_view Value) {
+      if (Value == "none")
+        return "0";
+      else if (Value == "read")
+        return "1";
+      else if (Value == "write")
+        return "2";
       return "0";
-    else if (Value == "read")
-      return "1";
-    else if (Value == "write")
-      return "2";
-    return "0";
+    }
   }
-}
 
   enum ConfigOption {
 #define OPT_BASE(type, group, enum, json, default) CONFIG_##enum,
@@ -101,15 +100,12 @@ namespace Handler {
     auto End = View.find_first_of(',');
     std::string_view Option = View.substr(Begin, End);
     while (Option.size() != 0) {
-      auto EnumValue = std::find_if(EnumPairs.begin(), EnumPairs.end(),
-        [Option](const PairTypes &Value) -> bool {
-          return Value.first == Option;
-        });
+      auto EnumValue =
+      std::find_if(EnumPairs.begin(), EnumPairs.end(), [Option](const PairTypes &Value) -> bool { return Value.first == Option; });
 
       if (EnumValue == EnumPairs.end()) {
         LogMan::Msg::IFmt("Skipping Unknown option: {}", Option);
-      }
-      else {
+      } else {
         EnumMask |= FEXCore::ToUnderlying(EnumValue->second);
       }
 
@@ -124,32 +120,35 @@ namespace Handler {
     return fextl::fmt::format("{}", EnumMask);
   }
 
-namespace DefaultValues {
+  namespace DefaultValues {
 #define P(x) x
 #define OPT_BASE(type, group, enum, json, default) extern const P(type) P(enum);
 #define OPT_STR(group, enum, json, default) extern const std::string_view P(enum);
 #define OPT_STRARRAY(group, enum, json, default) OPT_STR(group, enum, json, default)
 #include <FEXCore/Config/ConfigValues.inl>
 
-namespace Type {
+    namespace Type {
 #define OPT_BASE(type, group, enum, json, default) using P(enum) = P(type);
 #define OPT_STR(group, enum, json, default) using P(enum) = fextl::string;
 #define OPT_STRARRAY(group, enum, json, default) OPT_STR(group, enum, json, default)
 #include <FEXCore/Config/ConfigValues.inl>
-}
+    }
 #define FEX_CONFIG_OPT(name, enum) \
-  FEXCore::Config::Value<FEXCore::Config::DefaultValues::Type::enum> name {FEXCore::Config::CONFIG_##enum, FEXCore::Config::DefaultValues::enum}
+  FEXCore::Config::Value<FEXCore::Config::DefaultValues::Type::enum> name { \
+    FEXCore::Config::CONFIG_##enum, \
+    FEXCore::Config::DefaultValues::enum \
+  }
 
 #undef P
-}
+  }
 
   FEX_DEFAULT_VISIBILITY void SetDataDirectory(std::string_view Path);
   FEX_DEFAULT_VISIBILITY void SetConfigDirectory(const std::string_view Path, bool Global);
   FEX_DEFAULT_VISIBILITY void SetConfigFileLocation(std::string_view Path, bool Global);
 
-  FEX_DEFAULT_VISIBILITY fextl::string const& GetDataDirectory();
-  FEX_DEFAULT_VISIBILITY fextl::string const& GetConfigDirectory(bool Global);
-  FEX_DEFAULT_VISIBILITY fextl::string const& GetConfigFileLocation(bool Global = false);
+  FEX_DEFAULT_VISIBILITY fextl::string const &GetDataDirectory();
+  FEX_DEFAULT_VISIBILITY fextl::string const &GetConfigDirectory(bool Global);
+  FEX_DEFAULT_VISIBILITY fextl::string const &GetConfigFileLocation(bool Global = false);
   FEX_DEFAULT_VISIBILITY fextl::string GetApplicationConfig(const std::string_view Program, bool Global);
 
   using LayerValue = fextl::list<fextl::string>;
@@ -162,12 +161,9 @@ namespace Type {
 
     virtual void Load() = 0;
 
-    bool OptionExists(ConfigOption Option) const {
-      return OptionMap.find(Option) != OptionMap.end();
-    }
+    bool OptionExists(ConfigOption Option) const { return OptionMap.find(Option) != OptionMap.end(); }
 
-    std::optional<LayerValue*>
-    All(ConfigOption Option) {
+    std::optional<LayerValue *> All(ConfigOption Option) {
       const auto it = OptionMap.find(Option);
       if (it == OptionMap.end()) {
         return std::nullopt;
@@ -176,8 +172,7 @@ namespace Type {
       return &it->second;
     }
 
-    std::optional<fextl::string*>
-    Get(ConfigOption Option) {
+    std::optional<fextl::string *> Get(ConfigOption Option) {
       const auto it = OptionMap.find(Option);
       if (it == OptionMap.end()) {
         return std::nullopt;
@@ -186,17 +181,11 @@ namespace Type {
       return &it->second.front();
     }
 
-    void Set(ConfigOption Option, const char *Data) {
-      OptionMap[Option].emplace_back(fextl::string(Data));
-    }
+    void Set(ConfigOption Option, const char *Data) { OptionMap[Option].emplace_back(fextl::string(Data)); }
 
-    void Set(ConfigOption Option, std::string_view Data) {
-      OptionMap[Option].emplace_back(fextl::string(Data));
-    }
+    void Set(ConfigOption Option, std::string_view Data) { OptionMap[Option].emplace_back(fextl::string(Data)); }
 
-    void Set(ConfigOption Option, fextl::string Data) {
-      OptionMap[Option].emplace_back(std::move(Data));
-    }
+    void Set(ConfigOption Option, fextl::string Data) { OptionMap[Option].emplace_back(std::move(Data)); }
 
     void Set(ConfigOption Option, std::optional<fextl::string> Data) {
       if (Data) {
@@ -209,9 +198,7 @@ namespace Type {
       Set(Option, Data);
     }
 
-    void Erase(ConfigOption Option) {
-      OptionMap.erase(Option);
-    }
+    void Erase(ConfigOption Option) { OptionMap.erase(Option); }
 
     LayerType GetLayerType() const { return Type; }
     const LayerOptions &GetOptionMap() const { return OptionMap; }
@@ -232,39 +219,33 @@ namespace Type {
   FEX_DEFAULT_VISIBILITY void AddLayer(fextl::unique_ptr<FEXCore::Config::Layer> _Layer);
 
   FEX_DEFAULT_VISIBILITY bool Exists(ConfigOption Option);
-  FEX_DEFAULT_VISIBILITY std::optional<LayerValue*> All(ConfigOption Option);
-  FEX_DEFAULT_VISIBILITY std::optional<fextl::string*> Get(ConfigOption Option);
+  FEX_DEFAULT_VISIBILITY std::optional<LayerValue *> All(ConfigOption Option);
+  FEX_DEFAULT_VISIBILITY std::optional<fextl::string *> Get(ConfigOption Option);
 
   FEX_DEFAULT_VISIBILITY void Set(ConfigOption Option, std::string_view Data);
   FEX_DEFAULT_VISIBILITY void Erase(ConfigOption Option);
   FEX_DEFAULT_VISIBILITY void EraseSet(ConfigOption Option, std::string_view Data);
 
-  template<typename T>
-  class FEX_DEFAULT_VISIBILITY Value {
+  template<typename T> class FEX_DEFAULT_VISIBILITY Value {
   public:
-    template <typename TT = T> requires (!std::is_same_v<TT, fextl::string>)
-    Value(FEXCore::Config::ConfigOption _Option, TT Default)
-      : Option {_Option} {
+    template<typename TT = T>
+    requires(!std::is_same_v<TT, fextl::string>) Value(FEXCore::Config::ConfigOption _Option, TT Default) : Option{_Option} {
       ValueData = GetIfExists(Option, Default);
     }
 
-    template <typename TT = T> requires (std::is_same_v<TT, fextl::string>)
-    Value(FEXCore::Config::ConfigOption _Option, TT Default)
-      : Option {_Option} {
+    template<typename TT = T>
+    requires(std::is_same_v<TT, fextl::string>) Value(FEXCore::Config::ConfigOption _Option, TT Default) : Option{_Option} {
       ValueData = GetIfExists(Option, Default);
       GetListIfExists(Option, &AppendList);
     }
 
-    template <typename TT = T> requires (std::is_same_v<TT, fextl::string>)
-    Value(FEXCore::Config::ConfigOption _Option, std::string_view Default)
-      : Option {_Option} {
+    template<typename TT = T>
+    requires(std::is_same_v<TT, fextl::string>) Value(FEXCore::Config::ConfigOption _Option, std::string_view Default) : Option{_Option} {
       ValueData = GetIfExists(Option, Default);
       GetListIfExists(Option, &AppendList);
     }
 
-    template <typename TT = T> requires (!std::is_same_v<TT, fextl::string>)
-    Value(FEXCore::Config::ConfigOption _Option)
-      : Option {_Option} {
+    template<typename TT = T> requires(!std::is_same_v<TT, fextl::string>) Value(FEXCore::Config::ConfigOption _Option) : Option{_Option} {
       if (!FEXCore::Config::Exists(Option)) {
         ERROR_AND_DIE_FMT("FEXCore::Config::Value has no value");
       }
@@ -272,9 +253,7 @@ namespace Type {
       ValueData = Get(Option);
     }
 
-    template <typename TT = T> requires (std::is_same_v<TT, fextl::string>)
-    Value(FEXCore::Config::ConfigOption _Option)
-      : Option {_Option} {
+    template<typename TT = T> requires(std::is_same_v<TT, fextl::string>) Value(FEXCore::Config::ConfigOption _Option) : Option{_Option} {
       if (!FEXCore::Config::Exists(Option)) {
         ERROR_AND_DIE_FMT("FEXCore::Config::Value has no value");
       }
@@ -285,11 +264,9 @@ namespace Type {
 
     operator T() const { return ValueData; }
 
-    template <typename TT = T> requires (!std::is_same_v<TT, fextl::string>)
-    T operator()() const { return ValueData; }
+    template<typename TT = T> requires(!std::is_same_v<TT, fextl::string>) T operator()() const { return ValueData; }
 
-    template <typename TT = T> requires (std::is_same_v<TT, fextl::string>)
-    const T& operator()() const { return ValueData; }
+    template<typename TT = T> requires(std::is_same_v<TT, fextl::string>) const T &operator()() const { return ValueData; }
 
     Value<T>(T Value) { ValueData = std::move(Value); }
     fextl::list<T> &All() { return AppendList; }

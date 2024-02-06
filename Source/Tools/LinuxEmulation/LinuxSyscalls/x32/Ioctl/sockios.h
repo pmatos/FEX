@@ -6,11 +6,10 @@
 #include <sys/ioctl.h>
 
 namespace FEX::HLE::x32 {
-namespace sockios {
+  namespace sockios {
 #ifndef SIOCGSKNS
-#define SIOCGSKNS	0x894C
+#define SIOCGSKNS 0x894C
 #endif
 #include "LinuxSyscalls/x32/Ioctl/sockios.inl"
+  }
 }
-}
-

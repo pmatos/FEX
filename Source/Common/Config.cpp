@@ -21,77 +21,76 @@
 #include <tiny-json.h>
 
 namespace FEX::Config {
-namespace JSON {
-  struct JsonAllocator {
-    jsonPool_t PoolObject;
-    fextl::unique_ptr<fextl::list<json_t>> json_objects;
-  };
-  static_assert(offsetof(JsonAllocator, PoolObject) == 0, "This needs to be at offset zero");
-
-  json_t* PoolInit(jsonPool_t* Pool) {
-    JsonAllocator* alloc = reinterpret_cast<JsonAllocator*>(Pool);
-    alloc->json_objects = fextl::make_unique<fextl::list<json_t>>();
-    return &*alloc->json_objects->emplace(alloc->json_objects->end());
-  }
-
-  json_t* PoolAlloc(jsonPool_t* Pool) {
-    JsonAllocator* alloc = reinterpret_cast<JsonAllocator*>(Pool);
-    return &*alloc->json_objects->emplace(alloc->json_objects->end());
-  }
-
-  static void LoadJSonConfig(const fextl::string &Config, std::function<void(const char *Name, const char *ConfigSring)> Func) {
-    fextl::vector<char> Data;
-    if (!FEXCore::FileLoading::LoadFile(Data, Config)) {
-      return;
-    }
-
-    JsonAllocator Pool {
-      .PoolObject = {
-        .init = PoolInit,
-        .alloc = PoolAlloc,
-      },
+  namespace JSON {
+    struct JsonAllocator {
+      jsonPool_t PoolObject;
+      fextl::unique_ptr<fextl::list<json_t>> json_objects;
     };
+    static_assert(offsetof(JsonAllocator, PoolObject) == 0, "This needs to be at offset zero");
 
-    json_t const *json = json_createWithPool(&Data.at(0), &Pool.PoolObject);
-    if (!json) {
-      LogMan::Msg::EFmt("Couldn't create json");
-      return;
+    json_t *PoolInit(jsonPool_t *Pool) {
+      JsonAllocator *alloc = reinterpret_cast<JsonAllocator *>(Pool);
+      alloc->json_objects = fextl::make_unique<fextl::list<json_t>>();
+      return &*alloc->json_objects->emplace(alloc->json_objects->end());
     }
 
-    json_t const* ConfigList = json_getProperty(json, "Config");
-
-    if (!ConfigList) {
-      // This is a non-error if the configuration file exists but no Config section
-      return;
+    json_t *PoolAlloc(jsonPool_t *Pool) {
+      JsonAllocator *alloc = reinterpret_cast<JsonAllocator *>(Pool);
+      return &*alloc->json_objects->emplace(alloc->json_objects->end());
     }
 
-    for (json_t const* ConfigItem = json_getChild(ConfigList);
-      ConfigItem != nullptr;
-      ConfigItem = json_getSibling(ConfigItem)) {
-      const char* ConfigName = json_getName(ConfigItem);
-      const char* ConfigString = json_getValue(ConfigItem);
-
-      if (!ConfigName) {
-        LogMan::Msg::EFmt("Couldn't get config name");
+    static void LoadJSonConfig(const fextl::string &Config, std::function<void(const char *Name, const char *ConfigSring)> Func) {
+      fextl::vector<char> Data;
+      if (!FEXCore::FileLoading::LoadFile(Data, Config)) {
         return;
       }
 
-      if (!ConfigString) {
-        LogMan::Msg::EFmt("Couldn't get ConfigString for '{}'", ConfigName);
+      JsonAllocator Pool{
+      .PoolObject =
+      {
+      .init = PoolInit,
+      .alloc = PoolAlloc,
+      },
+      };
+
+      json_t const *json = json_createWithPool(&Data.at(0), &Pool.PoolObject);
+      if (!json) {
+        LogMan::Msg::EFmt("Couldn't create json");
         return;
       }
 
-      Func(ConfigName, ConfigString);
+      json_t const *ConfigList = json_getProperty(json, "Config");
+
+      if (!ConfigList) {
+        // This is a non-error if the configuration file exists but no Config section
+        return;
+      }
+
+      for (json_t const *ConfigItem = json_getChild(ConfigList); ConfigItem != nullptr; ConfigItem = json_getSibling(ConfigItem)) {
+        const char *ConfigName = json_getName(ConfigItem);
+        const char *ConfigString = json_getValue(ConfigItem);
+
+        if (!ConfigName) {
+          LogMan::Msg::EFmt("Couldn't get config name");
+          return;
+        }
+
+        if (!ConfigString) {
+          LogMan::Msg::EFmt("Couldn't get ConfigString for '{}'", ConfigName);
+          return;
+        }
+
+        Func(ConfigName, ConfigString);
+      }
     }
   }
-}
 
   static const fextl::map<FEXCore::Config::ConfigOption, fextl::string> ConfigToNameLookup = {{
 #define OPT_BASE(type, group, enum, json, default) {FEXCore::Config::ConfigOption::CONFIG_##enum, #json},
 #include <FEXCore/Config/ConfigValues.inl>
   }};
 
-  void SaveLayerToJSON(const fextl::string& Filename, FEXCore::Config::Layer *const Layer) {
+  void SaveLayerToJSON(const fextl::string &Filename, FEXCore::Config::Layer * const Layer) {
     char Buffer[4096];
     char *Dest{};
     Dest = json_objOpen(Buffer, nullptr);
@@ -106,10 +105,8 @@ namespace JSON {
     Dest = json_objClose(Dest);
     json_end(Dest);
 
-    auto File = FEXCore::File::File(Filename.c_str(),
-      FEXCore::File::FileModes::WRITE |
-      FEXCore::File::FileModes::CREATE |
-      FEXCore::File::FileModes::TRUNCATE);
+    auto File =
+    FEXCore::File::File(Filename.c_str(), FEXCore::File::FileModes::WRITE | FEXCore::File::FileModes::CREATE | FEXCore::File::FileModes::TRUNCATE);
 
     if (File.IsValid()) {
       File.Write(Buffer, strlen(Buffer));
@@ -137,7 +134,7 @@ namespace JSON {
 
   class AppLoader final : public OptionMapper {
   public:
-    explicit AppLoader(const fextl::string& Filename, FEXCore::Config::LayerType Type);
+    explicit AppLoader(const fextl::string &Filename, FEXCore::Config::LayerType Type);
     void Load();
 
   private:
@@ -146,11 +143,11 @@ namespace JSON {
 
   class EnvLoader final : public FEXCore::Config::Layer {
   public:
-    explicit EnvLoader(char *const _envp[]);
+    explicit EnvLoader(char * const _envp[]);
     void Load() override;
 
   private:
-    char *const *envp;
+    char * const *envp;
   };
 
   static const fextl::map<fextl::string, FEXCore::Config::ConfigOption, std::less<>> ConfigLookup = {{
@@ -158,9 +155,7 @@ namespace JSON {
 #include <FEXCore/Config/ConfigValues.inl>
   }};
 
-  OptionMapper::OptionMapper(FEXCore::Config::LayerType Layer)
-    : FEXCore::Config::Layer(Layer) {
-  }
+  OptionMapper::OptionMapper(FEXCore::Config::LayerType Layer) : FEXCore::Config::Layer(Layer) {}
 
   void OptionMapper::MapNameToOption(const char *ConfigName, const char *ConfigString) {
     auto it = ConfigLookup.find(ConfigName);
@@ -173,31 +168,23 @@ namespace JSON {
     }
   }
 
-  static const fextl::vector<std::pair<const char*, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
+  static const fextl::vector<std::pair<const char *, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
 #define OPT_BASE(type, group, enum, json, default) {"FEX_" #enum, FEXCore::Config::ConfigOption::CONFIG_##enum},
 #include <FEXCore/Config/ConfigValues.inl>
   }};
 
   MainLoader::MainLoader(FEXCore::Config::LayerType Type)
-    : OptionMapper(Type)
-    , Config{FEXCore::Config::GetConfigFileLocation(Type == FEXCore::Config::LayerType::LAYER_GLOBAL_MAIN)} {
-  }
+    : OptionMapper(Type),
+      Config{FEXCore::Config::GetConfigFileLocation(Type == FEXCore::Config::LayerType::LAYER_GLOBAL_MAIN)} {}
 
-  MainLoader::MainLoader(fextl::string ConfigFile)
-    : OptionMapper(FEXCore::Config::LayerType::LAYER_MAIN)
-    , Config{std::move(ConfigFile)} {
-  }
+  MainLoader::MainLoader(fextl::string ConfigFile) : OptionMapper(FEXCore::Config::LayerType::LAYER_MAIN), Config{std::move(ConfigFile)} {}
 
   void MainLoader::Load() {
-    JSON::LoadJSonConfig(Config, [this](const char *Name, const char *ConfigString) {
-      MapNameToOption(Name, ConfigString);
-    });
+    JSON::LoadJSonConfig(Config, [this](const char *Name, const char *ConfigString) { MapNameToOption(Name, ConfigString); });
   }
 
-  AppLoader::AppLoader(const fextl::string& Filename, FEXCore::Config::LayerType Type)
-    : OptionMapper(Type) {
-    const bool Global = Type == FEXCore::Config::LayerType::LAYER_GLOBAL_STEAM_APP ||
-                        Type == FEXCore::Config::LayerType::LAYER_GLOBAL_APP;
+  AppLoader::AppLoader(const fextl::string &Filename, FEXCore::Config::LayerType Type) : OptionMapper(Type) {
+    const bool Global = Type == FEXCore::Config::LayerType::LAYER_GLOBAL_STEAM_APP || Type == FEXCore::Config::LayerType::LAYER_GLOBAL_APP;
     Config = FEXCore::Config::GetApplicationConfig(Filename, Global);
 
     // Immediately load so we can reload the meta layer
@@ -205,28 +192,22 @@ namespace JSON {
   }
 
   void AppLoader::Load() {
-    JSON::LoadJSonConfig(Config, [this](const char *Name, const char *ConfigString) {
-      MapNameToOption(Name, ConfigString);
-    });
+    JSON::LoadJSonConfig(Config, [this](const char *Name, const char *ConfigString) { MapNameToOption(Name, ConfigString); });
   }
 
-  EnvLoader::EnvLoader(char *const _envp[])
-    : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_ENVIRONMENT)
-    , envp {_envp} {
-  }
+  EnvLoader::EnvLoader(char * const _envp[]) : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_ENVIRONMENT), envp{_envp} {}
 
   void EnvLoader::Load() {
     using EnvMapType = fextl::unordered_map<std::string_view, fextl::string>;
     EnvMapType EnvMap;
 
-    for(const char *const *pvar=envp; pvar && *pvar; pvar++) {
+    for (const char * const *pvar = envp; pvar && *pvar; pvar++) {
       std::string_view Var(*pvar);
       size_t pos = Var.rfind('=');
-      if (fextl::string::npos == pos)
-        continue;
+      if (fextl::string::npos == pos) continue;
 
-      std::string_view Key = Var.substr(0,pos);
-      std::string_view Value_View {Var.substr(pos+1)};
+      std::string_view Key = Var.substr(0, pos);
+      std::string_view Value_View{Var.substr(pos + 1)};
       std::optional<fextl::string> Value;
 
 #define ENVLOADER
@@ -234,22 +215,19 @@ namespace JSON {
 
       if (Value) {
         EnvMap.insert_or_assign(Key, *Value);
-      }
-      else {
+      } else {
         EnvMap.insert_or_assign(Key, Value_View);
       }
     }
 
-    auto GetVar = [](EnvMapType &EnvMap, const std::string_view id)  -> std::optional<std::string_view> {
-      if (EnvMap.find(id) != EnvMap.end())
-        return EnvMap.at(id);
+    auto GetVar = [](EnvMapType &EnvMap, const std::string_view id) -> std::optional<std::string_view> {
+      if (EnvMap.find(id) != EnvMap.end()) return EnvMap.at(id);
 
       // If envp[] was empty, search using std::getenv()
-      const char* vs = std::getenv(id.data());
+      const char *vs = std::getenv(id.data());
       if (vs) {
         return vs;
-      }
-      else {
+      } else {
         return std::nullopt;
       }
     };
@@ -270,19 +248,16 @@ namespace JSON {
   fextl::unique_ptr<FEXCore::Config::Layer> CreateMainLayer(fextl::string const *File) {
     if (File) {
       return fextl::make_unique<MainLoader>(*File);
-    }
-    else {
+    } else {
       return fextl::make_unique<MainLoader>(FEXCore::Config::LayerType::LAYER_MAIN);
     }
   }
 
-  fextl::unique_ptr<FEXCore::Config::Layer> CreateAppLayer(const fextl::string& Filename, FEXCore::Config::LayerType Type) {
+  fextl::unique_ptr<FEXCore::Config::Layer> CreateAppLayer(const fextl::string &Filename, FEXCore::Config::LayerType Type) {
     return fextl::make_unique<AppLoader>(Filename, Type);
   }
 
-  fextl::unique_ptr<FEXCore::Config::Layer> CreateEnvironmentLayer(char *const _envp[]) {
-    return fextl::make_unique<EnvLoader>(_envp);
-  }
+  fextl::unique_ptr<FEXCore::Config::Layer> CreateEnvironmentLayer(char * const _envp[]) { return fextl::make_unique<EnvLoader>(_envp); }
 
   fextl::string RecoverGuestProgramFilename(fextl::string Program, bool ExecFDInterp, const std::string_view ProgramFDFromEnv) {
     // If executed with a FEX FD then the Program argument might be empty.
@@ -352,13 +327,7 @@ namespace JSON {
   }
 
   ApplicationNames LoadConfig(
-    bool NoFEXArguments,
-    bool LoadProgramConfig,
-    int argc,
-    char **argv,
-    char **const envp,
-    bool ExecFDInterp,
-    const std::string_view ProgramFDFromEnv) {
+  bool NoFEXArguments, bool LoadProgramConfig, int argc, char **argv, char ** const envp, bool ExecFDInterp, const std::string_view ProgramFDFromEnv) {
     FEX::Config::InitializeConfigs();
     FEXCore::Config::Initialize();
     FEXCore::Config::AddLayer(CreateGlobalMainLayer());
@@ -366,8 +335,7 @@ namespace JSON {
 
     if (NoFEXArguments) {
       FEX::ArgLoader::LoadWithoutArguments(argc, argv);
-    }
-    else {
+    } else {
       FEXCore::Config::AddLayer(fextl::make_unique<FEX::ArgLoader::ArgLoader>(argc, argv));
     }
 
@@ -383,31 +351,27 @@ namespace JSON {
       }
 
       Args[0] = RecoverGuestProgramFilename(std::move(Args[0]), ExecFDInterp, ProgramFDFromEnv);
-      fextl::string& Program = Args[0];
+      fextl::string &Program = Args[0];
 
       bool Wine = false;
       fextl::string ProgramName;
       for (size_t CurrentProgramNameIndex = 0; CurrentProgramNameIndex < Args.size(); ++CurrentProgramNameIndex) {
         auto CurrentProgramName = FHU::Filesystem::GetFilename(Args[CurrentProgramNameIndex]);
 
-        if (CurrentProgramName == "wine-preloader" ||
-            CurrentProgramName == "wine64-preloader") {
+        if (CurrentProgramName == "wine-preloader" || CurrentProgramName == "wine64-preloader") {
           // Wine preloader is required to be in the format of `wine-preloader <wine executable>`
           // The preloader doesn't execve the executable, instead maps it directly itself
           // Skip the next argument since we know it is wine (potentially with custom wine executable name)
           ++CurrentProgramNameIndex;
           Wine = true;
-        }
-        else if(CurrentProgramName == "wine" ||
-                CurrentProgramName == "wine64") {
+        } else if (CurrentProgramName == "wine" || CurrentProgramName == "wine64") {
           // Next argument, this isn't the program we want
           //
           // If we are running wine or wine64 then we should check the next argument for the application name instead.
           // wine will change the active program name with `setprogname` or `prctl(PR_SET_NAME`.
           // Since FEX needs this data far earlier than libraries we need a different check.
           Wine = true;
-        }
-        else {
+        } else {
           if (Wine == true) {
             // If this was path separated with '\' then we need to check that.
             auto WinSeparator = CurrentProgramName.find_last_of('\\');
@@ -442,7 +406,7 @@ namespace JSON {
   }
 
 #ifndef _WIN32
-  char const* FindUserHomeThroughUID() {
+  char const *FindUserHomeThroughUID() {
     auto passwd = getpwuid(geteuid());
     if (passwd) {
       return passwd->pw_dir;
@@ -491,8 +455,7 @@ namespace JSON {
     if (DataOverride) {
       // Data override will override the complete directory
       DataDir = DataOverride;
-    }
-    else {
+    } else {
       DataDir = DataXDG ?: HomeDir;
       DataDir += "/.fex-emu/";
     }
@@ -503,23 +466,20 @@ namespace JSON {
     fextl::string ConfigDir;
     if (Global) {
       ConfigDir = GLOBAL_DATA_DIRECTORY;
-    }
-    else {
+    } else {
       char const *HomeDir = GetHomeDirectory();
       char const *ConfigXDG = getenv("XDG_CONFIG_HOME");
       char const *ConfigOverride = getenv("FEX_APP_CONFIG_LOCATION");
       if (ConfigOverride) {
         // Config override completely overrides the config directory
         ConfigDir = ConfigOverride;
-      }
-      else {
+      } else {
         ConfigDir = ConfigXDG ? ConfigXDG : HomeDir;
         ConfigDir += "/.fex-emu/";
       }
 
       // Ensure the folder structure is created for our configuration
-      if (!FHU::Filesystem::Exists(ConfigDir) &&
-          !FHU::Filesystem::CreateDirectories(ConfigDir)) {
+      if (!FHU::Filesystem::Exists(ConfigDir) && !FHU::Filesystem::CreateDirectories(ConfigDir)) {
         // Let's go local in this case
         return "./";
       }
@@ -532,14 +492,12 @@ namespace JSON {
     fextl::string ConfigFile{};
     if (Global) {
       ConfigFile = GetConfigDirectory(true) + "Config.json";
-    }
-    else {
+    } else {
       const char *AppConfig = getenv("FEX_APP_CONFIG");
       if (AppConfig) {
         // App config environment variable overwrites only the config file
         ConfigFile = AppConfig;
-      }
-      else {
+      } else {
         ConfigFile = GetConfigDirectory(false) + "Config.json";
       }
     }

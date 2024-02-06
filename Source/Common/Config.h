@@ -9,15 +9,13 @@
 namespace FEX::Config {
   class EmptyMapper : public FEXCore::Config::Layer {
   public:
-    explicit EmptyMapper()
-      : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_MAIN) {
-    }
+    explicit EmptyMapper() : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_MAIN) {}
     void Load() override {}
 
   protected:
   };
 
-  void SaveLayerToJSON(const fextl::string& Filename, FEXCore::Config::Layer *const Layer);
+  void SaveLayerToJSON(const fextl::string &Filename, FEXCore::Config::Layer * const Layer);
 
   struct ApplicationNames {
     // This is the full path to the program (if it exists).
@@ -40,14 +38,7 @@ namespace FEX::Config {
    * @return The application name and path structure
    */
   ApplicationNames LoadConfig(
-    bool NoFEXArguments,
-    bool LoadProgramConfig,
-    int argc,
-    char **argv,
-    char **const envp,
-    bool ExecFDInterp,
-    const std::string_view ProgramFDFromEnv
-  );
+  bool NoFEXArguments, bool LoadProgramConfig, int argc, char **argv, char ** const envp, bool ExecFDInterp, const std::string_view ProgramFDFromEnv);
 
   const char *GetHomeDirectory();
 
@@ -82,7 +73,7 @@ namespace FEX::Config {
    *
    * @return unique_ptr for that layer
    */
-  fextl::unique_ptr<FEXCore::Config::Layer> CreateAppLayer(const fextl::string& Filename, FEXCore::Config::LayerType Type);
+  fextl::unique_ptr<FEXCore::Config::Layer> CreateAppLayer(const fextl::string &Filename, FEXCore::Config::LayerType Type);
 
   /**
    * @brief iCreate an environment configuration loader
@@ -91,5 +82,5 @@ namespace FEX::Config {
    *
    * @return unique_ptr for that layer
    */
-  fextl::unique_ptr<FEXCore::Config::Layer> CreateEnvironmentLayer(char *const _envp[]);
+  fextl::unique_ptr<FEXCore::Config::Layer> CreateEnvironmentLayer(char * const _envp[]);
 }

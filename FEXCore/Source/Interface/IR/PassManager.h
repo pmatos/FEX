@@ -22,89 +22,77 @@ namespace FEXCore::Context {
 }
 
 namespace FEXCore::HLE {
-class SyscallHandler;
+  class SyscallHandler;
 }
 
 namespace FEXCore::IR {
-class PassManager;
-class IREmitter;
+  class PassManager;
+  class IREmitter;
 
-class Pass {
-public:
-  virtual ~Pass() = default;
-  virtual bool Run(IREmitter *IREmit) = 0;
+  class Pass {
+  public:
+    virtual ~Pass() = default;
+    virtual bool Run(IREmitter *IREmit) = 0;
 
-  void RegisterPassManager(PassManager *_Manager) {
-    Manager = _Manager;
-  }
+    void RegisterPassManager(PassManager *_Manager) { Manager = _Manager; }
 
-protected:
-  PassManager *Manager;
-};
+  protected:
+    PassManager *Manager;
+  };
 
-class PassManager final {
-  friend class InlineCallOptimization;
-public:
-  void AddDefaultPasses(FEXCore::Context::ContextImpl *ctx, bool InlineConstants);
-  void AddDefaultValidationPasses();
-  Pass* InsertPass(fextl::unique_ptr<Pass> Pass, fextl::string Name = "") {
-    auto PassPtr = InsertAt(Passes.end(), std::move(Pass))->get();
+  class PassManager final {
+    friend class InlineCallOptimization;
+  public:
+    void AddDefaultPasses(FEXCore::Context::ContextImpl *ctx, bool InlineConstants);
+    void AddDefaultValidationPasses();
+    Pass *InsertPass(fextl::unique_ptr<Pass> Pass, fextl::string Name = "") {
+      auto PassPtr = InsertAt(Passes.end(), std::move(Pass))->get();
 
-    if (!Name.empty()) {
-      NameToPassMaping[Name] = PassPtr;
+      if (!Name.empty()) {
+        NameToPassMaping[Name] = PassPtr;
+      }
+      return PassPtr;
     }
-    return PassPtr;
-  }
 
-  void InsertRegisterAllocationPass(bool SupportsAVX);
+    void InsertRegisterAllocationPass(bool SupportsAVX);
 
-  bool Run(IREmitter *IREmit);
+    bool Run(IREmitter *IREmit);
 
-  bool HasPass(fextl::string Name) const {
-    return NameToPassMaping.contains(Name);
-  }
+    bool HasPass(fextl::string Name) const { return NameToPassMaping.contains(Name); }
 
-  template<typename T>
-  T* GetPass(fextl::string Name) {
-    return dynamic_cast<T*>(NameToPassMaping[Name]);
-  }
+    template<typename T> T *GetPass(fextl::string Name) { return dynamic_cast<T *>(NameToPassMaping[Name]); }
 
-  Pass* GetPass(fextl::string Name) {
-    return NameToPassMaping[Name];
-  }
+    Pass *GetPass(fextl::string Name) { return NameToPassMaping[Name]; }
 
-  void RegisterSyscallHandler(FEXCore::HLE::SyscallHandler *Handler) {
-    SyscallHandler = Handler;
-  }
+    void RegisterSyscallHandler(FEXCore::HLE::SyscallHandler *Handler) { SyscallHandler = Handler; }
 
-  void Finalize();
+    void Finalize();
 
-protected:
-  FEXCore::HLE::SyscallHandler *SyscallHandler;
+  protected:
+    FEXCore::HLE::SyscallHandler *SyscallHandler;
 
-private:
-  using PassArrayType = fextl::vector<fextl::unique_ptr<Pass>>;
-  PassArrayType::iterator InsertAt(PassArrayType::iterator pos, fextl::unique_ptr<Pass> Pass) {
-    Pass->RegisterPassManager(this);
-    return Passes.insert(pos, std::move(Pass));
-  }
-  PassArrayType Passes;
-  fextl::unordered_map<fextl::string, Pass*> NameToPassMaping;
+  private:
+    using PassArrayType = fextl::vector<fextl::unique_ptr<Pass>>;
+    PassArrayType::iterator InsertAt(PassArrayType::iterator pos, fextl::unique_ptr<Pass> Pass) {
+      Pass->RegisterPassManager(this);
+      return Passes.insert(pos, std::move(Pass));
+    }
+    PassArrayType Passes;
+    fextl::unordered_map<fextl::string, Pass *> NameToPassMaping;
 
 #if defined(ASSERTIONS_ENABLED) && ASSERTIONS_ENABLED
-  fextl::vector<fextl::unique_ptr<Pass>> ValidationPasses;
-  void InsertValidationPass(fextl::unique_ptr<Pass> Pass, fextl::string Name = "") {
-    Pass->RegisterPassManager(this);
-    auto PassPtr = ValidationPasses.emplace_back(std::move(Pass)).get();
+    fextl::vector<fextl::unique_ptr<Pass>> ValidationPasses;
+    void InsertValidationPass(fextl::unique_ptr<Pass> Pass, fextl::string Name = "") {
+      Pass->RegisterPassManager(this);
+      auto PassPtr = ValidationPasses.emplace_back(std::move(Pass)).get();
 
-    if (!Name.empty()) {
-      NameToPassMaping[Name] = PassPtr;
+      if (!Name.empty()) {
+        NameToPassMaping[Name] = PassPtr;
+      }
     }
-  }
 #endif
 
-  FEX_CONFIG_OPT(Is64BitMode, IS64BIT_MODE);
-  FEX_CONFIG_OPT(PassManagerDumpIR, PASSMANAGERDUMPIR);
-};
+    FEX_CONFIG_OPT(Is64BitMode, IS64BIT_MODE);
+    FEX_CONFIG_OPT(PassManagerDumpIR, PASSMANAGERDUMPIR);
+  };
 }
-

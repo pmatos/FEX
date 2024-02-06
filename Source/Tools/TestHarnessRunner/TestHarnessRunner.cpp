@@ -44,9 +44,7 @@ $end_info$
 #include <sys/types.h>
 #include <utility>
 
-void MsgHandler(LogMan::DebugLevels Level, char const *Message) {
-  fextl::fmt::print("[{}] {}\n", LogMan::DebugLevelStr(Level), Message);
-}
+void MsgHandler(LogMan::DebugLevels Level, char const *Message) { fextl::fmt::print("[{}] {}\n", LogMan::DebugLevelStr(Level), Message); }
 
 void AssertHandler(char const *Message) {
   fextl::fmt::print("[ASSERT] {}\n", Message);
@@ -56,56 +54,54 @@ void AssertHandler(char const *Message) {
 }
 
 namespace {
-static const fextl::vector<std::pair<const char*, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
+  static const fextl::vector<std::pair<const char *, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
 #define OPT_BASE(type, group, enum, json, default) {"FEX_" #enum, FEXCore::Config::ConfigOption::CONFIG_##enum},
 #include <FEXCore/Config/ConfigValues.inl>
-}};
+  }};
 
-// Claims to be a local application config layer
-class TestEnvLoader final : public FEXCore::Config::Layer {
-public:
-  explicit TestEnvLoader(fextl::vector<std::pair<std::string_view, std::string_view>> _Env)
-    : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_LOCAL_APP)
-    , Env {std::move(_Env)} {
-    Load();
-  }
+  // Claims to be a local application config layer
+  class TestEnvLoader final : public FEXCore::Config::Layer {
+  public:
+    explicit TestEnvLoader(fextl::vector<std::pair<std::string_view, std::string_view>> _Env)
+      : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_LOCAL_APP),
+        Env{std::move(_Env)} {
+      Load();
+    }
 
-  void Load() override {
-    fextl::unordered_map<std::string_view, std::string> EnvMap;
-    for (auto &Option : Env) {
-      std::string_view Key = Option.first;
-      std::string_view Value_View = Option.second;
-      std::optional<fextl::string> Value;
+    void Load() override {
+      fextl::unordered_map<std::string_view, std::string> EnvMap;
+      for (auto &Option : Env) {
+        std::string_view Key = Option.first;
+        std::string_view Value_View = Option.second;
+        std::optional<fextl::string> Value;
 
 #define ENVLOADER
 #include <FEXCore/Config/ConfigOptions.inl>
 
-      if (Value) {
-        EnvMap.insert_or_assign(Key, *Value);
+        if (Value) {
+          EnvMap.insert_or_assign(Key, *Value);
+        } else {
+          EnvMap.insert_or_assign(Key, Value_View);
+        }
       }
-      else {
-        EnvMap.insert_or_assign(Key, Value_View);
+
+      auto GetVar = [&](const std::string_view id) -> std::optional<std::string_view> {
+        const auto it = EnvMap.find(id);
+        if (it == EnvMap.end()) return std::nullopt;
+
+        return it->second;
+      };
+
+      for (auto &it : EnvConfigLookup) {
+        if (auto Value = GetVar(it.first); Value) {
+          Set(it.second, *Value);
+        }
       }
     }
 
-    auto GetVar = [&](const std::string_view id) -> std::optional<std::string_view> {
-      const auto it = EnvMap.find(id);
-      if (it == EnvMap.end())
-        return std::nullopt;
-
-      return it->second;
-    };
-
-    for (auto &it : EnvConfigLookup) {
-      if (auto Value = GetVar(it.first); Value) {
-        Set(it.second, *Value);
-      }
-    }
-  }
-
-private:
-  fextl::vector<std::pair<std::string_view, std::string_view>> Env;
-};
+  private:
+    fextl::vector<std::pair<std::string_view, std::string_view>> Env;
+  };
 }
 
 namespace LongJumpHandler {
@@ -114,55 +110,53 @@ namespace LongJumpHandler {
 
 #ifndef _WIN32
   void RegisterLongJumpHandler(FEX::HLE::SignalDelegator *Handler) {
-    Handler->RegisterFrontendHostSignalHandler(SIGSEGV, [](FEXCore::Core::InternalThreadState *Thread, int Signal, void *info, void *ucontext) {
+    Handler->RegisterFrontendHostSignalHandler(
+    SIGSEGV,
+    [](FEXCore::Core::InternalThreadState *Thread, int Signal, void *info, void *ucontext) {
       constexpr uint8_t HLT = 0xF4;
-      if (reinterpret_cast<uint8_t*>(Thread->CurrentFrame->State.rip)[0] != HLT) {
+      if (reinterpret_cast<uint8_t *>(Thread->CurrentFrame->State.rip)[0] != HLT) {
         DidFault = true;
         return false;
       }
 
       longjmp(LongJumpHandler::LongJump, 1);
       return false;
-    }, true);
+    },
+    true);
   }
 #else
   FEX::DummyHandlers::DummySignalDelegator *Handler;
 
-  static void LongJumpHandler() {
-    longjmp(LongJump, 1);
-  }
+  static void LongJumpHandler() { longjmp(LongJump, 1); }
 
-  LONG WINAPI
-  VectoredExceptionHandler(struct _EXCEPTION_POINTERS *ExceptionInfo) {
+  LONG WINAPI VectoredExceptionHandler(struct _EXCEPTION_POINTERS *ExceptionInfo) {
     auto Thread = Handler->GetBackingTLSThread();
     PCONTEXT Context;
     Context = ExceptionInfo->ContextRecord;
 
     switch (ExceptionInfo->ExceptionRecord->ExceptionCode) {
-      case STATUS_DATATYPE_MISALIGNMENT: {
-        const auto PC = FEX::ArchHelpers::Context::GetPc(Context);
-        if (!Thread->CPUBackend->IsAddressInCodeBuffer(PC)) {
-          // Wasn't a sigbus in JIT code
-          return EXCEPTION_CONTINUE_SEARCH;
-        }
-
-        const auto Result = FEXCore::ArchHelpers::Arm64::HandleUnalignedAccess(true, PC, FEX::ArchHelpers::Context::GetArmGPRs(Context));
-        FEX::ArchHelpers::Context::SetPc(Context, PC + Result.second);
-        return Result.first ?
-          EXCEPTION_CONTINUE_EXECUTION :
-          EXCEPTION_CONTINUE_SEARCH;
+    case STATUS_DATATYPE_MISALIGNMENT: {
+      const auto PC = FEX::ArchHelpers::Context::GetPc(Context);
+      if (!Thread->CPUBackend->IsAddressInCodeBuffer(PC)) {
+        // Wasn't a sigbus in JIT code
+        return EXCEPTION_CONTINUE_SEARCH;
       }
-      case STATUS_ACCESS_VIOLATION: {
-        constexpr uint8_t HLT = 0xF4;
-        if (reinterpret_cast<uint8_t*>(Thread->CurrentFrame->State.rip)[0] != HLT) {
-          DidFault = true;
-          return EXCEPTION_CONTINUE_SEARCH;
-        }
 
-        FEX::ArchHelpers::Context::SetPc(Context, reinterpret_cast<uint64_t>(LongJumpHandler));
-        return EXCEPTION_CONTINUE_EXECUTION;
+      const auto Result = FEXCore::ArchHelpers::Arm64::HandleUnalignedAccess(true, PC, FEX::ArchHelpers::Context::GetArmGPRs(Context));
+      FEX::ArchHelpers::Context::SetPc(Context, PC + Result.second);
+      return Result.first ? EXCEPTION_CONTINUE_EXECUTION : EXCEPTION_CONTINUE_SEARCH;
+    }
+    case STATUS_ACCESS_VIOLATION: {
+      constexpr uint8_t HLT = 0xF4;
+      if (reinterpret_cast<uint8_t *>(Thread->CurrentFrame->State.rip)[0] != HLT) {
+        DidFault = true;
+        return EXCEPTION_CONTINUE_SEARCH;
       }
-      default: break;
+
+      FEX::ArchHelpers::Context::SetPc(Context, reinterpret_cast<uint64_t>(LongJumpHandler));
+      return EXCEPTION_CONTINUE_EXECUTION;
+    }
+    default: break;
     }
 
     printf("!Fault!\n");
@@ -184,7 +178,7 @@ namespace LongJumpHandler {
 #endif
 }
 
-int main(int argc, char **argv, char **const envp) {
+int main(int argc, char **argv, char ** const envp) {
 #ifndef _WIN32
   auto SBRKPointer = FEXCore::Allocator::DisableSBRKAllocations();
 #endif
@@ -264,20 +258,14 @@ int main(int argc, char **argv, char **const envp) {
   SupportsAVX = HostFeatures.SupportsAVX;
   SupportsAVX2 = HostFeatures.SupportsAVX2;
 
-  bool TestUnsupported =
-    (!HostFeatures.Supports3DNow && Loader.Requires3DNow()) ||
-    (!HostFeatures.SupportsSSE4A && Loader.RequiresSSE4A()) ||
-    (!SupportsAVX && Loader.RequiresAVX()) ||
-    (!SupportsAVX2 && Loader.RequiresAVX2()) ||
-    (!HostFeatures.SupportsRAND && Loader.RequiresRAND()) ||
-    (!HostFeatures.SupportsSHA && Loader.RequiresSHA()) ||
-    (!HostFeatures.SupportsCLZERO && Loader.RequiresCLZERO()) ||
-    (!HostFeatures.SupportsBMI1 && Loader.RequiresBMI1()) ||
-    (!HostFeatures.SupportsBMI2 && Loader.RequiresBMI2()) ||
-    (!HostFeatures.SupportsCLWB && Loader.RequiresCLWB());
+  bool TestUnsupported = (!HostFeatures.Supports3DNow && Loader.Requires3DNow()) || (!HostFeatures.SupportsSSE4A && Loader.RequiresSSE4A()) ||
+  (!SupportsAVX && Loader.RequiresAVX()) || (!SupportsAVX2 && Loader.RequiresAVX2()) ||
+  (!HostFeatures.SupportsRAND && Loader.RequiresRAND()) || (!HostFeatures.SupportsSHA && Loader.RequiresSHA()) ||
+  (!HostFeatures.SupportsCLZERO && Loader.RequiresCLZERO()) || (!HostFeatures.SupportsBMI1 && Loader.RequiresBMI1()) ||
+  (!HostFeatures.SupportsBMI2 && Loader.RequiresBMI2()) || (!HostFeatures.SupportsCLWB && Loader.RequiresCLWB());
 
 #ifdef _WIN32
-    TestUnsupported |= Loader.RequiresLinux();
+  TestUnsupported |= Loader.RequiresLinux();
 #endif
 
   if (TestUnsupported) {
@@ -286,8 +274,9 @@ int main(int argc, char **argv, char **const envp) {
 
   if (Core != FEXCore::Config::CONFIG_CUSTOM) {
 #ifndef _WIN32
-    auto SyscallHandler = Loader.Is64BitMode() ? FEX::HLE::x64::CreateHandler(CTX.get(), SignalDelegation.get())
-                                               : FEX::HLE::x32::CreateHandler(CTX.get(), SignalDelegation.get(), std::move(Allocator));
+    auto SyscallHandler = Loader.Is64BitMode()
+    ? FEX::HLE::x64::CreateHandler(CTX.get(), SignalDelegation.get())
+    : FEX::HLE::x32::CreateHandler(CTX.get(), SignalDelegation.get(), std::move(Allocator));
 
 #else
     auto SyscallHandler = FEX::WindowsHandlers::CreateSyscallHandler();
@@ -330,7 +319,7 @@ int main(int argc, char **argv, char **const envp) {
   else {
     // Run as host
     SupportsAVX = true;
-    SignalDelegation->RegisterTLSState((FEXCore::Core::InternalThreadState*)UINTPTR_MAX);
+    SignalDelegation->RegisterTLSState((FEXCore::Core::InternalThreadState *)UINTPTR_MAX);
     if (!Loader.MapMemory()) {
       // failed to map
       LogMan::Msg::EFmt("Failed to map {}-bit elf file.", Loader.Is64BitMode() ? 64 : 32);
@@ -362,4 +351,3 @@ int main(int argc, char **argv, char **const envp) {
 
   return Passed ? 0 : -1;
 }
-

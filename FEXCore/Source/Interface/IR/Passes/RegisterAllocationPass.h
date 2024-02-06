@@ -12,11 +12,11 @@ $end_info$
 #include <stdint.h>
 
 namespace FEXCore::IR {
-class RegisterAllocationData;
-struct RegisterAllocationDataDeleter;
-struct RegisterClassType;
+  class RegisterAllocationData;
+  struct RegisterAllocationDataDeleter;
+  struct RegisterClassType;
 
-class RegisterAllocationPass : public FEXCore::IR::Pass {
+  class RegisterAllocationPass : public FEXCore::IR::Pass {
   public:
     bool HasFullRA() const { return HadFullRA; }
 
@@ -35,7 +35,8 @@ class RegisterAllocationPass : public FEXCore::IR::Pass {
      * AddRegisterConflict(GPRClass, 0, PairClass, 0); -> Make sure the pair interferes with x0
      * AddRegisterConflict(GPRClass, 1, PairClass, 1); -> Make sure the pair interferes with x1
      */
-    virtual void AddRegisterConflict(FEXCore::IR::RegisterClassType ClassConflict, uint32_t RegConflict, FEXCore::IR::RegisterClassType Class, uint32_t Reg) = 0;
+    virtual void AddRegisterConflict(
+    FEXCore::IR::RegisterClassType ClassConflict, uint32_t RegConflict, FEXCore::IR::RegisterClassType Class, uint32_t Reg) = 0;
 
     /**
      * @name Inference graph handling
@@ -53,12 +54,12 @@ class RegisterAllocationPass : public FEXCore::IR::Pass {
     /**  @} */
 
   protected:
-    bool HasSpills {};
+    bool HasSpills{};
     // Debug option to disable split slot reuse
     // Can be useful for testing if there is a bug with spill slots
-    constexpr static bool ReuseSpillSlots {true};
-    uint32_t SpillSlotCount {};
-    bool HadFullRA {};
-};
+    constexpr static bool ReuseSpillSlots{true};
+    uint32_t SpillSlotCount{};
+    bool HadFullRA{};
+  };
 
 }

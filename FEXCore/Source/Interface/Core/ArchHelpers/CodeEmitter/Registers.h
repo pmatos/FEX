@@ -14,21 +14,18 @@ namespace FEXCore::ARMEmitter {
    * This class doesn't imply a size when used
    */
   class Register {
-    public:
-      Register() = delete;
-      constexpr explicit Register(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    Register() = delete;
+    constexpr explicit Register(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const Register&, const Register&) = default;
+    friend constexpr auto operator<= > (const Register&, const Register&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
-      constexpr WRegister W() const;
-      constexpr XRegister X() const;
+    constexpr uint32_t Idx() const { return Index; }
+    constexpr WRegister W() const;
+    constexpr XRegister X() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(Register) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<Register>, "Needs to be trivial");
@@ -38,25 +35,20 @@ namespace FEXCore::ARMEmitter {
    * This class will imply a 32-bit register size being used.
    */
   class WRegister {
-    public:
-      WRegister() = delete;
-      constexpr explicit WRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    WRegister() = delete;
+    constexpr explicit WRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const WRegister&, const WRegister&) = default;
+    friend constexpr auto operator<= > (const WRegister&, const WRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator Register() const {
-        return Register(Index);
-      }
-      constexpr XRegister X() const;
-      constexpr Register R() const;
+    constexpr operator Register() const { return Register(Index); }
+    constexpr XRegister X() const;
+    constexpr Register R() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(Register) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<Register>, "Needs to be trivial");
@@ -66,53 +58,36 @@ namespace FEXCore::ARMEmitter {
    * This class will imply a 64-bit register size being used.
    */
   class XRegister {
-    public:
-      XRegister() = delete;
-      constexpr explicit XRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    XRegister() = delete;
+    constexpr explicit XRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const XRegister&, const XRegister&) = default;
+    friend constexpr auto operator<= > (const XRegister&, const XRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator Register() const {
-        return Register(Index);
-      }
-      constexpr WRegister W() const;
-      constexpr Register R() const;
+    constexpr operator Register() const { return Register(Index); }
+    constexpr WRegister W() const;
+    constexpr Register R() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(Register) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<Register>, "Needs to be trivial");
   static_assert(std::is_standard_layout_v<Register>, "Needs to be standard");
 
-  inline constexpr WRegister Register::W() const {
-    return WRegister{Index};
-  }
+  inline constexpr WRegister Register::W() const { return WRegister{Index}; }
 
-  inline constexpr XRegister Register::X() const {
-    return XRegister{Index};
-  }
+  inline constexpr XRegister Register::X() const { return XRegister{Index}; }
 
-  inline constexpr XRegister WRegister::X() const {
-    return XRegister{Index};
-  }
+  inline constexpr XRegister WRegister::X() const { return XRegister{Index}; }
 
-  inline constexpr Register WRegister::R() const {
-    return *this;
-  }
+  inline constexpr Register WRegister::R() const { return *this; }
 
-  inline constexpr WRegister XRegister::W() const {
-    return WRegister{Index};
-  }
+  inline constexpr WRegister XRegister::W() const { return WRegister{Index}; }
 
-  inline constexpr Register XRegister::R() const {
-    return *this;
-  }
+  inline constexpr Register XRegister::R() const { return *this; }
 
   // Namespace containing all unsized GPR register objects.
   namespace Reg {
@@ -262,26 +237,23 @@ namespace FEXCore::ARMEmitter {
    * It does imply that this instruction isn't using the register for SVE.
    */
   class VRegister {
-    public:
-      VRegister() = delete;
-      constexpr explicit VRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    VRegister() = delete;
+    constexpr explicit VRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const VRegister&, const VRegister&) = default;
+    friend constexpr auto operator<= > (const VRegister&, const VRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr BRegister B() const;
-      constexpr HRegister H() const;
-      constexpr SRegister S() const;
-      constexpr DRegister D() const;
-      constexpr QRegister Q() const;
-      constexpr ZRegister Z() const;
+    constexpr BRegister B() const;
+    constexpr HRegister H() const;
+    constexpr SRegister S() const;
+    constexpr DRegister D() const;
+    constexpr QRegister Q() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(VRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<VRegister>, "Needs to be trivial");
@@ -291,29 +263,24 @@ namespace FEXCore::ARMEmitter {
    * This class implies 8-bit scalar register.
    */
   class BRegister {
-    public:
-      BRegister() = delete;
-      constexpr explicit BRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    BRegister() = delete;
+    constexpr explicit BRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const BRegister&, const BRegister&) = default;
+    friend constexpr auto operator<= > (const BRegister&, const BRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator VRegister() const {
-        return VRegister(Index);
-      }
-      constexpr BRegister V() const;
-      constexpr HRegister H() const;
-      constexpr SRegister S() const;
-      constexpr DRegister D() const;
-      constexpr QRegister Q() const;
-      constexpr ZRegister Z() const;
+    constexpr operator VRegister() const { return VRegister(Index); }
+    constexpr BRegister V() const;
+    constexpr HRegister H() const;
+    constexpr SRegister S() const;
+    constexpr DRegister D() const;
+    constexpr QRegister Q() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(BRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<BRegister>, "Needs to be trivial");
@@ -323,29 +290,24 @@ namespace FEXCore::ARMEmitter {
    * This class implies 16-bit scalar register.
    */
   class HRegister {
-    public:
-      HRegister() = delete;
-      constexpr explicit HRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    HRegister() = delete;
+    constexpr explicit HRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const HRegister&, const HRegister&) = default;
+    friend constexpr auto operator<= > (const HRegister&, const HRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator VRegister() const {
-        return VRegister(Index);
-      }
-      constexpr HRegister V() const;
-      constexpr BRegister B() const;
-      constexpr SRegister S() const;
-      constexpr DRegister D() const;
-      constexpr QRegister Q() const;
-      constexpr ZRegister Z() const;
+    constexpr operator VRegister() const { return VRegister(Index); }
+    constexpr HRegister V() const;
+    constexpr BRegister B() const;
+    constexpr SRegister S() const;
+    constexpr DRegister D() const;
+    constexpr QRegister Q() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(HRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<HRegister>, "Needs to be trivial");
@@ -355,29 +317,24 @@ namespace FEXCore::ARMEmitter {
    * This class implies 32-bit scalar register.
    */
   class SRegister {
-    public:
-      SRegister() = delete;
-      constexpr explicit SRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    SRegister() = delete;
+    constexpr explicit SRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const SRegister&, const SRegister&) = default;
+    friend constexpr auto operator<= > (const SRegister&, const SRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator VRegister() const {
-        return VRegister(Index);
-      }
-      constexpr SRegister V() const;
-      constexpr BRegister B() const;
-      constexpr HRegister H() const;
-      constexpr DRegister D() const;
-      constexpr QRegister Q() const;
-      constexpr ZRegister Z() const;
+    constexpr operator VRegister() const { return VRegister(Index); }
+    constexpr SRegister V() const;
+    constexpr BRegister B() const;
+    constexpr HRegister H() const;
+    constexpr DRegister D() const;
+    constexpr QRegister Q() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(SRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<SRegister>, "Needs to be trivial");
@@ -388,29 +345,24 @@ namespace FEXCore::ARMEmitter {
    * Associated with operating the instruction at 64-bit.
    */
   class DRegister {
-    public:
-      DRegister() = delete;
-      constexpr explicit DRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    DRegister() = delete;
+    constexpr explicit DRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const DRegister&, const DRegister&) = default;
+    friend constexpr auto operator<= > (const DRegister&, const DRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator VRegister() const {
-        return VRegister(Index);
-      }
-      constexpr DRegister V() const;
-      constexpr BRegister B() const;
-      constexpr HRegister H() const;
-      constexpr SRegister S() const;
-      constexpr QRegister Q() const;
-      constexpr ZRegister Z() const;
+    constexpr operator VRegister() const { return VRegister(Index); }
+    constexpr DRegister V() const;
+    constexpr BRegister B() const;
+    constexpr HRegister H() const;
+    constexpr SRegister S() const;
+    constexpr QRegister Q() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(DRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<DRegister>, "Needs to be trivial");
@@ -421,29 +373,24 @@ namespace FEXCore::ARMEmitter {
    * Associated with operating the instruction at 128-bit.
    */
   class QRegister {
-    public:
-      QRegister() = delete;
-      constexpr explicit QRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    QRegister() = delete;
+    constexpr explicit QRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const QRegister&, const QRegister&) = default;
+    friend constexpr auto operator<= > (const QRegister&, const QRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator VRegister() const {
-        return VRegister(Index);
-      }
-      constexpr QRegister V() const;
-      constexpr BRegister B() const;
-      constexpr HRegister H() const;
-      constexpr SRegister S() const;
-      constexpr DRegister D() const;
-      constexpr ZRegister Z() const;
+    constexpr operator VRegister() const { return VRegister(Index); }
+    constexpr QRegister V() const;
+    constexpr BRegister B() const;
+    constexpr HRegister H() const;
+    constexpr SRegister S() const;
+    constexpr DRegister D() const;
+    constexpr ZRegister Z() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(QRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<QRegister>, "Needs to be trivial");
@@ -453,170 +400,83 @@ namespace FEXCore::ARMEmitter {
    * This class explicitly implies the instruction will operate using SVE.
    */
   class ZRegister {
-    public:
-      ZRegister() = delete;
-      constexpr explicit ZRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    ZRegister() = delete;
+    constexpr explicit ZRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const ZRegister&, const ZRegister&) = default;
+    friend constexpr auto operator<= > (const ZRegister&, const ZRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr VRegister V() const;
-      constexpr BRegister B() const;
-      constexpr HRegister H() const;
-      constexpr SRegister S() const;
-      constexpr DRegister D() const;
-      constexpr QRegister Q() const;
+    constexpr VRegister V() const;
+    constexpr BRegister B() const;
+    constexpr HRegister H() const;
+    constexpr SRegister S() const;
+    constexpr DRegister D() const;
+    constexpr QRegister Q() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(ZRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<ZRegister>, "Needs to be trivial");
   static_assert(std::is_standard_layout_v<ZRegister>, "Needs to be standard");
 
   // VRegister
-  inline constexpr BRegister VRegister::B() const {
-    return BRegister{Index};
-  }
-  inline constexpr HRegister VRegister::H() const {
-    return HRegister{Index};
-  }
-  inline constexpr SRegister VRegister::S() const {
-    return SRegister{Index};
-  }
-  inline constexpr DRegister VRegister::D() const {
-    return DRegister{Index};
-  }
-  inline constexpr QRegister VRegister::Q() const {
-    return QRegister{Index};
-  }
-  inline constexpr ZRegister VRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr BRegister VRegister::B() const { return BRegister{Index}; }
+  inline constexpr HRegister VRegister::H() const { return HRegister{Index}; }
+  inline constexpr SRegister VRegister::S() const { return SRegister{Index}; }
+  inline constexpr DRegister VRegister::D() const { return DRegister{Index}; }
+  inline constexpr QRegister VRegister::Q() const { return QRegister{Index}; }
+  inline constexpr ZRegister VRegister::Z() const { return ZRegister{Index}; }
 
   // BRegister
-  inline constexpr BRegister BRegister::V() const {
-    return *this;
-  }
-  inline constexpr HRegister BRegister::H() const {
-    return HRegister{Index};
-  }
-  inline constexpr SRegister BRegister::S() const {
-    return SRegister{Index};
-  }
-  inline constexpr DRegister BRegister::D() const {
-    return DRegister{Index};
-  }
-  inline constexpr QRegister BRegister::Q() const {
-    return QRegister{Index};
-  }
-  inline constexpr ZRegister BRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr BRegister BRegister::V() const { return *this; }
+  inline constexpr HRegister BRegister::H() const { return HRegister{Index}; }
+  inline constexpr SRegister BRegister::S() const { return SRegister{Index}; }
+  inline constexpr DRegister BRegister::D() const { return DRegister{Index}; }
+  inline constexpr QRegister BRegister::Q() const { return QRegister{Index}; }
+  inline constexpr ZRegister BRegister::Z() const { return ZRegister{Index}; }
 
   // HRegister
-  inline constexpr HRegister HRegister::V() const {
-    return *this;
-  }
-  inline constexpr BRegister HRegister::B() const {
-    return BRegister{Index};
-  }
-  inline constexpr SRegister HRegister::S() const {
-    return SRegister{Index};
-  }
-  inline constexpr DRegister HRegister::D() const {
-    return DRegister{Index};
-  }
-  inline constexpr QRegister HRegister::Q() const {
-    return QRegister{Index};
-  }
-  inline constexpr ZRegister HRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr HRegister HRegister::V() const { return *this; }
+  inline constexpr BRegister HRegister::B() const { return BRegister{Index}; }
+  inline constexpr SRegister HRegister::S() const { return SRegister{Index}; }
+  inline constexpr DRegister HRegister::D() const { return DRegister{Index}; }
+  inline constexpr QRegister HRegister::Q() const { return QRegister{Index}; }
+  inline constexpr ZRegister HRegister::Z() const { return ZRegister{Index}; }
 
   // SRegister
-  inline constexpr SRegister SRegister::V() const {
-    return *this;
-  }
-  inline constexpr BRegister SRegister::B() const {
-    return BRegister{Index};
-  }
-  inline constexpr HRegister SRegister::H() const {
-    return HRegister{Index};
-  }
-  inline constexpr DRegister SRegister::D() const {
-    return DRegister{Index};
-  }
-  inline constexpr QRegister SRegister::Q() const {
-    return QRegister{Index};
-  }
-  inline constexpr ZRegister SRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr SRegister SRegister::V() const { return *this; }
+  inline constexpr BRegister SRegister::B() const { return BRegister{Index}; }
+  inline constexpr HRegister SRegister::H() const { return HRegister{Index}; }
+  inline constexpr DRegister SRegister::D() const { return DRegister{Index}; }
+  inline constexpr QRegister SRegister::Q() const { return QRegister{Index}; }
+  inline constexpr ZRegister SRegister::Z() const { return ZRegister{Index}; }
 
   // DRegister
-  inline constexpr DRegister DRegister::V() const {
-    return DRegister{Index};
-  }
-  inline constexpr BRegister DRegister::B() const {
-    return BRegister{Index};
-  }
-  inline constexpr HRegister DRegister::H() const {
-    return HRegister{Index};
-  }
-  inline constexpr SRegister DRegister::S() const {
-    return SRegister{Index};
-  }
-  inline constexpr QRegister DRegister::Q() const {
-    return QRegister{Index};
-  }
-  inline constexpr ZRegister DRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr DRegister DRegister::V() const { return DRegister{Index}; }
+  inline constexpr BRegister DRegister::B() const { return BRegister{Index}; }
+  inline constexpr HRegister DRegister::H() const { return HRegister{Index}; }
+  inline constexpr SRegister DRegister::S() const { return SRegister{Index}; }
+  inline constexpr QRegister DRegister::Q() const { return QRegister{Index}; }
+  inline constexpr ZRegister DRegister::Z() const { return ZRegister{Index}; }
 
   // QRegister
-  inline constexpr QRegister QRegister::V() const {
-    return *this;
-  }
-  inline constexpr BRegister QRegister::B() const {
-    return BRegister{Index};
-  }
-  inline constexpr HRegister QRegister::H() const {
-    return HRegister{Index};
-  }
-  inline constexpr SRegister QRegister::S() const {
-    return SRegister{Index};
-  }
-  inline constexpr DRegister QRegister::D() const {
-    return DRegister{Index};
-  }
-  inline constexpr ZRegister QRegister::Z() const {
-    return ZRegister{Index};
-  }
+  inline constexpr QRegister QRegister::V() const { return *this; }
+  inline constexpr BRegister QRegister::B() const { return BRegister{Index}; }
+  inline constexpr HRegister QRegister::H() const { return HRegister{Index}; }
+  inline constexpr SRegister QRegister::S() const { return SRegister{Index}; }
+  inline constexpr DRegister QRegister::D() const { return DRegister{Index}; }
+  inline constexpr ZRegister QRegister::Z() const { return ZRegister{Index}; }
 
   // ZRegister
-  inline constexpr VRegister ZRegister::V() const {
-    return VRegister(Index);
-  }
-  inline constexpr BRegister ZRegister::B() const {
-    return BRegister(Index);
-  }
-  inline constexpr HRegister ZRegister::H() const {
-    return HRegister(Index);
-  }
-  inline constexpr SRegister ZRegister::S() const {
-    return SRegister(Index);
-  }
-  inline constexpr DRegister ZRegister::D() const {
-    return DRegister(Index);
-  }
-  inline constexpr QRegister ZRegister::Q() const {
-    return QRegister(Index);
-  }
+  inline constexpr VRegister ZRegister::V() const { return VRegister(Index); }
+  inline constexpr BRegister ZRegister::B() const { return BRegister(Index); }
+  inline constexpr HRegister ZRegister::H() const { return HRegister(Index); }
+  inline constexpr SRegister ZRegister::S() const { return SRegister(Index); }
+  inline constexpr DRegister ZRegister::D() const { return DRegister(Index); }
+  inline constexpr QRegister ZRegister::Q() const { return QRegister(Index); }
 
   // Namespace containing all unsized ASIMD register objects.
   namespace VReg {
@@ -871,29 +731,15 @@ namespace FEXCore::ARMEmitter {
   }
 
   // Zero-cost FPR->GPR
-  inline constexpr Register ToReg(HRegister Reg) {
-    return Register(Reg.Idx());
-  }
-  inline constexpr Register ToReg(SRegister Reg) {
-    return Register(Reg.Idx());
-  }
-  inline constexpr Register ToReg(DRegister Reg) {
-    return Register(Reg.Idx());
-  }
-  inline constexpr Register ToReg(VRegister Reg) {
-    return Register(Reg.Idx());
-  }
+  inline constexpr Register ToReg(HRegister Reg) { return Register(Reg.Idx()); }
+  inline constexpr Register ToReg(SRegister Reg) { return Register(Reg.Idx()); }
+  inline constexpr Register ToReg(DRegister Reg) { return Register(Reg.Idx()); }
+  inline constexpr Register ToReg(VRegister Reg) { return Register(Reg.Idx()); }
 
   // Zero-cost GPR->FPR
-  inline constexpr VRegister ToVReg(Register Reg) {
-    return VRegister(Reg.Idx());
-  }
-  inline constexpr VRegister ToVReg(XRegister Reg) {
-    return VRegister(Reg.Idx());
-  }
-  inline constexpr VRegister ToVReg(WRegister Reg) {
-    return VRegister(Reg.Idx());
-  }
+  inline constexpr VRegister ToVReg(Register Reg) { return VRegister(Reg.Idx()); }
+  inline constexpr VRegister ToVReg(XRegister Reg) { return VRegister(Reg.Idx()); }
+  inline constexpr VRegister ToVReg(WRegister Reg) { return VRegister(Reg.Idx()); }
 
   class PRegisterZero;
   class PRegisterMerge;
@@ -902,22 +748,19 @@ namespace FEXCore::ARMEmitter {
    * This is unsized because of how SVE operates.
    */
   class PRegister {
-    public:
-      PRegister() = delete;
-      constexpr PRegister(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    PRegister() = delete;
+    constexpr PRegister(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const PRegister&, const PRegister&) = default;
+    friend constexpr auto operator<= > (const PRegister&, const PRegister&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr PRegisterZero Zeroing() const;
-      constexpr PRegisterMerge Merging() const;
+    constexpr PRegisterZero Zeroing() const;
+    constexpr PRegisterMerge Merging() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(PRegister) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<PRegister>, "Needs to be trivial");
@@ -925,27 +768,20 @@ namespace FEXCore::ARMEmitter {
 
   // Unsized predicate register for SVE with zeroing semantics.
   class PRegisterZero {
-    public:
-      PRegisterZero() = delete;
-      constexpr PRegisterZero(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    PRegisterZero() = delete;
+    constexpr PRegisterZero(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const PRegisterZero&, const PRegisterZero&) = default;
+    friend constexpr auto operator<= > (const PRegisterZero&, const PRegisterZero&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator PRegister() const {
-        return PRegister(Index);
-      }
-      constexpr PRegister P() const {
-        return PRegister(Index);
-      }
-      constexpr PRegisterMerge Merging() const;
+    constexpr operator PRegister() const { return PRegister(Index); }
+    constexpr PRegister P() const { return PRegister(Index); }
+    constexpr PRegisterMerge Merging() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(PRegisterZero) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<PRegisterZero>, "Needs to be trivial");
@@ -953,49 +789,34 @@ namespace FEXCore::ARMEmitter {
 
   // Unsized predicate register for SVE with merging semantics.
   class PRegisterMerge {
-    public:
-      PRegisterMerge() = delete;
-      constexpr PRegisterMerge(uint32_t Idx)
-        : Index {Idx} {}
+  public:
+    PRegisterMerge() = delete;
+    constexpr PRegisterMerge(uint32_t Idx) : Index{Idx} {}
 
-      friend constexpr auto operator<=>(const PRegisterMerge&, const PRegisterMerge&) = default;
+    friend constexpr auto operator<= > (const PRegisterMerge&, const PRegisterMerge&) = default;
 
-      constexpr uint32_t Idx() const {
-        return Index;
-      }
+    constexpr uint32_t Idx() const { return Index; }
 
-      constexpr operator PRegister() const {
-        return PRegister(Index);
-      }
-      constexpr PRegister P() const {
-        return PRegister(Index);
-      }
-      constexpr PRegisterZero Zeroing() const;
+    constexpr operator PRegister() const { return PRegister(Index); }
+    constexpr PRegister P() const { return PRegister(Index); }
+    constexpr PRegisterZero Zeroing() const;
 
-    private:
-      uint32_t Index;
+  private:
+    uint32_t Index;
   };
   static_assert(sizeof(PRegisterZero) == sizeof(uint32_t), "Needs to be uint32_t");
   static_assert(std::is_trivial_v<PRegisterZero>, "Needs to be trivial");
   static_assert(std::is_standard_layout_v<PRegisterZero>, "Needs to be standard");
 
   // PRegister
-  inline constexpr PRegisterZero PRegister::Zeroing() const {
-    return PRegisterZero(Idx());
-  }
-  inline constexpr PRegisterMerge PRegister::Merging() const {
-    return PRegisterMerge(Idx());
-  }
+  inline constexpr PRegisterZero PRegister::Zeroing() const { return PRegisterZero(Idx()); }
+  inline constexpr PRegisterMerge PRegister::Merging() const { return PRegisterMerge(Idx()); }
 
   // PRegisterZero
-  inline constexpr PRegisterMerge PRegisterZero::Merging() const {
-    return PRegisterMerge(Idx());
-  }
+  inline constexpr PRegisterMerge PRegisterZero::Merging() const { return PRegisterMerge(Idx()); }
 
   // PRegisterMerge
-  inline constexpr PRegisterZero PRegisterMerge::Zeroing() const {
-    return PRegisterZero(Idx());
-  }
+  inline constexpr PRegisterZero PRegisterMerge::Zeroing() const { return PRegisterZero(Idx()); }
 
   // Namespace containing all unsigned SVE predicate register objects.
   namespace PReg {

@@ -42,7 +42,8 @@ namespace FEX::HLE::x32 {
   void RegisterTimer(FEX::HLE::SyscallHandler *Handler);
 
   x32SyscallHandler::x32SyscallHandler(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *_SignalDelegation, fextl::unique_ptr<MemAllocator> Allocator)
-    : SyscallHandler{ctx, _SignalDelegation}, AllocHandler{std::move(Allocator)} {
+    : SyscallHandler{ctx, _SignalDelegation},
+      AllocHandler{std::move(Allocator)} {
     OSABI = FEXCore::HLE::SyscallOSABI::OS_LINUX32;
     RegisterSyscallHandlers();
   }
@@ -57,9 +58,11 @@ namespace FEX::HLE::x32 {
       return raw.raw;
     };
 
-    Definitions.resize(FEX::HLE::x32::SYSCALL_x86_MAX, SyscallFunctionDefinition {
-      .NumArgs = 255,
-      .Ptr = cvt(&UnimplementedSyscall),
+    Definitions.resize(
+    FEX::HLE::x32::SYSCALL_x86_MAX,
+    SyscallFunctionDefinition{
+    .NumArgs = 255,
+    .Ptr = cvt(&UnimplementedSyscall),
     });
 
     FEX::HLE::RegisterEpoll(this);
@@ -104,7 +107,7 @@ namespace FEX::HLE::x32 {
     FEX::HLE::x32::InitializeStaticIoctlHandlers();
 
 #if PRINT_MISSING_SYSCALLS
-    for (auto &Syscall: SyscallNames) {
+    for (auto &Syscall : SyscallNames) {
       if (Definitions[Syscall.first].Ptr == cvt(&UnimplementedSyscall)) {
         LogMan::Msg::DFmt("Unimplemented syscall: {}: {}", Syscall.first, Syscall.second);
       }
@@ -112,7 +115,8 @@ namespace FEX::HLE::x32 {
 #endif
   }
 
-  fextl::unique_ptr<FEX::HLE::SyscallHandler> CreateHandler(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *_SignalDelegation, fextl::unique_ptr<MemAllocator> Allocator) {
+  fextl::unique_ptr<FEX::HLE::SyscallHandler>
+  CreateHandler(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *_SignalDelegation, fextl::unique_ptr<MemAllocator> Allocator) {
     return fextl::make_unique<x32SyscallHandler>(ctx, _SignalDelegation, std::move(Allocator));
   }
 

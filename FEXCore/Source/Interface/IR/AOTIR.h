@@ -16,7 +16,7 @@
 #include <FEXCore/HLE/SourcecodeResolver.h>
 
 namespace FEXCore::Core {
-struct DebugData;
+  struct DebugData;
 }
 namespace FEXCore::Context {
   class ContextImpl;
@@ -73,7 +73,8 @@ namespace FEXCore::IR {
     fextl::unique_ptr<FEXCore::Context::AOTIRWriter> Stream;
     fextl::map<uint64_t, uint64_t> Index;
 
-    void AppendAOTIRCaptureCache(uint64_t GuestRIP, uint64_t Start, uint64_t Length, uint64_t Hash, FEXCore::IR::IRListView *IRList, FEXCore::IR::RegisterAllocationData *RAData);
+    void AppendAOTIRCaptureCache(
+    uint64_t GuestRIP, uint64_t Start, uint64_t Length, uint64_t Hash, FEXCore::IR::IRListView *IRList, FEXCore::IR::RegisterAllocationData *RAData);
   };
 
   struct AOTIRCacheEntry {
@@ -89,66 +90,54 @@ namespace FEXCore::IR {
   using AOTCacheType = fextl::unordered_map<fextl::string, FEXCore::IR::AOTIRCacheEntry>;
 
   class AOTIRCaptureCache final {
-    public:
-      using WriteOutFn = std::function<void()>;
+  public:
+    using WriteOutFn = std::function<void()>;
 
-      AOTIRCaptureCache(FEXCore::Context::ContextImpl *ctx) : CTX {ctx} {}
+    AOTIRCaptureCache(FEXCore::Context::ContextImpl *ctx) : CTX{ctx} {}
 
-      void FinalizeAOTIRCache();
-      void AOTIRCaptureCacheWriteoutQueue_Flush();
-      void AOTIRCaptureCacheWriteoutQueue_Append(const WriteOutFn &fn);
-      void WriteFilesWithCode(const Context::AOTIRCodeFileWriterFn &Writer);
+    void FinalizeAOTIRCache();
+    void AOTIRCaptureCacheWriteoutQueue_Flush();
+    void AOTIRCaptureCacheWriteoutQueue_Append(const WriteOutFn &fn);
+    void WriteFilesWithCode(const Context::AOTIRCodeFileWriterFn &Writer);
 
-      struct PreGenerateIRFetchResult {
-        FEXCore::IR::IRListView *IRList {};
-        FEXCore::IR::RegisterAllocationData::UniquePtr RAData {};
-        FEXCore::Core::DebugData *DebugData {};
-        uint64_t StartAddr {};
-        uint64_t Length {};
-        bool GeneratedIR {};
-      };
-      [[nodiscard]] PreGenerateIRFetchResult PreGenerateIRFetch(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, FEXCore::IR::IRListView *IRList);
+    struct PreGenerateIRFetchResult {
+      FEXCore::IR::IRListView *IRList{};
+      FEXCore::IR::RegisterAllocationData::UniquePtr RAData{};
+      FEXCore::Core::DebugData *DebugData{};
+      uint64_t StartAddr{};
+      uint64_t Length{};
+      bool GeneratedIR{};
+    };
+    [[nodiscard]] PreGenerateIRFetchResult PreGenerateIRFetch(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, FEXCore::IR::IRListView *IRList);
 
-      bool PostCompileCode(FEXCore::Core::InternalThreadState *Thread,
-        void* CodePtr,
-        uint64_t GuestRIP,
-        uint64_t StartAddr,
-        uint64_t Length,
-        FEXCore::IR::RegisterAllocationData::UniquePtr RAData,
-        FEXCore::IR::IRListView *IRList,
-        FEXCore::Core::DebugData *DebugData,
-        bool GeneratedIR);
+    bool PostCompileCode(
+    FEXCore::Core::InternalThreadState *Thread, void *CodePtr, uint64_t GuestRIP, uint64_t StartAddr, uint64_t Length,
+    FEXCore::IR::RegisterAllocationData::UniquePtr RAData, FEXCore::IR::IRListView *IRList, FEXCore::Core::DebugData *DebugData, bool GeneratedIR);
 
-      AOTIRCacheEntry *LoadAOTIRCacheEntry(const fextl::string &filename);
-      void UnloadAOTIRCacheEntry(AOTIRCacheEntry *Entry);
+    AOTIRCacheEntry *LoadAOTIRCacheEntry(const fextl::string &filename);
+    void UnloadAOTIRCacheEntry(AOTIRCacheEntry *Entry);
 
-      // Callbacks
-      void SetAOTIRLoader(Context::AOTIRLoaderCBFn CacheReader) {
-        AOTIRLoader = std::move(CacheReader);
-      }
+    // Callbacks
+    void SetAOTIRLoader(Context::AOTIRLoaderCBFn CacheReader) { AOTIRLoader = std::move(CacheReader); }
 
-      void SetAOTIRWriter(Context::AOTIRWriterCBFn CacheWriter) {
-        AOTIRWriter = std::move(CacheWriter);
-      }
+    void SetAOTIRWriter(Context::AOTIRWriterCBFn CacheWriter) { AOTIRWriter = std::move(CacheWriter); }
 
-      void SetAOTIRRenamer(Context::AOTIRRenamerCBFn CacheRenamer) {
-        AOTIRRenamer = std::move(CacheRenamer);
-      }
+    void SetAOTIRRenamer(Context::AOTIRRenamerCBFn CacheRenamer) { AOTIRRenamer = std::move(CacheRenamer); }
 
-    private:
-      FEXCore::Context::ContextImpl *CTX;
+  private:
+    FEXCore::Context::ContextImpl *CTX;
 
-      std::shared_mutex AOTIRCacheLock;
-      std::shared_mutex AOTIRCaptureCacheWriteoutLock;
-      std::atomic<bool> AOTIRCaptureCacheWriteoutFlusing;
+    std::shared_mutex AOTIRCacheLock;
+    std::shared_mutex AOTIRCaptureCacheWriteoutLock;
+    std::atomic<bool> AOTIRCaptureCacheWriteoutFlusing;
 
-      fextl::queue<WriteOutFn> AOTIRCaptureCacheWriteoutQueue;
+    fextl::queue<WriteOutFn> AOTIRCaptureCacheWriteoutQueue;
 
-      FEXCore::IR::AOTCacheType AOTIRCache;
+    FEXCore::IR::AOTCacheType AOTIRCache;
 
-      Context::AOTIRLoaderCBFn AOTIRLoader;
-      Context::AOTIRWriterCBFn AOTIRWriter;
-      Context::AOTIRRenamerCBFn AOTIRRenamer;
-      fextl::unordered_map<fextl::string, FEXCore::IR::AOTIRCaptureCacheEntry> AOTIRCaptureCacheMap;
+    Context::AOTIRLoaderCBFn AOTIRLoader;
+    Context::AOTIRWriterCBFn AOTIRWriter;
+    Context::AOTIRRenamerCBFn AOTIRRenamer;
+    fextl::unordered_map<fextl::string, FEXCore::IR::AOTIRCaptureCacheEntry> AOTIRCaptureCacheMap;
   };
 }

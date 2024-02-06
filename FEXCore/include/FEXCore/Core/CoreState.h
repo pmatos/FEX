@@ -21,52 +21,47 @@ namespace FEXCore::Core {
   //
   // Prefer std::atomic with default memory ordering unless you really know what you're doing.
   // Primarily this ensure program ordering when signals are concerned.
-  template<typename T>
-  class NonAtomicRefCounter {
-    public:
-      void Increment(T Value) {
-        // Specifically avoiding fetch_add here because that will turn in to ldxr+stxr or lock xadd.
-        // FEX very specifically wants to use simple loadstore instructions for this
-        //
-        // ARM64 ex:
-        // ldr x0, [x1];
-        // add x0, x0, #1;
-        // str x0, [x1];
-        //
-        // x86-64 ex:
-        // inc qword [rax];
-        auto Current = AtomicVariable.load(std::memory_order_relaxed);
-        AtomicVariable.store(Current + Value, std::memory_order_relaxed);
-      }
+  template<typename T> class NonAtomicRefCounter {
+  public:
+    void Increment(T Value) {
+      // Specifically avoiding fetch_add here because that will turn in to ldxr+stxr or lock xadd.
+      // FEX very specifically wants to use simple loadstore instructions for this
+      //
+      // ARM64 ex:
+      // ldr x0, [x1];
+      // add x0, x0, #1;
+      // str x0, [x1];
+      //
+      // x86-64 ex:
+      // inc qword [rax];
+      auto Current = AtomicVariable.load(std::memory_order_relaxed);
+      AtomicVariable.store(Current + Value, std::memory_order_relaxed);
+    }
 
-      // Returns original value.
-      // x86-64 needs to know the result on decrement.
-      T Decrement(T Value) {
-        // Specifically avoiding fetch_sub here because that will turn into ldxr+stxr or lock xadd.
-        // FEX very specifically wants to use simple loadstore instructions for this
-        //
-        // ARM64 ex:
-        // ldr x0, [x1];
-        // sub x0, x0, #1;
-        // str x0, [x1];
-        //
-        // x86-64 ex:
-        // dec qword [rax];
-        auto Current = AtomicVariable.load(std::memory_order_relaxed);
-        AtomicVariable.store(Current - Value, std::memory_order_relaxed);
-        return Current;
-      }
+    // Returns original value.
+    // x86-64 needs to know the result on decrement.
+    T Decrement(T Value) {
+      // Specifically avoiding fetch_sub here because that will turn into ldxr+stxr or lock xadd.
+      // FEX very specifically wants to use simple loadstore instructions for this
+      //
+      // ARM64 ex:
+      // ldr x0, [x1];
+      // sub x0, x0, #1;
+      // str x0, [x1];
+      //
+      // x86-64 ex:
+      // dec qword [rax];
+      auto Current = AtomicVariable.load(std::memory_order_relaxed);
+      AtomicVariable.store(Current - Value, std::memory_order_relaxed);
+      return Current;
+    }
 
-      T Load() const {
-        return AtomicVariable.load(std::memory_order_relaxed);
-      }
+    T Load() const { return AtomicVariable.load(std::memory_order_relaxed); }
 
-      void Store(T Value) {
-        AtomicVariable.store(Value, std::memory_order_relaxed);
-      }
+    void Store(T Value) { AtomicVariable.store(Value, std::memory_order_relaxed); }
 
-    private:
-      std::atomic<T> AtomicVariable;
+  private:
+    std::atomic<T> AtomicVariable;
   };
   static_assert(std::is_standard_layout_v<NonAtomicRefCounter<uint64_t>>, "Needs to be standard layout");
   static_assert(std::is_trivially_copyable_v<NonAtomicRefCounter<uint64_t>>, "needs to be trivially copyable");
@@ -110,7 +105,7 @@ namespace FEXCore::Core {
     struct {
       uint32_t base;
     } gdt[32]{};
-    uint16_t FCW { 0x37F };
+    uint16_t FCW{0x37F};
     uint8_t AbridgedFTW{};
 
     uint8_t _pad2[5];
@@ -118,7 +113,7 @@ namespace FEXCore::Core {
     // Counts the nesting depth of program sections that cause signals to be deferred.
     NonAtomicRefCounter<uint64_t> DeferredSignalRefCount;
     // Since this memory region is thread local, we use NonAtomicRefCounter for fast atomic access.
-    NonAtomicRefCounter<uint64_t> *DeferredSignalFaultAddress;
+    NonAtomicRefCounter<uint64_t>* DeferredSignalFaultAddress;
 
     static constexpr size_t FLAG_SIZE = sizeof(flags[0]);
     static constexpr size_t GDT_SIZE = sizeof(gdt[0]);
@@ -331,7 +326,9 @@ namespace FEXCore::Core {
   static_assert(offsetof(CpuStateFrame, State) == 0, "CPUState must be first member in CpuStateFrame");
   static_assert(offsetof(CpuStateFrame, State.rip) == 0, "rip must be zero offset in CpuStateFrame");
   static_assert(offsetof(CpuStateFrame, Pointers) % 8 == 0, "JITPointers need to be aligned to 8 bytes");
-  static_assert(offsetof(CpuStateFrame, Pointers) + sizeof(CpuStateFrame::Pointers) <= 32760, "JITPointers maximum pointer needs to be less than architecture maximum 32768");
+  static_assert(
+  offsetof(CpuStateFrame, Pointers) + sizeof(CpuStateFrame::Pointers) <= 32760,
+  "JITPointers maximum pointer needs to be less than architecture maximum 32768");
 
   static_assert(std::is_standard_layout<CpuStateFrame>::value, "This needs to be standard layout");
   static_assert(sizeof(CpuStateFrame::SynchronousFaultData) == 8, "This needs to be 8 bytes");

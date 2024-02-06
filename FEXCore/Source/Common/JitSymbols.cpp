@@ -7,8 +7,7 @@
 #include <unistd.h>
 
 namespace FEXCore {
-  JITSymbols::JITSymbols() {
-  }
+  JITSymbols::JITSymbols() {}
 
   JITSymbols::~JITSymbols() {
     if (fd != -1) {
@@ -83,7 +82,8 @@ namespace FEXCore {
 
     // Linux perf format is very straightforward
     // `<HostPtr> <Size> <Name>\n`
-    const auto FMTResult = fmt::format_to_n(CurrentBufferOffset, RemainingSize, "{} {:x} {}+0x{:x} ({})\n", HostAddr, CodeSize, Name, Offset, HostAddr);
+    const auto FMTResult =
+    fmt::format_to_n(CurrentBufferOffset, RemainingSize, "{} {:x} {}+0x{:x} ({})\n", HostAddr, CodeSize, Name, Offset, HostAddr);
     if (FMTResult.out >= &Buffer->Buffer[Buffer->BUFFER_SIZE]) {
       // Couldn't fit, need to force a write.
       WriteBuffer(Buffer, true);
@@ -121,8 +121,7 @@ namespace FEXCore {
   void JITSymbols::WriteBuffer(Core::JITSymbolBuffer *Buffer, bool ForceWrite) {
     auto Now = std::chrono::steady_clock::now();
     if (!ForceWrite) {
-      if (((Buffer->LastWrite - Now) < Buffer->MAXIMUM_THRESHOLD) &&
-          Buffer->Offset < Buffer->NEEDS_WRITE_DISTANCE) {
+      if (((Buffer->LastWrite - Now) < Buffer->MAXIMUM_THRESHOLD) && Buffer->Offset < Buffer->NEEDS_WRITE_DISTANCE) {
         // Still buffering, no need to write.
         return;
       }

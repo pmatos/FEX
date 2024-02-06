@@ -23,7 +23,7 @@ $end_info$
 #include <unistd.h>
 #include <vector>
 
-int main(int argc, char **argv, char **const envp) {
+int main(int argc, char **argv, char ** const envp) {
   FEXCore::Config::Initialize();
   FEXCore::Config::AddLayer(FEX::Config::CreateGlobalMainLayer());
   FEXCore::Config::AddLayer(FEX::Config::CreateMainLayer());
@@ -43,7 +43,7 @@ int main(int argc, char **argv, char **const envp) {
   }
 
   FEX_CONFIG_OPT(RootFSPath, ROOTFS);
-  std::vector<const char*> Argv;
+  std::vector<const char *> Argv;
   fextl::string BinShPath = RootFSPath() + "/bin/sh";
   fextl::string BinBashPath = RootFSPath() + "/bin/bash";
 
@@ -54,9 +54,9 @@ int main(int argc, char **argv, char **const envp) {
     FEXInterpreterPath = FEXCore::Config::FindContainerPrefix() + FEXINTERPRETER_PATH;
   }
   const char *FEXArgs[] = {
-    FEXInterpreterPath.c_str(),
-    Args.empty() ? BinBashPath.c_str() : BinShPath.c_str(),
-    "-c",
+  FEXInterpreterPath.c_str(),
+  Args.empty() ? BinBashPath.c_str() : BinShPath.c_str(),
+  "-c",
   };
 
   // Remove -c argument if arguments are empty
@@ -76,7 +76,7 @@ int main(int argc, char **argv, char **const envp) {
   }
 
   // Set --norc when no arguments are passed so PS1 doesn't get overwritten
-  const char* NoRC = "--norc";
+  const char *NoRC = "--norc";
   if (Args.empty()) {
     Argv.emplace_back(NoRC);
   }
@@ -91,12 +91,10 @@ int main(int argc, char **argv, char **const envp) {
   std::vector<const char *> Envp{};
   char *PS1Env{};
   for (unsigned i = 0;; ++i) {
-    if (envp[i] == nullptr)
-      break;
+    if (envp[i] == nullptr) break;
     if (strstr(envp[i], "PS1=") == envp[i]) {
       PS1Env = envp[i];
-    }
-    else {
+    } else {
       Envp.emplace_back(envp[i]);
     }
   }
@@ -108,5 +106,5 @@ int main(int argc, char **argv, char **const envp) {
   Envp.emplace_back(PS1.c_str());
   Envp.emplace_back(nullptr);
 
-  return execve(Argv[0], const_cast<char *const*>(&Argv.at(0)), const_cast<char *const*>(&Envp[0]));
+  return execve(Argv[0], const_cast<char * const *>(&Argv.at(0)), const_cast<char * const *>(&Envp[0]));
 }

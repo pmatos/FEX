@@ -133,18 +133,17 @@ namespace FEXServerClient {
 
     static_assert(sizeof(PacketHeader) == 24, "Wrong size");
 
-    [[maybe_unused]]
-    static PacketHeader FillHeader(Logging::PacketTypes Type) {
-      struct timespec Time{};
+    [[maybe_unused]] static PacketHeader FillHeader(Logging::PacketTypes Type) {
+      struct timespec Time {};
       uint64_t Timestamp{};
       clock_gettime(CLOCK_MONOTONIC, &Time);
       Timestamp = Time.tv_sec * 1e9 + Time.tv_nsec;
 
-      Logging::PacketHeader Msg {
-        .Timestamp = Timestamp,
-        .PacketType = Type,
-        .PID = ::getpid(),
-        .TID = FHU::Syscalls::gettid(),
+      Logging::PacketHeader Msg{
+      .Timestamp = Timestamp,
+      .PacketType = Type,
+      .PID = ::getpid(),
+      .TID = FHU::Syscalls::gettid(),
       };
 
       return Msg;

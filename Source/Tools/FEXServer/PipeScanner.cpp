@@ -22,7 +22,7 @@ namespace PipeScanner {
           char *end{};
           int open_fd = std::strtol(dir->d_name, &end, 8);
           if (end != dir->d_name) {
-            struct stat stat{};
+            struct stat stat {};
             int result = fstat(open_fd, &stat);
             if (result == -1) {
               continue;

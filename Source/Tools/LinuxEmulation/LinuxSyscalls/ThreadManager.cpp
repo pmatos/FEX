@@ -6,7 +6,8 @@
 #include <FEXHeaderUtils/Syscalls.h>
 
 namespace FEX::HLE {
-  FEXCore::Core::InternalThreadState *ThreadManager::CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) {
+  FEXCore::Core::InternalThreadState *
+  ThreadManager::CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) {
     auto Thread = CTX->CreateThread(InitialRIP, StackPointer, NewThreadState, ParentTID);
 
     ++IdleWaitRefCount;
@@ -78,10 +79,7 @@ namespace FEX::HLE {
 
   void ThreadManager::WaitForIdleWithTimeout() {
     std::unique_lock<std::mutex> lk(IdleWaitMutex);
-    bool WaitResult = IdleWaitCV.wait_for(lk, std::chrono::milliseconds(1500),
-      [this] {
-        return IdleWaitRefCount.load() == 0;
-    });
+    bool WaitResult = IdleWaitCV.wait_for(lk, std::chrono::milliseconds(1500), [this] { return IdleWaitRefCount.load() == 0; });
 
     if (!WaitResult) {
       // The wait failed, this will occur if we stepped in to a syscall
@@ -103,9 +101,7 @@ namespace FEX::HLE {
 
     // Spin while waiting for the threads to start up
     std::unique_lock<std::mutex> lk(IdleWaitMutex);
-    IdleWaitCV.wait(lk, [this, NumThreads] {
-      return IdleWaitRefCount.load() >= NumThreads;
-    });
+    IdleWaitCV.wait(lk, [this, NumThreads] { return IdleWaitRefCount.load() >= NumThreads; });
 
     Running = true;
   }
@@ -130,18 +126,16 @@ namespace FEX::HLE {
 
   void ThreadManager::Stop(bool IgnoreCurrentThread) {
     pid_t tid = FHU::Syscalls::gettid();
-    FEXCore::Core::InternalThreadState* CurrentThread{};
+    FEXCore::Core::InternalThreadState *CurrentThread{};
 
     // Tell all the threads that they should stop
     {
       std::lock_guard<std::mutex> lk(ThreadCreationMutex);
       for (auto &Thread : Threads) {
-        if (IgnoreCurrentThread &&
-            Thread->ThreadManager.TID == tid) {
+        if (IgnoreCurrentThread && Thread->ThreadManager.TID == tid) {
           // If we are callign stop from the current thread then we can ignore sending signals to this thread
           // This means that this thread is already gone
-        }
-        else if (Thread->ThreadManager.TID == tid) {
+        } else if (Thread->ThreadManager.TID == tid) {
           // We need to save the current thread for last to ensure all threads receive their stop signals
           CurrentThread = Thread;
           continue;
@@ -229,9 +223,7 @@ namespace FEX::HLE {
 
   void ThreadManager::WaitForIdle() {
     std::unique_lock<std::mutex> lk(IdleWaitMutex);
-    IdleWaitCV.wait(lk, [this] {
-      return IdleWaitRefCount.load() == 0;
-    });
+    IdleWaitCV.wait(lk, [this] { return IdleWaitRefCount.load() == 0; });
 
     Running = false;
   }

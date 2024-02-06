@@ -14,7 +14,11 @@ $end_info$
 #include <stdint.h>
 #include <sys/types.h>
 
-#define SYSCALL_STUB(name) do { ERROR_AND_DIE_FMT("Syscall: " #name " stub!"); return -ENOSYS; } while(0)
+#define SYSCALL_STUB(name) \
+  do { \
+    ERROR_AND_DIE_FMT("Syscall: " #name " stub!"); \
+    return -ENOSYS; \
+  } while (0)
 
 namespace FEXCore::Core {
   struct CpuStateFrame;
@@ -22,16 +26,10 @@ namespace FEXCore::Core {
 
 namespace FEX::HLE::x32 {
   void RegisterStubs(FEX::HLE::SyscallHandler *Handler) {
-    REGISTER_SYSCALL_IMPL_X32(readdir, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t {
-      SYSCALL_STUB(readdir);
-    });
+    REGISTER_SYSCALL_IMPL_X32(readdir, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { SYSCALL_STUB(readdir); });
 
-    REGISTER_SYSCALL_IMPL_X32(vm86old, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t {
-      return -ENOSYS;
-    });
+    REGISTER_SYSCALL_IMPL_X32(vm86old, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { return -ENOSYS; });
 
-    REGISTER_SYSCALL_IMPL_X32(vm86, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t {
-      return -ENOSYS;
-    });
+    REGISTER_SYSCALL_IMPL_X32(vm86, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { return -ENOSYS; });
   }
 }

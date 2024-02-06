@@ -71,9 +71,7 @@ struct TLS {
     return reinterpret_cast<std::atomic<uint32_t> &>(TEB->TlsSlots[FEXCore::ToUnderlying(Slot::CONTROL_WORD)]);
   }
 
-  CONTEXT *&EntryContext() const {
-    return reinterpret_cast<CONTEXT *&>(TEB->TlsSlots[FEXCore::ToUnderlying(Slot::ENTRY_CONTEXT)]);
-  }
+  CONTEXT *&EntryContext() const { return reinterpret_cast<CONTEXT *&>(TEB->TlsSlots[FEXCore::ToUnderlying(Slot::ENTRY_CONTEXT)]); }
 
   FEXCore::Core::InternalThreadState *&ThreadState() const {
     return reinterpret_cast<FEXCore::Core::InternalThreadState *&>(TEB->TlsSlots[FEXCore::ToUnderlying(Slot::THREAD_STATE)]);
@@ -105,19 +103,14 @@ namespace {
     return {Err, TLS{reinterpret_cast<_TEB *>(Info.TebBaseAddress)}};
   }
 
-  TLS GetTLS() {
-    return TLS{NtCurrentTeb()};
-  }
+  TLS GetTLS() { return TLS{NtCurrentTeb()}; }
 
   uint64_t GetWowTEB(void *TEB) {
     static constexpr size_t WowTEBOffsetMemberOffset{0x180c};
-    return static_cast<uint64_t>(*reinterpret_cast<LONG *>(reinterpret_cast<uintptr_t>(TEB) + WowTEBOffsetMemberOffset)
-                                 + reinterpret_cast<uint64_t>(TEB));
+    return static_cast<uint64_t>(*reinterpret_cast<LONG *>(reinterpret_cast<uintptr_t>(TEB) + WowTEBOffsetMemberOffset) + reinterpret_cast<uint64_t>(TEB));
   }
 
-  bool IsAddressInJit(uint64_t Address) {
-    return GetTLS().ThreadState()->CPUBackend->IsAddressInCodeBuffer(Address);
-  }
+  bool IsAddressInJit(uint64_t Address) { return GetTLS().ThreadState()->CPUBackend->IsAddressInCodeBuffer(Address); }
 }
 
 namespace Context {
@@ -154,7 +147,7 @@ namespace Context {
     State.ds_cached = 0;
 
     // Floating-point register state
-    const auto *XSave = reinterpret_cast<XSAVE_FORMAT*>(Context->ExtendedRegisters);
+    const auto *XSave = reinterpret_cast<XSAVE_FORMAT *>(Context->ExtendedRegisters);
 
     memcpy(State.xmm.sse.data, XSave->XmmRegisters, sizeof(State.xmm.sse.data));
     memcpy(State.mm, XSave->FloatRegisters, sizeof(State.mm));
@@ -194,18 +187,15 @@ namespace Context {
 
     // Floating-point register state
 
-    auto *XSave = reinterpret_cast<XSAVE_FORMAT*>(Context->ExtendedRegisters);
+    auto *XSave = reinterpret_cast<XSAVE_FORMAT *>(Context->ExtendedRegisters);
 
     memcpy(XSave->XmmRegisters, State.xmm.sse.data, sizeof(State.xmm.sse.data));
     memcpy(XSave->FloatRegisters, State.mm, sizeof(State.mm));
 
     XSave->ControlWord = State.FCW;
-    XSave->StatusWord =
-      (State.flags[FEXCore::X86State::X87FLAG_TOP_LOC] << 11) |
-      (State.flags[FEXCore::X86State::X87FLAG_C0_LOC] << 8) |
-      (State.flags[FEXCore::X86State::X87FLAG_C1_LOC] << 9) |
-      (State.flags[FEXCore::X86State::X87FLAG_C2_LOC] << 10) |
-      (State.flags[FEXCore::X86State::X87FLAG_C3_LOC] << 14);
+    XSave->StatusWord = (State.flags[FEXCore::X86State::X87FLAG_TOP_LOC] << 11) | (State.flags[FEXCore::X86State::X87FLAG_C0_LOC] << 8) |
+    (State.flags[FEXCore::X86State::X87FLAG_C1_LOC] << 9) | (State.flags[FEXCore::X86State::X87FLAG_C2_LOC] << 10) |
+    (State.flags[FEXCore::X86State::X87FLAG_C3_LOC] << 14);
     XSave->TagWord = State.AbridgedFTW;
 
     Context->FloatSave.ControlWord = XSave->ControlWord;
@@ -224,9 +214,7 @@ namespace Context {
       return Err;
     }
 
-    WOW64_CONTEXT TmpWowContext{
-      .ContextFlags = WOW64_CONTEXT_FULL | WOW64_CONTEXT_EXTENDED_REGISTERS
-    };
+    WOW64_CONTEXT TmpWowContext{.ContextFlags = WOW64_CONTEXT_FULL | WOW64_CONTEXT_EXTENDED_REGISTERS};
 
     Context::StoreWowContextFromState(TLS.ThreadState(), &TmpWowContext);
     return RtlWow64SetThreadContext(Thread, &TmpWowContext);
@@ -254,7 +242,7 @@ namespace Context {
     ReconstructThreadState(Context);
 
     WOW64_CONTEXT WowContext{
-      .ContextFlags = WOW64_CONTEXT_ALL,
+    .ContextFlags = WOW64_CONTEXT_ALL,
     };
 
     auto *XSave = reinterpret_cast<XSAVE_FORMAT *>(WowContext.ExtendedRegisters);
@@ -346,9 +334,7 @@ namespace Logging {
 
 class WowSyscallHandler : public FEXCore::HLE::SyscallHandler, public FEXCore::Allocator::FEXAllocOperators {
 public:
-  WowSyscallHandler() {
-    OSABI = FEXCore::HLE::SyscallOSABI::OS_WIN32;
-  }
+  WowSyscallHandler() { OSABI = FEXCore::HLE::SyscallOSABI::OS_WIN32; }
 
   uint64_t HandleSyscall(FEXCore::Core::CpuStateFrame *Frame, FEXCore::HLE::SyscallArguments *Args) override {
     const uint64_t ReturnRIP = *(uint32_t *)(Frame->State.gregs[FEXCore::X86State::REG_RSP]); // Return address from the stack
@@ -372,14 +358,11 @@ public:
 
       Context::UnlockJITContext();
       Wow64ProcessPendingCrossProcessItems();
-      ReturnRAX = static_cast<uint64_t>(Wow64SystemServiceEx(static_cast<UINT>(EntryRAX),
-                                                             reinterpret_cast<UINT *>(ReturnRSP + 4)));
+      ReturnRAX = static_cast<uint64_t>(Wow64SystemServiceEx(static_cast<UINT>(EntryRAX), reinterpret_cast<UINT *>(ReturnRSP + 4)));
       Context::LockJITContext();
-
     }
     // If a new context has been set, use it directly and don't return to the syscall caller
-    if (Frame->State.rip == (uint64_t)&BridgeInstrs::Syscall ||
-        Frame->State.rip == (uint64_t)&BridgeInstrs::UnixCall) {
+    if (Frame->State.rip == (uint64_t)&BridgeInstrs::Syscall || Frame->State.rip == (uint64_t)&BridgeInstrs::UnixCall) {
       Frame->State.gregs[FEXCore::X86State::REG_RAX] = ReturnRAX;
       Frame->State.gregs[FEXCore::X86State::REG_RSP] = ReturnRSP;
       Frame->State.rip = ReturnRIP;
@@ -389,9 +372,7 @@ public:
     return 0;
   }
 
-  FEXCore::HLE::SyscallABI GetSyscallABI(uint64_t Syscall) override {
-    return { .NumArgs = 0, .HasReturn = false, .HostSyscallNumber = -1 };
-  }
+  FEXCore::HLE::SyscallABI GetSyscallABI(uint64_t Syscall) override { return {.NumArgs = 0, .HasReturn = false, .HostSyscallNumber = -1}; }
 
   FEXCore::HLE::AOTIRCacheEntryLookupResult LookupAOTIRCacheEntry(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestAddr) override {
     return {0, 0};
@@ -459,13 +440,9 @@ NTSTATUS BTCpuThreadTerm(HANDLE Thread) {
   return STATUS_SUCCESS;
 }
 
-void *BTCpuGetBopCode() {
-  return &BridgeInstrs::Syscall;
-}
+void *BTCpuGetBopCode() { return &BridgeInstrs::Syscall; }
 
-void *__wine_get_unix_opcode() {
-  return &BridgeInstrs::UnixCall;
-}
+void *__wine_get_unix_opcode() { return &BridgeInstrs::UnixCall; }
 
 NTSTATUS BTCpuGetContext(HANDLE Thread, HANDLE Process, void *Unknown, WOW64_CONTEXT *Context) {
   auto [Err, TLS] = GetThreadTLS(Thread);
@@ -519,7 +496,7 @@ void BTCpuSimulate() {
 
   // APC handling calls BTCpuSimulate from syscalls and then use NtContinue to return to the previous context,
   // to avoid the saved context being clobbered in this case only save the entry context highest in the stack
-  if (!GetTLS().EntryContext() ||  GetTLS().EntryContext()->Sp <= entry_context.Sp) {
+  if (!GetTLS().EntryContext() || GetTLS().EntryContext()->Sp <= entry_context.Sp) {
     GetTLS().EntryContext() = &entry_context;
   }
 
@@ -539,8 +516,7 @@ NTSTATUS BTCpuSuspendLocalThread(HANDLE Thread, ULONG *Count) {
     LogMan::Msg::DFmt("Suspending self");
     // Mark the CPU area as dirty, to force the JIT context to be restored from it on entry as it may be changed using
     // SetThreadContext (which doesn't use the BTCpu API)
-    if (!(GetTLS().ControlWord().fetch_or(ControlBits::WOW_CPU_AREA_DIRTY, std::memory_order::relaxed) &
-                            ControlBits::WOW_CPU_AREA_DIRTY)) {
+    if (!(GetTLS().ControlWord().fetch_or(ControlBits::WOW_CPU_AREA_DIRTY, std::memory_order::relaxed) & ControlBits::WOW_CPU_AREA_DIRTY)) {
       if (NTSTATUS Err = Context::FlushThreadStateContext(Thread); Err) {
         return Err;
       }
@@ -559,8 +535,7 @@ NTSTATUS BTCpuSuspendLocalThread(HANDLE Thread, ULONG *Count) {
   std::scoped_lock Lock(ThreadSuspendLock);
 
   // If the thread hasn't yet been initialized, suspend it without special handling as it wont yet have entered the JIT
-  if (!InitializedWOWThreads.contains(ThreadTID))
-    return NtSuspendThread(Thread, Count);
+  if (!InitializedWOWThreads.contains(ThreadTID)) return NtSuspendThread(Thread, Count);
 
   // If CONTROL_IN_JIT is unset at this point, then it can never be set (and thus the JIT cannot be reentered) as
   // CONTROL_PAUSED has been set, as such, while this may redundantly request interrupts in rare cases it will never
@@ -575,7 +550,8 @@ NTSTATUS BTCpuSuspendLocalThread(HANDLE Thread, ULONG *Count) {
   }
 
   // Spin until the JIT is interrupted
-  while (TLS.ControlWord().load() & ControlBits::IN_JIT);
+  while (TLS.ControlWord().load() & ControlBits::IN_JIT)
+    ;
 
   // The JIT has now been interrupted and the context stored in the thread's CPU area is up-to-date
   if (Err = NtSuspendThread(Thread, Count); Err) {
@@ -584,7 +560,7 @@ NTSTATUS BTCpuSuspendLocalThread(HANDLE Thread, ULONG *Count) {
   }
 
   CONTEXT TmpContext{
-    .ContextFlags = CONTEXT_INTEGER,
+  .ContextFlags = CONTEXT_INTEGER,
   };
 
   // NtSuspendThread may return before the thread is actually suspended, so a sync operation like NtGetContextThread
@@ -653,13 +629,11 @@ void BTCpuFlushInstructionCache2(const void *Address, SIZE_T Size) {
 }
 
 void BTCpuNotifyMemoryAlloc(void *Address, SIZE_T Size, ULONG Type, ULONG Prot) {
-  InvalidationTracker.HandleMemoryProtectionNotification(GetTLS().ThreadState(), reinterpret_cast<uint64_t>(Address), static_cast<uint64_t>(Size),
-                                                   Prot);
+  InvalidationTracker.HandleMemoryProtectionNotification(GetTLS().ThreadState(), reinterpret_cast<uint64_t>(Address), static_cast<uint64_t>(Size), Prot);
 }
 
 void BTCpuNotifyMemoryProtect(void *Address, SIZE_T Size, ULONG NewProt) {
-  InvalidationTracker.HandleMemoryProtectionNotification(GetTLS().ThreadState(), reinterpret_cast<uint64_t>(Address), static_cast<uint64_t>(Size),
-                                                   NewProt);
+  InvalidationTracker.HandleMemoryProtectionNotification(GetTLS().ThreadState(), reinterpret_cast<uint64_t>(Address), static_cast<uint64_t>(Size), NewProt);
 }
 
 void BTCpuNotifyMemoryFree(void *Address, SIZE_T Size, ULONG FreeType) {
@@ -674,9 +648,7 @@ void BTCpuNotifyUnmapViewOfSection(void *Address, ULONG Flags) {
   InvalidationTracker.InvalidateContainingSection(GetTLS().ThreadState(), reinterpret_cast<uint64_t>(Address), true);
 }
 
-BOOLEAN WINAPI BTCpuIsProcessorFeaturePresent(UINT Feature) {
-  return CPUFeatures->IsFeaturePresent(Feature) ? TRUE : FALSE;
-}
+BOOLEAN WINAPI BTCpuIsProcessorFeaturePresent(UINT Feature) { return CPUFeatures->IsFeaturePresent(Feature) ? TRUE : FALSE; }
 
 BOOLEAN BTCpuUpdateProcessorInformation(SYSTEM_CPU_INFORMATION *Info) {
   CPUFeatures->UpdateInformation(Info);

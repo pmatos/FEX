@@ -23,40 +23,36 @@ namespace FEXCore::Allocator {
   FEX_DEFAULT_VISIBILITY void ClearFaultEvaluate();
 
   class FEX_DEFAULT_VISIBILITY YesIKnowImNotSupposedToUseTheGlibcAllocator final {
-    public:
-      FEX_DEFAULT_VISIBILITY YesIKnowImNotSupposedToUseTheGlibcAllocator();
-      FEX_DEFAULT_VISIBILITY ~YesIKnowImNotSupposedToUseTheGlibcAllocator();
-      FEX_DEFAULT_VISIBILITY static void HardDisable();
+  public:
+    FEX_DEFAULT_VISIBILITY YesIKnowImNotSupposedToUseTheGlibcAllocator();
+    FEX_DEFAULT_VISIBILITY ~YesIKnowImNotSupposedToUseTheGlibcAllocator();
+    FEX_DEFAULT_VISIBILITY static void HardDisable();
   };
 
   class FEX_DEFAULT_VISIBILITY GLIBCScopedFault final {
-    public:
-      GLIBCScopedFault() {
-        FEXCore::Allocator::SetupFaultEvaluate();
-      }
-      ~GLIBCScopedFault() {
-        FEXCore::Allocator::ClearFaultEvaluate();
-      }
+  public:
+    GLIBCScopedFault() { FEXCore::Allocator::SetupFaultEvaluate(); }
+    ~GLIBCScopedFault() { FEXCore::Allocator::ClearFaultEvaluate(); }
   };
 #else
   FEX_DEFAULT_VISIBILITY inline void SetupFaultEvaluate() {}
   FEX_DEFAULT_VISIBILITY inline void ClearFaultEvaluate() {}
 
   class FEX_DEFAULT_VISIBILITY YesIKnowImNotSupposedToUseTheGlibcAllocator final {
-    public:
+  public:
     FEX_DEFAULT_VISIBILITY YesIKnowImNotSupposedToUseTheGlibcAllocator() {}
     FEX_DEFAULT_VISIBILITY ~YesIKnowImNotSupposedToUseTheGlibcAllocator() {}
     FEX_DEFAULT_VISIBILITY static inline void HardDisable() {}
   };
 
   class FEX_DEFAULT_VISIBILITY GLIBCScopedFault final {
-    public:
-      GLIBCScopedFault() {
-        // nop
-      }
-      ~GLIBCScopedFault() {
-        // nop
-      }
+  public:
+    GLIBCScopedFault() {
+      // nop
+    }
+    ~GLIBCScopedFault() {
+      // nop
+    }
   };
 #endif
 
@@ -65,7 +61,7 @@ namespace FEXCore::Allocator {
   FEX_DEFAULT_VISIBILITY void *DisableSBRKAllocations();
 
   // Allow sbrk again. Pass in the pointer returned by `DisableSBRKAllocations`
-  FEX_DEFAULT_VISIBILITY void ReenableSBRKAllocations(void* Ptr);
+  FEX_DEFAULT_VISIBILITY void ReenableSBRKAllocations(void *Ptr);
 
   struct MemoryRegion {
     void *Ptr;
@@ -73,7 +69,7 @@ namespace FEXCore::Allocator {
   };
 
   FEX_DEFAULT_VISIBILITY fextl::vector<MemoryRegion> StealMemoryRegion(uintptr_t Begin, uintptr_t End);
-  FEX_DEFAULT_VISIBILITY void ReclaimMemoryRegion(const fextl::vector<MemoryRegion> & Regions);
+  FEX_DEFAULT_VISIBILITY void ReclaimMemoryRegion(const fextl::vector<MemoryRegion> &Regions);
   // When running a 64-bit executable on ARM then userspace guest only gets 47 bits of VA
   // This is a feature of x86-64 where the kernel gets a full 128TB of VA space
   // x86-64 canonical addresses with bit 48 set will sign extend the address (Ignoring LA57)

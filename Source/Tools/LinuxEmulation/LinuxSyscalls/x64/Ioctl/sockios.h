@@ -7,8 +7,7 @@
 #include <sys/ioctl.h>
 
 namespace FEX::HLE::x64 {
-namespace sockios {
+  namespace sockios {
 #include "LinuxSyscalls/x64/Ioctl/sockios.inl"
+  }
 }
-}
-

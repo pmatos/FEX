@@ -47,8 +47,7 @@ namespace FEX::HLE::x32 {
     uint32_t AddAndRunHandler(int fd, uint32_t cmd, uint32_t args);
     void AssignDeviceTypeToFD(int fd, drm_version const &Version);
 
-    template <size_t LRUSize>
-    class LRUCacheFDCache {
+    template<size_t LRUSize> class LRUCacheFDCache {
     public:
       LRUCacheFDCache() {
         // Set the last element to our handler
@@ -56,10 +55,8 @@ namespace FEX::HLE::x32 {
         LRUCache[LRUSize] = std::make_pair(0, AddAndRunHandler);
       }
 
-      using HandlerType = uint32_t(*)(int fd, uint32_t cmd, uint32_t args);
-      void SetFDHandler(uint32_t FD, HandlerType Handler) {
-        FDToHandler[FD] = Handler;
-      }
+      using HandlerType = uint32_t (*)(int fd, uint32_t cmd, uint32_t args);
+      void SetFDHandler(uint32_t FD, HandlerType Handler) { FDToHandler[FD] = Handler; }
 
       void DuplicateFD(int fd, int NewFD) {
         auto it = FDToHandler.find(fd);
@@ -102,7 +99,7 @@ namespace FEX::HLE::x32 {
 
         // Wasn't found in map, query it
         drm_version Host_Version{};
-        Host_Version.name = reinterpret_cast<char*>(alloca(128));
+        Host_Version.name = reinterpret_cast<char *>(alloca(128));
         Host_Version.name_len = 128;
         uint64_t Result = ioctl(fd, DRM_IOCTL_VERSION, &Host_Version);
 
@@ -138,26 +135,22 @@ namespace FEX::HLE::x32 {
 
     static LRUCacheFDCache<3> FDToHandler;
 
-    uint32_t AddAndRunHandler(int fd, uint32_t cmd, uint32_t args) {
-      return FDToHandler.AddAndRunMapHandler(fd, cmd, args);
-    }
+    uint32_t AddAndRunHandler(int fd, uint32_t cmd, uint32_t args) { return FDToHandler.AddAndRunMapHandler(fd, cmd, args); }
 
-    void CheckAndAddFDDuplication(int fd, int NewFD) {
-      FDToHandler.DuplicateFD(fd, NewFD);
-    }
+    void CheckAndAddFDDuplication(int fd, int NewFD) { FDToHandler.DuplicateFD(fd, NewFD); }
 
     uint32_t AMDGPU_Handler(int fd, uint32_t cmd, uint32_t args) {
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_AMDGPU_GEM_METADATA): {
-          AMDGPU::fex_drm_amdgpu_gem_metadata *val = reinterpret_cast<AMDGPU::fex_drm_amdgpu_gem_metadata*>(args);
-          drm_amdgpu_gem_metadata Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_AMDGPU_GEM_METADATA, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_AMDGPU_GEM_METADATA): {
+        AMDGPU::fex_drm_amdgpu_gem_metadata *val = reinterpret_cast<AMDGPU::fex_drm_amdgpu_gem_metadata *>(args);
+        drm_amdgpu_gem_metadata Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_AMDGPU_GEM_METADATA, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
@@ -169,10 +162,10 @@ namespace FEX::HLE::x32 {
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("AMDGPU", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("AMDGPU", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -183,116 +176,116 @@ namespace FEX::HLE::x32 {
 
     uint32_t RADEON_Handler(int fd, uint32_t cmd, uint32_t args) {
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_CP_INIT): {
-          RADEON::fex_drm_radeon_init_t *val = reinterpret_cast<RADEON::fex_drm_radeon_init_t*>(args);
-          drm_radeon_init_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CP_INIT, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_CP_INIT): {
+        RADEON::fex_drm_radeon_init_t *val = reinterpret_cast<RADEON::fex_drm_radeon_init_t *>(args);
+        drm_radeon_init_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CP_INIT, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_CLEAR): {
-          RADEON::fex_drm_radeon_clear_t *val = reinterpret_cast<RADEON::fex_drm_radeon_clear_t*>(args);
-          drm_radeon_clear_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CLEAR, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_CLEAR): {
+        RADEON::fex_drm_radeon_clear_t *val = reinterpret_cast<RADEON::fex_drm_radeon_clear_t *>(args);
+        drm_radeon_clear_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CLEAR, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_STIPPLE): {
-          RADEON::fex_drm_radeon_stipple_t *val = reinterpret_cast<RADEON::fex_drm_radeon_stipple_t*>(args);
-          drm_radeon_stipple_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_STIPPLE, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_STIPPLE): {
+        RADEON::fex_drm_radeon_stipple_t *val = reinterpret_cast<RADEON::fex_drm_radeon_stipple_t *>(args);
+        drm_radeon_stipple_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_STIPPLE, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_TEXTURE): {
-          RADEON::fex_drm_radeon_texture_t *val = reinterpret_cast<RADEON::fex_drm_radeon_texture_t*>(args);
-          drm_radeon_texture_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_TEXTURE, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_TEXTURE): {
+        RADEON::fex_drm_radeon_texture_t *val = reinterpret_cast<RADEON::fex_drm_radeon_texture_t *>(args);
+        drm_radeon_texture_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_TEXTURE, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_VERTEX2): {
-          RADEON::fex_drm_radeon_vertex2_t *val = reinterpret_cast<RADEON::fex_drm_radeon_vertex2_t*>(args);
-          drm_radeon_vertex2_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_VERTEX2, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_VERTEX2): {
+        RADEON::fex_drm_radeon_vertex2_t *val = reinterpret_cast<RADEON::fex_drm_radeon_vertex2_t *>(args);
+        drm_radeon_vertex2_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_VERTEX2, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_CMDBUF): {
-          RADEON::fex_drm_radeon_cmd_buffer_t *val = reinterpret_cast<RADEON::fex_drm_radeon_cmd_buffer_t*>(args);
-          drm_radeon_cmd_buffer_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CMDBUF, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_CMDBUF): {
+        RADEON::fex_drm_radeon_cmd_buffer_t *val = reinterpret_cast<RADEON::fex_drm_radeon_cmd_buffer_t *>(args);
+        drm_radeon_cmd_buffer_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_CMDBUF, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_GETPARAM): {
-          RADEON::fex_drm_radeon_getparam_t *val = reinterpret_cast<RADEON::fex_drm_radeon_getparam_t*>(args);
-          drm_radeon_getparam_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_GETPARAM, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_GETPARAM): {
+        RADEON::fex_drm_radeon_getparam_t *val = reinterpret_cast<RADEON::fex_drm_radeon_getparam_t *>(args);
+        drm_radeon_getparam_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_GETPARAM, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_ALLOC): {
-          RADEON::fex_drm_radeon_mem_alloc_t *val = reinterpret_cast<RADEON::fex_drm_radeon_mem_alloc_t*>(args);
-          drm_radeon_mem_alloc_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_ALLOC, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_ALLOC): {
+        RADEON::fex_drm_radeon_mem_alloc_t *val = reinterpret_cast<RADEON::fex_drm_radeon_mem_alloc_t *>(args);
+        drm_radeon_mem_alloc_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_ALLOC, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_IRQ_EMIT): {
-          RADEON::fex_drm_radeon_irq_emit_t *val = reinterpret_cast<RADEON::fex_drm_radeon_irq_emit_t*>(args);
-          drm_radeon_irq_emit_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_IRQ_EMIT, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_IRQ_EMIT): {
+        RADEON::fex_drm_radeon_irq_emit_t *val = reinterpret_cast<RADEON::fex_drm_radeon_irq_emit_t *>(args);
+        drm_radeon_irq_emit_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_IRQ_EMIT, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_SETPARAM): {
-          RADEON::fex_drm_radeon_setparam_t *val = reinterpret_cast<RADEON::fex_drm_radeon_setparam_t*>(args);
-          drm_radeon_setparam_t Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_SETPARAM, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_SETPARAM): {
+        RADEON::fex_drm_radeon_setparam_t *val = reinterpret_cast<RADEON::fex_drm_radeon_setparam_t *>(args);
+        drm_radeon_setparam_t Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_SETPARAM, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
-        case _IOC_NR(FEX_DRM_IOCTL_RADEON_GEM_CREATE): {
-          RADEON::fex_drm_radeon_gem_create *val = reinterpret_cast<RADEON::fex_drm_radeon_gem_create*>(args);
-          drm_radeon_gem_create Host_val = *val;
-          uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_GEM_CREATE, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+        SYSCALL_ERRNO();
+        break;
+      }
+      case _IOC_NR(FEX_DRM_IOCTL_RADEON_GEM_CREATE): {
+        RADEON::fex_drm_radeon_gem_create *val = reinterpret_cast<RADEON::fex_drm_radeon_gem_create *>(args);
+        drm_radeon_gem_create Host_val = *val;
+        uint64_t Result = ioctl(fd, DRM_IOCTL_RADEON_GEM_CREATE, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
@@ -304,10 +297,10 @@ namespace FEX::HLE::x32 {
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("RADEON", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("RADEON", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -318,16 +311,16 @@ namespace FEX::HLE::x32 {
 
     uint32_t MSM_Handler(int fd, uint32_t cmd, uint32_t args) {
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_MSM_WAIT_FENCE): {
-          MSM::fex_drm_msm_wait_fence *val = reinterpret_cast<MSM::fex_drm_msm_wait_fence*>(args);
-          drm_msm_wait_fence Host_val = *val;
-          uint64_t Result = ::ioctl(fd, DRM_IOCTL_MSM_WAIT_FENCE, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_MSM_WAIT_FENCE): {
+        MSM::fex_drm_msm_wait_fence *val = reinterpret_cast<MSM::fex_drm_msm_wait_fence *>(args);
+        drm_msm_wait_fence Host_val = *val;
+        uint64_t Result = ::ioctl(fd, DRM_IOCTL_MSM_WAIT_FENCE, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
@@ -340,10 +333,10 @@ namespace FEX::HLE::x32 {
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("MSM", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("MSM", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -358,17 +351,17 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset)
-      // DRM
+        // DRM
 #include "LinuxSyscalls/x32/Ioctl/nouveau_drm.inl"
         {
           uint64_t Result = ::ioctl(fd, cmd, args);
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("Nouveau", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("Nouveau", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -378,16 +371,17 @@ namespace FEX::HLE::x32 {
     }
 
     uint32_t I915_Handler(int fd, uint32_t cmd, uint32_t args) {
-#define SIMPLE(enum, type) case _IOC_NR(FEX_##enum): { \
-          I915::fex_##type *guest = reinterpret_cast<I915::fex_##type*>(args); \
-          type host = *guest; \
-          uint64_t Result = ::ioctl(fd, enum, &host); \
-          if (Result != -1) { \
-            *guest = host; \
-          } \
-          SYSCALL_ERRNO(); \
-          break; \
-        }
+#define SIMPLE(enum, type) \
+  case _IOC_NR(FEX_##enum): { \
+    I915::fex_##type *guest = reinterpret_cast<I915::fex_##type *>(args); \
+    type host = *guest; \
+    uint64_t Result = ::ioctl(fd, enum, &host); \
+    if (Result != -1) { \
+      *guest = host; \
+    } \
+    SYSCALL_ERRNO(); \
+    break; \
+  }
 
 
       switch (_IOC_NR(cmd)) {
@@ -401,17 +395,17 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset)
-      // DRM
+        // DRM
 #include "LinuxSyscalls/x32/Ioctl/i915_drm.inl"
         {
           uint64_t Result = ::ioctl(fd, cmd, args);
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("I915", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("I915", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef SIMPLE
 #undef _BASIC_META
@@ -427,17 +421,17 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset)
-      // DRM
+        // DRM
 #include "LinuxSyscalls/x32/Ioctl/panfrost_drm.inl"
         {
           uint64_t Result = ::ioctl(fd, cmd, args);
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("Panfrost", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("Panfrost", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -452,17 +446,17 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset)
-      // DRM
+        // DRM
 #include "LinuxSyscalls/x32/Ioctl/lima_drm.inl"
         {
           uint64_t Result = ::ioctl(fd, cmd, args);
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("Lima", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("Lima", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -473,16 +467,16 @@ namespace FEX::HLE::x32 {
 
     uint32_t VC4_Handler(int fd, uint32_t cmd, uint32_t args) {
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_VC4_PERFMON_GET_VALUES): {
-          FEX::HLE::x32::VC4::fex_drm_vc4_perfmon_get_values *val = reinterpret_cast<FEX::HLE::x32::VC4::fex_drm_vc4_perfmon_get_values*>(args);
-          drm_vc4_perfmon_get_values Host_val = *val;
-          uint64_t Result = ::ioctl(fd, DRM_IOCTL_VC4_PERFMON_GET_VALUES, &Host_val);
-          if (Result != -1) {
-            *val = Host_val;
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_VC4_PERFMON_GET_VALUES): {
+        FEX::HLE::x32::VC4::fex_drm_vc4_perfmon_get_values *val = reinterpret_cast<FEX::HLE::x32::VC4::fex_drm_vc4_perfmon_get_values *>(args);
+        drm_vc4_perfmon_get_values Host_val = *val;
+        uint64_t Result = ::ioctl(fd, DRM_IOCTL_VC4_PERFMON_GET_VALUES, &Host_val);
+        if (Result != -1) {
+          *val = Host_val;
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
@@ -495,10 +489,10 @@ namespace FEX::HLE::x32 {
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("VC4", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("VC4", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -509,16 +503,16 @@ namespace FEX::HLE::x32 {
 
     uint32_t V3D_Handler(int fd, uint32_t cmd, uint32_t args) {
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_V3D_SUBMIT_CSD): {
-          FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd *val = reinterpret_cast<FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd*>(args);
-          drm_v3d_submit_csd Host_val = FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd::SafeConvertToHost(val, _IOC_SIZE(cmd));
-          uint64_t Result = ::ioctl(fd, DRM_IOCTL_V3D_SUBMIT_CSD, &Host_val);
-          if (Result != -1) {
-            FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd::SafeConvertToGuest(val, Host_val, _IOC_SIZE(cmd));
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_V3D_SUBMIT_CSD): {
+        FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd *val = reinterpret_cast<FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd *>(args);
+        drm_v3d_submit_csd Host_val = FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd::SafeConvertToHost(val, _IOC_SIZE(cmd));
+        uint64_t Result = ::ioctl(fd, DRM_IOCTL_V3D_SUBMIT_CSD, &Host_val);
+        if (Result != -1) {
+          FEX::HLE::x32::V3D::fex_drm_v3d_submit_csd::SafeConvertToGuest(val, Host_val, _IOC_SIZE(cmd));
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
@@ -531,10 +525,10 @@ namespace FEX::HLE::x32 {
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("V3D", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("V3D", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -549,17 +543,17 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset)
-      // DRM
+        // DRM
 #include "LinuxSyscalls/x32/Ioctl/virtio_drm.inl"
         {
           uint64_t Result = ::ioctl(fd, cmd, args);
           SYSCALL_ERRNO();
           break;
         }
-        default:
-          UnhandledIoctl("Virtio", fd, cmd, args);
-          return -EPERM;
-          break;
+      default:
+        UnhandledIoctl("Virtio", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef _BASIC_META
 #undef _BASIC_META_VAR
@@ -578,35 +572,25 @@ namespace FEX::HLE::x32 {
       if (Version.name) {
         if (strncmp(Version.name, "amdgpu", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, AMDGPU_Handler);
-        }
-        else if (strncmp(Version.name, "radeon", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "radeon", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, RADEON_Handler);
-        }
-        else if (strncmp(Version.name, "msm", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "msm", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, MSM_Handler);
-        }
-        else if (strncmp(Version.name, "nouveau", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "nouveau", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, Nouveau_Handler);
-        }
-        else if (strncmp(Version.name, "i915", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "i915", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, I915_Handler);
-        }
-        else if (strncmp(Version.name, "panfrost", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "panfrost", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, Panfrost_Handler);
-        }
-        else if (strncmp(Version.name, "lima", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "lima", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, Lima_Handler);
-        }
-        else if (strncmp(Version.name, "vc4", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "vc4", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, VC4_Handler);
-        }
-        else if (strncmp(Version.name, "v3d", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "v3d", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, V3D_Handler);
-        }
-        else if (strncmp(Version.name, "virtio_gpu", Version.name_len) == 0) {
+        } else if (strncmp(Version.name, "virtio_gpu", Version.name_len) == 0) {
           FDToHandler.SetFDHandler(fd, Virtio_Handler);
-        }
-        else {
+        } else {
           LogMan::Msg::IFmt("Unknown DRM device: '{}'. Using default passthrough", Version.name);
           FDToHandler.SetFDHandler(fd, Default_Handler);
         }
@@ -614,29 +598,30 @@ namespace FEX::HLE::x32 {
     }
 
     uint32_t Handler(int fd, uint32_t cmd, uint32_t args) {
-#define SIMPLE(enum, type) case _IOC_NR(FEX_##enum): { \
-          DRM::fex_##type *guest = reinterpret_cast<DRM::fex_##type*>(args); \
-          type host = *guest; \
-          uint64_t Result = ::ioctl(fd, enum, &host); \
-          if (Result != -1) { \
-            *guest = host; \
-          } \
-          SYSCALL_ERRNO(); \
-          break; \
-        }
+#define SIMPLE(enum, type) \
+  case _IOC_NR(FEX_##enum): { \
+    DRM::fex_##type *guest = reinterpret_cast<DRM::fex_##type *>(args); \
+    type host = *guest; \
+    uint64_t Result = ::ioctl(fd, enum, &host); \
+    if (Result != -1) { \
+      *guest = host; \
+    } \
+    SYSCALL_ERRNO(); \
+    break; \
+  }
 
       switch (_IOC_NR(cmd)) {
-        case _IOC_NR(FEX_DRM_IOCTL_VERSION): {
-          fex_drm_version *version = reinterpret_cast<fex_drm_version*>(args);
-          drm_version Host_Version = *version;
-          uint64_t Result = ::ioctl(fd, DRM_IOCTL_VERSION, &Host_Version);
-          if (Result != -1) {
-            *version = Host_Version;
-            AssignDeviceTypeToFD(fd, Host_Version);
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_VERSION): {
+        fex_drm_version *version = reinterpret_cast<fex_drm_version *>(args);
+        drm_version Host_Version = *version;
+        uint64_t Result = ::ioctl(fd, DRM_IOCTL_VERSION, &Host_Version);
+        if (Result != -1) {
+          *version = Host_Version;
+          AssignDeviceTypeToFD(fd, Host_Version);
         }
+        SYSCALL_ERRNO();
+        break;
+      }
 
         SIMPLE(DRM_IOCTL_GET_UNIQUE, drm_unique)
         SIMPLE(DRM_IOCTL_GET_CLIENT, drm_client)
@@ -653,29 +638,29 @@ namespace FEX::HLE::x32 {
         SIMPLE(DRM_IOCTL_SET_SAREA_CTX, drm_ctx_priv_map)
         SIMPLE(DRM_IOCTL_GET_SAREA_CTX, drm_ctx_priv_map)
 
-        SIMPLE(DRM_IOCTL_RES_CTX,     drm_ctx_res)
-        SIMPLE(DRM_IOCTL_DMA,         drm_dma)
-        SIMPLE(DRM_IOCTL_SG_ALLOC,    drm_scatter_gather)
-        SIMPLE(DRM_IOCTL_SG_FREE,     drm_scatter_gather)
+        SIMPLE(DRM_IOCTL_RES_CTX, drm_ctx_res)
+        SIMPLE(DRM_IOCTL_DMA, drm_dma)
+        SIMPLE(DRM_IOCTL_SG_ALLOC, drm_scatter_gather)
+        SIMPLE(DRM_IOCTL_SG_FREE, drm_scatter_gather)
         SIMPLE(DRM_IOCTL_UPDATE_DRAW, drm_update_draw)
         SIMPLE(DRM_IOCTL_MODE_GETPLANERESOURCES, drm_mode_get_plane_res)
-        SIMPLE(DRM_IOCTL_MODE_ADDFB2,            drm_mode_fb_cmd2)
+        SIMPLE(DRM_IOCTL_MODE_ADDFB2, drm_mode_fb_cmd2)
         SIMPLE(DRM_IOCTL_MODE_OBJ_GETPROPERTIES, drm_mode_obj_get_properties)
-        SIMPLE(DRM_IOCTL_MODE_OBJ_SETPROPERTY,   drm_mode_obj_set_property)
-        SIMPLE(DRM_IOCTL_MODE_GETFB2,            drm_mode_fb_cmd2)
+        SIMPLE(DRM_IOCTL_MODE_OBJ_SETPROPERTY, drm_mode_obj_set_property)
+        SIMPLE(DRM_IOCTL_MODE_GETFB2, drm_mode_fb_cmd2)
 
-        case _IOC_NR(FEX_DRM_IOCTL_WAIT_VBLANK): {
-          fex_drm_wait_vblank *guest = reinterpret_cast<fex_drm_wait_vblank*>(args);
-          drm_wait_vblank Host{};
-          Host.request = guest->request;
-          uint64_t Result = ::ioctl(fd, FEX_DRM_IOCTL_WAIT_VBLANK, &Host);
-          if (Result != -1) {
-            guest->reply = Host.reply;
-          }
-          SYSCALL_ERRNO();
-          break;
+      case _IOC_NR(FEX_DRM_IOCTL_WAIT_VBLANK): {
+        fex_drm_wait_vblank *guest = reinterpret_cast<fex_drm_wait_vblank *>(args);
+        drm_wait_vblank Host{};
+        Host.request = guest->request;
+        uint64_t Result = ::ioctl(fd, FEX_DRM_IOCTL_WAIT_VBLANK, &Host);
+        if (Result != -1) {
+          guest->reply = Host.reply;
         }
-        // Passthrough
+        SYSCALL_ERRNO();
+        break;
+      }
+      // Passthrough
 #define _BASIC_META(x) case _IOC_NR(x):
 #define _BASIC_META_VAR(x, args...) case _IOC_NR(x):
 #define _CUSTOM_META(name, ioctl_num)
@@ -688,16 +673,16 @@ namespace FEX::HLE::x32 {
           break;
         }
 
-        case DRM_COMMAND_BASE ... (DRM_COMMAND_END - 1): {
-          // This is the space of the DRM device commands
-          auto it = FDToHandler.FindHandler(fd);
-          return it(fd, cmd, args);
+      case DRM_COMMAND_BASE ...(DRM_COMMAND_END - 1): {
+        // This is the space of the DRM device commands
+        auto it = FDToHandler.FindHandler(fd);
+        return it(fd, cmd, args);
         break;
-        }
-        default:
-          UnhandledIoctl("DRM", fd, cmd, args);
-          return -EPERM;
-          break;
+      }
+      default:
+        UnhandledIoctl("DRM", fd, cmd, args);
+        return -EPERM;
+        break;
       }
 #undef SIMPLE
 #undef _BASIC_META
@@ -726,19 +711,19 @@ namespace FEX::HLE::x32 {
 #define _CUSTOM_META(name, ioctl_num) IoctlHandler{_IOC_TYPE(FEX_##name), FEX::HLE::x32::BasicHandler::BasicHandler},
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset) IoctlHandler{_IOC_TYPE(FEX_##name), FEX::HLE::x32::BasicHandler::BasicHandler},
 
-      // Asound
+    // Asound
 #include "LinuxSyscalls/x32/Ioctl/asound.inl"
-      // Streams
+    // Streams
 #include "LinuxSyscalls/x32/Ioctl/streams.inl"
-      // USB Dev
+    // USB Dev
 #include "LinuxSyscalls/x32/Ioctl/usbdev.inl"
-      // Input
+    // Input
 #include "LinuxSyscalls/x32/Ioctl/input.inl"
-      // SOCKIOS
+    // SOCKIOS
 #include "LinuxSyscalls/x32/Ioctl/sockios.inl"
-      // Joystick
+    // Joystick
 #include "LinuxSyscalls/x32/Ioctl/joystick.inl"
-      // Wireless
+    // Wireless
 #include "LinuxSyscalls/x32/Ioctl/wireless.inl"
 
 #undef _BASIC_META
@@ -750,7 +735,7 @@ namespace FEX::HLE::x32 {
 #define _BASIC_META_VAR(x, args...) IoctlHandler{_IOC_TYPE(x(args)), FEX::HLE::x32::DRM::Handler},
 #define _CUSTOM_META(name, ioctl_num) IoctlHandler{_IOC_TYPE(FEX_##name), FEX::HLE::x32::DRM::Handler},
 #define _CUSTOM_META_OFFSET(name, ioctl_num, offset) IoctlHandler{_IOC_TYPE(FEX_##name), FEX::HLE::x32::DRM::Handler},
-      // DRM
+    // DRM
 #include "LinuxSyscalls/x32/Ioctl/drm.inl"
 
 #include "LinuxSyscalls/x32/Ioctl/amdgpu_drm.inl"
@@ -781,8 +766,5 @@ namespace FEX::HLE::x32 {
     return Handlers[_IOC_TYPE(request)](fd, request, args);
   }
 
-  void CheckAndAddFDDuplication(int fd, int NewFD) {
-    DRM::CheckAndAddFDDuplication(fd, NewFD);
-  }
+  void CheckAndAddFDDuplication(int fd, int NewFD) { DRM::CheckAndAddFDDuplication(fd, NewFD); }
 }
-

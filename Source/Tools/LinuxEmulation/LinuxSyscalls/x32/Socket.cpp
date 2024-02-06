@@ -135,7 +135,7 @@ namespace FEX::HLE::x32 {
   };
 
   static uint64_t SendMsg(int sockfd, const struct msghdr32 *msg, int flags) {
-    struct msghdr HostHeader{};
+    struct msghdr HostHeader {};
     fextl::vector<iovec> Host_iovec(msg->msg_iovlen);
     for (size_t i = 0; i < msg->msg_iovlen; ++i) {
       Host_iovec[i] = msg->msg_iov[i];
@@ -153,11 +153,10 @@ namespace FEX::HLE::x32 {
     HostHeader.msg_flags = msg->msg_flags;
     if (HostHeader.msg_controllen) {
       void *CurrentGuestPtr = msg->msg_control;
-      struct cmsghdr *CurrentHost = reinterpret_cast<struct cmsghdr*>(HostHeader.msg_control);
+      struct cmsghdr *CurrentHost = reinterpret_cast<struct cmsghdr *>(HostHeader.msg_control);
 
-      for (cmsghdr32 *msghdr_guest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr);
-          CurrentGuestPtr != 0;
-          msghdr_guest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr)) {
+      for (cmsghdr32 *msghdr_guest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr); CurrentGuestPtr != 0;
+           msghdr_guest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr)) {
 
         CurrentHost->cmsg_level = msghdr_guest->cmsg_level;
         CurrentHost->cmsg_type = msghdr_guest->cmsg_type;
@@ -175,11 +174,10 @@ namespace FEX::HLE::x32 {
         // Go to next msg
         if (msghdr_guest->cmsg_len < sizeof(cmsghdr32)) {
           CurrentGuestPtr = nullptr;
-        }
-        else {
-          CurrentGuestPtr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + msghdr_guest->cmsg_len);
-          CurrentGuestPtr = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
-          if (CurrentGuestPtr >= reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(static_cast<void*>(msg->msg_control)) + msg->msg_controllen)) {
+        } else {
+          CurrentGuestPtr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + msghdr_guest->cmsg_len);
+          CurrentGuestPtr = reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
+          if (CurrentGuestPtr >= reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(static_cast<void *>(msg->msg_control)) + msg->msg_controllen)) {
             CurrentGuestPtr = nullptr;
           }
         }
@@ -191,7 +189,7 @@ namespace FEX::HLE::x32 {
   }
 
   static uint64_t RecvMsg(int sockfd, struct msghdr32 *msg, int flags) {
-    struct msghdr HostHeader{};
+    struct msghdr HostHeader {};
     fextl::vector<iovec> Host_iovec(msg->msg_iovlen);
     for (size_t i = 0; i < msg->msg_iovlen; ++i) {
       Host_iovec[i] = msg->msg_iov[i];
@@ -203,8 +201,8 @@ namespace FEX::HLE::x32 {
     HostHeader.msg_iov = Host_iovec.data();
     HostHeader.msg_iovlen = msg->msg_iovlen;
 
-    HostHeader.msg_control = alloca(msg->msg_controllen*2);
-    HostHeader.msg_controllen = msg->msg_controllen*2;
+    HostHeader.msg_control = alloca(msg->msg_controllen * 2);
+    HostHeader.msg_controllen = msg->msg_controllen * 2;
 
     HostHeader.msg_flags = msg->msg_flags;
 
@@ -221,10 +219,8 @@ namespace FEX::HLE::x32 {
         // Host and guest cmsg data structures aren't compatible.
         // Copy them over now
         void *CurrentGuestPtr = msg->msg_control;
-        for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&HostHeader);
-            cmsg != nullptr;
-            cmsg = CMSG_NXTHDR(&HostHeader, cmsg)) {
-          cmsghdr32 *CurrentGuest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr);
+        for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&HostHeader); cmsg != nullptr; cmsg = CMSG_NXTHDR(&HostHeader, cmsg)) {
+          cmsghdr32 *CurrentGuest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr);
 
           // Copy over the header first
           // cmsg_len needs to be adjusted by the size of the header between host and guest
@@ -241,9 +237,8 @@ namespace FEX::HLE::x32 {
             msg->msg_controllen -= SizeIncrease;
 
             memcpy(CurrentGuest->cmsg_data, CMSG_DATA(cmsg), cmsg->cmsg_len - sizeof(struct cmsghdr));
-            CurrentGuestPtr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + CurrentGuest->cmsg_len);
-            CurrentGuestPtr = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
-
+            CurrentGuestPtr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + CurrentGuest->cmsg_len);
+            CurrentGuestPtr = reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
           }
         }
       }
@@ -265,8 +260,8 @@ namespace FEX::HLE::x32 {
     Host->msg_iovlen = Guest->msg_iovlen;
 
     // XXX: This could result in a stack overflow
-    Host->msg_control = alloca(Guest->msg_controllen*2);
-    Host->msg_controllen = Guest->msg_controllen*2;
+    Host->msg_control = alloca(Guest->msg_controllen * 2);
+    Host->msg_controllen = Guest->msg_controllen * 2;
 
     Host->msg_flags = Guest->msg_flags;
   }
@@ -284,10 +279,8 @@ namespace FEX::HLE::x32 {
       // Host and guest cmsg data structures aren't compatible.
       // Copy them over now
       void *CurrentGuestPtr = Guest->msg_control;
-      for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(Host);
-          cmsg != nullptr;
-          cmsg = CMSG_NXTHDR(Host, cmsg)) {
-        cmsghdr32 *CurrentGuest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr);
+      for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(Host); cmsg != nullptr; cmsg = CMSG_NXTHDR(Host, cmsg)) {
+        cmsghdr32 *CurrentGuest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr);
 
         // Copy over the header first
         // cmsg_len needs to be adjusted by the size of the header between host and guest
@@ -304,8 +297,8 @@ namespace FEX::HLE::x32 {
           Guest->msg_controllen -= SizeIncrease;
 
           memcpy(CurrentGuest->cmsg_data, CMSG_DATA(cmsg), cmsg->cmsg_len - sizeof(struct cmsghdr));
-          CurrentGuestPtr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + CurrentGuest->cmsg_len);
-          CurrentGuestPtr = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
+          CurrentGuestPtr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + CurrentGuest->cmsg_len);
+          CurrentGuestPtr = reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
         }
       }
     }
@@ -369,11 +362,10 @@ namespace FEX::HLE::x32 {
 
       if (msg.msg_controllen) {
         void *CurrentGuestPtr = guest.msg_control;
-        struct cmsghdr *CurrentHost = reinterpret_cast<struct cmsghdr*>(msg.msg_control);
+        struct cmsghdr *CurrentHost = reinterpret_cast<struct cmsghdr *>(msg.msg_control);
 
-        for (cmsghdr32 *msghdr_guest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr);
-            CurrentGuestPtr != 0;
-            msghdr_guest = reinterpret_cast<cmsghdr32*>(CurrentGuestPtr)) {
+        for (cmsghdr32 *msghdr_guest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr); CurrentGuestPtr != 0;
+             msghdr_guest = reinterpret_cast<cmsghdr32 *>(CurrentGuestPtr)) {
 
           CurrentHost->cmsg_level = msghdr_guest->cmsg_level;
           CurrentHost->cmsg_type = msghdr_guest->cmsg_type;
@@ -391,11 +383,10 @@ namespace FEX::HLE::x32 {
           // Go to next msg
           if (msghdr_guest->cmsg_len < sizeof(cmsghdr32)) {
             CurrentGuestPtr = nullptr;
-          }
-          else {
-            CurrentGuestPtr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + msghdr_guest->cmsg_len);
-            CurrentGuestPtr = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
-            if (CurrentGuestPtr >= reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(static_cast<void*>(guest.msg_control)) + guest.msg_controllen)) {
+          } else {
+            CurrentGuestPtr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(CurrentGuestPtr) + msghdr_guest->cmsg_len);
+            CurrentGuestPtr = reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(CurrentGuestPtr) + 3) & ~3ULL);
+            if (CurrentGuestPtr >= reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(static_cast<void *>(guest.msg_control)) + guest.msg_controllen)) {
               CurrentGuestPtr = nullptr;
             }
           }
@@ -421,156 +412,125 @@ namespace FEX::HLE::x32 {
 
     if (level == SOL_SOCKET) {
       switch (optname) {
-        case SO_ATTACH_FILTER:
-        case SO_ATTACH_REUSEPORT_CBPF: {
-          struct sock_fprog32 {
-            uint16_t len;
-            uint32_t filter;
-          };
-          struct sock_fprog64 {
-            uint16_t len;
-            uint64_t filter;
-          };
+      case SO_ATTACH_FILTER:
+      case SO_ATTACH_REUSEPORT_CBPF: {
+        struct sock_fprog32 {
+          uint16_t len;
+          uint32_t filter;
+        };
+        struct sock_fprog64 {
+          uint16_t len;
+          uint64_t filter;
+        };
 
-          if (optlen != sizeof(sock_fprog32)) {
-            return -EINVAL;
-          }
+        if (optlen != sizeof(sock_fprog32)) {
+          return -EINVAL;
+        }
 
-          sock_fprog32 *prog = reinterpret_cast<sock_fprog32*>(optval.Ptr);
-          sock_fprog64 prog64{};
-          prog64.len = prog->len;
-          prog64.filter = prog->filter;
+        sock_fprog32 *prog = reinterpret_cast<sock_fprog32 *>(optval.Ptr);
+        sock_fprog64 prog64{};
+        prog64.len = prog->len;
+        prog64.filter = prog->filter;
 
-          Result = ::syscall(SYSCALL_DEF(setsockopt),
-            sockfd,
-            level,
-            optname,
-            &prog64,
-            sizeof(sock_fprog64)
-            );
-          break;
-        }
-        case SO_RCVTIMEO_OLD: {
-          // _OLD uses old_timeval32. Needs to be converted
-          struct timeval tv64 = *reinterpret_cast<timeval32*>(optval.Ptr);
-          Result = ::syscall(SYSCALL_DEF(setsockopt),
-            sockfd,
-            level,
-            SO_RCVTIMEO_NEW,
-            &tv64,
-            sizeof(tv64)
-            );
-          break;
-        }
-        case SO_SNDTIMEO_OLD: {
-          // _OLD uses old_timeval32. Needs to be converted
-          struct timeval tv64 = *reinterpret_cast<timeval32*>(optval.Ptr);
-          Result = ::syscall(SYSCALL_DEF(setsockopt),
-            sockfd,
-            level,
-            SO_SNDTIMEO_NEW,
-            &tv64,
-            sizeof(tv64)
-            );
-          break;
-        }
-        // Each optname as a reminder which setting has been manually checked
-        case SO_DEBUG:
-        case SO_REUSEADDR:
-        case SO_TYPE:
-        case SO_ERROR:
-        case SO_DONTROUTE:
-        case SO_BROADCAST:
-        case SO_SNDBUF:
-        case SO_RCVBUF:
-        case SO_SNDBUFFORCE:
-        case SO_RCVBUFFORCE:
-        case SO_KEEPALIVE:
-        case SO_OOBINLINE:
-        case SO_NO_CHECK:
-        case SO_PRIORITY:
-        case SO_LINGER:
-        case SO_BSDCOMPAT:
-        case SO_REUSEPORT:
-        /**
+        Result = ::syscall(SYSCALL_DEF(setsockopt), sockfd, level, optname, &prog64, sizeof(sock_fprog64));
+        break;
+      }
+      case SO_RCVTIMEO_OLD: {
+        // _OLD uses old_timeval32. Needs to be converted
+        struct timeval tv64 = *reinterpret_cast<timeval32 *>(optval.Ptr);
+        Result = ::syscall(SYSCALL_DEF(setsockopt), sockfd, level, SO_RCVTIMEO_NEW, &tv64, sizeof(tv64));
+        break;
+      }
+      case SO_SNDTIMEO_OLD: {
+        // _OLD uses old_timeval32. Needs to be converted
+        struct timeval tv64 = *reinterpret_cast<timeval32 *>(optval.Ptr);
+        Result = ::syscall(SYSCALL_DEF(setsockopt), sockfd, level, SO_SNDTIMEO_NEW, &tv64, sizeof(tv64));
+        break;
+      }
+      // Each optname as a reminder which setting has been manually checked
+      case SO_DEBUG:
+      case SO_REUSEADDR:
+      case SO_TYPE:
+      case SO_ERROR:
+      case SO_DONTROUTE:
+      case SO_BROADCAST:
+      case SO_SNDBUF:
+      case SO_RCVBUF:
+      case SO_SNDBUFFORCE:
+      case SO_RCVBUFFORCE:
+      case SO_KEEPALIVE:
+      case SO_OOBINLINE:
+      case SO_NO_CHECK:
+      case SO_PRIORITY:
+      case SO_LINGER:
+      case SO_BSDCOMPAT:
+      case SO_REUSEPORT:
+      /**
          * @name These end up differing between {x86,arm} and {powerpc, alpha, sparc, mips, parisc}
          * @{ */
-        case SO_PASSCRED:
-        case SO_PEERCRED:
-        case SO_RCVLOWAT:
-        case SO_SNDLOWAT:
-        /**  @} */
-        case SO_SECURITY_AUTHENTICATION:
-        case SO_SECURITY_ENCRYPTION_TRANSPORT:
-        case SO_SECURITY_ENCRYPTION_NETWORK:
-        case SO_DETACH_FILTER:
-        case SO_PEERNAME:
-        case SO_TIMESTAMP_OLD: // Returns int32_t boolean
-        case SO_ACCEPTCONN:
-        case SO_PEERSEC:
-        // Gap 32, 33
-        case SO_PASSSEC:
-        case SO_TIMESTAMPNS_OLD: // Returns int32_t boolean
-        case SO_MARK:
-        case SO_TIMESTAMPING_OLD: // Returns so_timestamping
-        case SO_PROTOCOL:
-        case SO_DOMAIN:
-        case SO_RXQ_OVFL:
-        case SO_WIFI_STATUS:
-        case SO_PEEK_OFF:
-        case SO_NOFCS:
-        case SO_LOCK_FILTER:
-        case SO_SELECT_ERR_QUEUE:
-        case SO_BUSY_POLL:
-        case SO_MAX_PACING_RATE:
-        case SO_BPF_EXTENSIONS:
-        case SO_INCOMING_CPU:
-        case SO_ATTACH_BPF:
-        case SO_ATTACH_REUSEPORT_EBPF:
-        case SO_CNX_ADVICE:
-        // Gap 54 (SCM_TIMESTAMPING_OPT_STATS)
-        case SO_MEMINFO:
-        case SO_INCOMING_NAPI_ID:
-        case SO_COOKIE: // Cookie always returns 64-bit even on 32-bit
-        // Gap 58 (SCM_TIMESTAMPING_PKTINFO)
-        case SO_PEERGROUPS:
-        case SO_ZEROCOPY:
-        case SO_TXTIME:
-        case SO_BINDTOIFINDEX:
-        case SO_TIMESTAMP_NEW:
-        case SO_TIMESTAMPNS_NEW:
-        case SO_TIMESTAMPING_NEW:
-        case SO_RCVTIMEO_NEW:
-        case SO_SNDTIMEO_NEW:
-        case SO_DETACH_REUSEPORT_BPF:
-        case SO_PREFER_BUSY_POLL:
-        case SO_BUSY_POLL_BUDGET:
-        case SO_NETNS_COOKIE: // Cookie always returns 64-bit even on 32-bit
-        case SO_BUF_LOCK:
-        case SO_RESERVE_MEM:
-        case SO_TXREHASH:
-        case SO_RCVMARK:
-        case SO_PASSPIDFD:
-        case SO_PEERPIDFD:
-        default:
-          Result = ::syscall(SYSCALL_DEF(setsockopt),
-            sockfd,
-            level,
-            optname,
-            reinterpret_cast<const void*>(optval.Ptr),
-            optlen
-            );
-          break;
+      case SO_PASSCRED:
+      case SO_PEERCRED:
+      case SO_RCVLOWAT:
+      case SO_SNDLOWAT:
+      /**  @} */
+      case SO_SECURITY_AUTHENTICATION:
+      case SO_SECURITY_ENCRYPTION_TRANSPORT:
+      case SO_SECURITY_ENCRYPTION_NETWORK:
+      case SO_DETACH_FILTER:
+      case SO_PEERNAME:
+      case SO_TIMESTAMP_OLD: // Returns int32_t boolean
+      case SO_ACCEPTCONN:
+      case SO_PEERSEC:
+      // Gap 32, 33
+      case SO_PASSSEC:
+      case SO_TIMESTAMPNS_OLD: // Returns int32_t boolean
+      case SO_MARK:
+      case SO_TIMESTAMPING_OLD: // Returns so_timestamping
+      case SO_PROTOCOL:
+      case SO_DOMAIN:
+      case SO_RXQ_OVFL:
+      case SO_WIFI_STATUS:
+      case SO_PEEK_OFF:
+      case SO_NOFCS:
+      case SO_LOCK_FILTER:
+      case SO_SELECT_ERR_QUEUE:
+      case SO_BUSY_POLL:
+      case SO_MAX_PACING_RATE:
+      case SO_BPF_EXTENSIONS:
+      case SO_INCOMING_CPU:
+      case SO_ATTACH_BPF:
+      case SO_ATTACH_REUSEPORT_EBPF:
+      case SO_CNX_ADVICE:
+      // Gap 54 (SCM_TIMESTAMPING_OPT_STATS)
+      case SO_MEMINFO:
+      case SO_INCOMING_NAPI_ID:
+      case SO_COOKIE: // Cookie always returns 64-bit even on 32-bit
+      // Gap 58 (SCM_TIMESTAMPING_PKTINFO)
+      case SO_PEERGROUPS:
+      case SO_ZEROCOPY:
+      case SO_TXTIME:
+      case SO_BINDTOIFINDEX:
+      case SO_TIMESTAMP_NEW:
+      case SO_TIMESTAMPNS_NEW:
+      case SO_TIMESTAMPING_NEW:
+      case SO_RCVTIMEO_NEW:
+      case SO_SNDTIMEO_NEW:
+      case SO_DETACH_REUSEPORT_BPF:
+      case SO_PREFER_BUSY_POLL:
+      case SO_BUSY_POLL_BUDGET:
+      case SO_NETNS_COOKIE: // Cookie always returns 64-bit even on 32-bit
+      case SO_BUF_LOCK:
+      case SO_RESERVE_MEM:
+      case SO_TXREHASH:
+      case SO_RCVMARK:
+      case SO_PASSPIDFD:
+      case SO_PEERPIDFD:
+      default:
+        Result = ::syscall(SYSCALL_DEF(setsockopt), sockfd, level, optname, reinterpret_cast<const void *>(optval.Ptr), optlen);
+        break;
       }
-    }
-    else {
-      Result = ::syscall(SYSCALL_DEF(setsockopt),
-        sockfd,
-        level,
-        optname,
-        reinterpret_cast<const void*>(optval.Ptr),
-        optlen
-        );
+    } else {
+      Result = ::syscall(SYSCALL_DEF(setsockopt), sockfd, level, optname, reinterpret_cast<const void *>(optval.Ptr), optlen);
     }
 
     SYSCALL_ERRNO();
@@ -580,114 +540,99 @@ namespace FEX::HLE::x32 {
     uint64_t Result{};
     if (level == SOL_SOCKET) {
       switch (optname) {
-        case SO_RCVTIMEO_OLD: {
-          // _OLD uses old_timeval32. Needs to be converted
-          struct timeval tv64{};
-          Result = ::syscall(SYSCALL_DEF(getsockopt),
-            sockfd,
-            level,
-            SO_RCVTIMEO_NEW,
-            &tv64,
-            sizeof(tv64)
-            );
-           *reinterpret_cast<timeval32*>(optval.Ptr) = tv64;
-          break;
-        }
-        case SO_SNDTIMEO_OLD: {
-          // _OLD uses old_timeval32. Needs to be converted
-          struct timeval tv64{};
-          Result = ::syscall(SYSCALL_DEF(getsockopt),
-            sockfd,
-            level,
-            SO_SNDTIMEO_NEW,
-            &tv64,
-            sizeof(tv64)
-            );
-           *reinterpret_cast<timeval32*>(optval.Ptr) = tv64;
-          break;
-        }
-        // Each optname as a reminder which setting has been manually checked
-        case SO_DEBUG:
-        case SO_REUSEADDR:
-        case SO_TYPE:
-        case SO_ERROR:
-        case SO_DONTROUTE:
-        case SO_BROADCAST:
-        case SO_SNDBUF:
-        case SO_RCVBUF:
-        case SO_SNDBUFFORCE:
-        case SO_RCVBUFFORCE:
-        case SO_KEEPALIVE:
-        case SO_OOBINLINE:
-        case SO_NO_CHECK:
-        case SO_PRIORITY:
-        case SO_LINGER:
-        case SO_BSDCOMPAT:
-        case SO_REUSEPORT:
-        /**
+      case SO_RCVTIMEO_OLD: {
+        // _OLD uses old_timeval32. Needs to be converted
+        struct timeval tv64 {};
+        Result = ::syscall(SYSCALL_DEF(getsockopt), sockfd, level, SO_RCVTIMEO_NEW, &tv64, sizeof(tv64));
+        *reinterpret_cast<timeval32 *>(optval.Ptr) = tv64;
+        break;
+      }
+      case SO_SNDTIMEO_OLD: {
+        // _OLD uses old_timeval32. Needs to be converted
+        struct timeval tv64 {};
+        Result = ::syscall(SYSCALL_DEF(getsockopt), sockfd, level, SO_SNDTIMEO_NEW, &tv64, sizeof(tv64));
+        *reinterpret_cast<timeval32 *>(optval.Ptr) = tv64;
+        break;
+      }
+      // Each optname as a reminder which setting has been manually checked
+      case SO_DEBUG:
+      case SO_REUSEADDR:
+      case SO_TYPE:
+      case SO_ERROR:
+      case SO_DONTROUTE:
+      case SO_BROADCAST:
+      case SO_SNDBUF:
+      case SO_RCVBUF:
+      case SO_SNDBUFFORCE:
+      case SO_RCVBUFFORCE:
+      case SO_KEEPALIVE:
+      case SO_OOBINLINE:
+      case SO_NO_CHECK:
+      case SO_PRIORITY:
+      case SO_LINGER:
+      case SO_BSDCOMPAT:
+      case SO_REUSEPORT:
+      /**
          * @name These end up differing between {x86,arm} and {powerpc, alpha, sparc, mips, parisc}
          * @{ */
-        case SO_PASSCRED:
-        case SO_PEERCRED:
-        case SO_RCVLOWAT:
-        case SO_SNDLOWAT:
-        /**  @} */
-        case SO_SECURITY_AUTHENTICATION:
-        case SO_SECURITY_ENCRYPTION_TRANSPORT:
-        case SO_SECURITY_ENCRYPTION_NETWORK:
-        case SO_ATTACH_FILTER: // Renamed to SO_GET_FILTER on get. Same between 32-bit and 64-bit
-        case SO_DETACH_FILTER:
-        case SO_PEERNAME:
-        case SO_TIMESTAMP_OLD: // Returns int32_t boolean
-        case SO_ACCEPTCONN:
-        case SO_PEERSEC:
-        // Gap 32, 33
-        case SO_PASSSEC:
-        case SO_TIMESTAMPNS_OLD: // Returns int32_t boolean
-        case SO_MARK:
-        case SO_TIMESTAMPING_OLD: // Returns so_timestamping
-        case SO_PROTOCOL:
-        case SO_DOMAIN:
-        case SO_RXQ_OVFL:
-        case SO_WIFI_STATUS:
-        case SO_PEEK_OFF:
-        case SO_NOFCS:
-        case SO_LOCK_FILTER:
-        case SO_SELECT_ERR_QUEUE:
-        case SO_BUSY_POLL:
-        case SO_MAX_PACING_RATE:
-        case SO_BPF_EXTENSIONS:
-        case SO_INCOMING_CPU:
-        case SO_ATTACH_BPF:
-        case SO_ATTACH_REUSEPORT_CBPF: // Doesn't do anything in get
-        case SO_ATTACH_REUSEPORT_EBPF:
-        case SO_CNX_ADVICE:
-        // Gap 54 (SCM_TIMESTAMPING_OPT_STATS)
-        case SO_MEMINFO:
-        case SO_INCOMING_NAPI_ID:
-        case SO_COOKIE: // Cookie always returns 64-bit even on 32-bit
-        // Gap 58 (SCM_TIMESTAMPING_PKTINFO)
-        case SO_PEERGROUPS:
-        case SO_ZEROCOPY:
-        case SO_TXTIME:
-        case SO_BINDTOIFINDEX:
-        case SO_TIMESTAMP_NEW:
-        case SO_TIMESTAMPNS_NEW:
-        case SO_TIMESTAMPING_NEW:
-        case SO_RCVTIMEO_NEW:
-        case SO_SNDTIMEO_NEW:
-        case SO_DETACH_REUSEPORT_BPF:
-        case SO_PREFER_BUSY_POLL:
-        case SO_BUSY_POLL_BUDGET:
-        case SO_NETNS_COOKIE: // Cookie always returns 64-bit even on 32-bit
-        case SO_BUF_LOCK:
-        case SO_RESERVE_MEM:
-        default:
-          Result = ::syscall(SYSCALL_DEF(getsockopt), sockfd, level, optname, optval, optlen);
-          break;
+      case SO_PASSCRED:
+      case SO_PEERCRED:
+      case SO_RCVLOWAT:
+      case SO_SNDLOWAT:
+      /**  @} */
+      case SO_SECURITY_AUTHENTICATION:
+      case SO_SECURITY_ENCRYPTION_TRANSPORT:
+      case SO_SECURITY_ENCRYPTION_NETWORK:
+      case SO_ATTACH_FILTER: // Renamed to SO_GET_FILTER on get. Same between 32-bit and 64-bit
+      case SO_DETACH_FILTER:
+      case SO_PEERNAME:
+      case SO_TIMESTAMP_OLD: // Returns int32_t boolean
+      case SO_ACCEPTCONN:
+      case SO_PEERSEC:
+      // Gap 32, 33
+      case SO_PASSSEC:
+      case SO_TIMESTAMPNS_OLD: // Returns int32_t boolean
+      case SO_MARK:
+      case SO_TIMESTAMPING_OLD: // Returns so_timestamping
+      case SO_PROTOCOL:
+      case SO_DOMAIN:
+      case SO_RXQ_OVFL:
+      case SO_WIFI_STATUS:
+      case SO_PEEK_OFF:
+      case SO_NOFCS:
+      case SO_LOCK_FILTER:
+      case SO_SELECT_ERR_QUEUE:
+      case SO_BUSY_POLL:
+      case SO_MAX_PACING_RATE:
+      case SO_BPF_EXTENSIONS:
+      case SO_INCOMING_CPU:
+      case SO_ATTACH_BPF:
+      case SO_ATTACH_REUSEPORT_CBPF: // Doesn't do anything in get
+      case SO_ATTACH_REUSEPORT_EBPF:
+      case SO_CNX_ADVICE:
+      // Gap 54 (SCM_TIMESTAMPING_OPT_STATS)
+      case SO_MEMINFO:
+      case SO_INCOMING_NAPI_ID:
+      case SO_COOKIE: // Cookie always returns 64-bit even on 32-bit
+      // Gap 58 (SCM_TIMESTAMPING_PKTINFO)
+      case SO_PEERGROUPS:
+      case SO_ZEROCOPY:
+      case SO_TXTIME:
+      case SO_BINDTOIFINDEX:
+      case SO_TIMESTAMP_NEW:
+      case SO_TIMESTAMPNS_NEW:
+      case SO_TIMESTAMPING_NEW:
+      case SO_RCVTIMEO_NEW:
+      case SO_SNDTIMEO_NEW:
+      case SO_DETACH_REUSEPORT_BPF:
+      case SO_PREFER_BUSY_POLL:
+      case SO_BUSY_POLL_BUDGET:
+      case SO_NETNS_COOKIE: // Cookie always returns 64-bit even on 32-bit
+      case SO_BUF_LOCK:
+      case SO_RESERVE_MEM:
+      default: Result = ::syscall(SYSCALL_DEF(getsockopt), sockfd, level, optname, optval, optlen); break;
       }
-    }
-    else {
+    } else {
       Result = ::syscall(SYSCALL_DEF(getsockopt), sockfd, level, optname, optval, optlen);
     }
     SYSCALL_ERRNO();
@@ -698,127 +643,105 @@ namespace FEX::HLE::x32 {
       uint64_t Result{};
 
       switch (call) {
-        case OP_SOCKET: {
-          Result = ::socket(Arguments[0], Arguments[1], Arguments[2]);
-          break;
+      case OP_SOCKET: {
+        Result = ::socket(Arguments[0], Arguments[1], Arguments[2]);
+        break;
+      }
+      case OP_BIND: {
+        Result = ::bind(Arguments[0], reinterpret_cast<const struct sockaddr *>(Arguments[1]), Arguments[2]);
+        break;
+      }
+      case OP_CONNECT: {
+        Result = ::connect(Arguments[0], reinterpret_cast<const struct sockaddr *>(Arguments[1]), Arguments[2]);
+        break;
+      }
+      case OP_LISTEN: {
+        Result = ::listen(Arguments[0], Arguments[1]);
+        break;
+      }
+      case OP_ACCEPT: {
+        Result = ::accept(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t *>(Arguments[2]));
+        break;
+      }
+      case OP_GETSOCKNAME: {
+        Result = ::getsockname(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t *>(Arguments[2]));
+        break;
+      }
+      case OP_GETPEERNAME: {
+        Result = ::getpeername(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t *>(Arguments[2]));
+        break;
+      }
+      case OP_SOCKETPAIR: {
+        Result = ::socketpair(Arguments[0], Arguments[1], Arguments[2], reinterpret_cast<int32_t *>(Arguments[3]));
+        break;
+      }
+      case OP_SEND: {
+        Result = ::send(Arguments[0], reinterpret_cast<const void *>(Arguments[1]), Arguments[2], Arguments[3]);
+        break;
+      }
+      case OP_RECV: {
+        Result = ::recv(Arguments[0], reinterpret_cast<void *>(Arguments[1]), Arguments[2], Arguments[3]);
+        break;
+      }
+      case OP_SENDTO: {
+        Result = ::sendto(
+        Arguments[0], reinterpret_cast<const void *>(Arguments[1]), Arguments[2], Arguments[3],
+        reinterpret_cast<struct sockaddr *>(Arguments[4]), reinterpret_cast<socklen_t>(Arguments[5]));
+        break;
+      }
+      case OP_RECVFROM: {
+        Result = ::recvfrom(
+        Arguments[0], reinterpret_cast<void *>(Arguments[1]), Arguments[2], Arguments[3], reinterpret_cast<struct sockaddr *>(Arguments[4]),
+        reinterpret_cast<socklen_t *>(Arguments[5]));
+        break;
+      }
+      case OP_SHUTDOWN: {
+        Result = ::shutdown(Arguments[0], Arguments[1]);
+        break;
+      }
+      case OP_SETSOCKOPT: {
+        return SetSockOpt(Arguments[0], Arguments[1], Arguments[2], Arguments[3], reinterpret_cast<socklen_t>(Arguments[4]));
+        break;
+      }
+      case OP_GETSOCKOPT: {
+        return GetSockOpt(Arguments[0], Arguments[1], Arguments[2], reinterpret_cast<void *>(Arguments[3]), reinterpret_cast<socklen_t *>(Arguments[4]));
+        break;
+      }
+      case OP_SENDMSG: {
+        return SendMsg(Arguments[0], reinterpret_cast<const struct msghdr32 *>(Arguments[1]), Arguments[2]);
+        break;
+      }
+      case OP_RECVMSG: {
+        return RecvMsg(Arguments[0], reinterpret_cast<struct msghdr32 *>(Arguments[1]), Arguments[2]);
+        break;
+      }
+      case OP_ACCEPT4: {
+        return ::accept4(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t *>(Arguments[2]), Arguments[3]);
+        break;
+      }
+      case OP_RECVMMSG: {
+        timespec32 *timeout_ts = reinterpret_cast<timespec32 *>(Arguments[4]);
+        struct timespec tp64 {};
+        struct timespec *timed_ptr{};
+        if (timeout_ts) {
+          tp64 = *timeout_ts;
+          timed_ptr = &tp64;
         }
-        case OP_BIND: {
-          Result = ::bind(Arguments[0], reinterpret_cast<const struct sockaddr *>(Arguments[1]), Arguments[2]);
-          break;
-        }
-        case OP_CONNECT: {
-          Result = ::connect(Arguments[0], reinterpret_cast<const struct sockaddr *>(Arguments[1]), Arguments[2]);
-          break;
-        }
-        case OP_LISTEN: {
-          Result = ::listen(Arguments[0], Arguments[1]);
-          break;
-        }
-        case OP_ACCEPT: {
-          Result = ::accept(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t*>(Arguments[2]));
-          break;
-        }
-        case OP_GETSOCKNAME: {
-          Result = ::getsockname(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t*>(Arguments[2]));
-          break;
-        }
-        case OP_GETPEERNAME: {
-          Result = ::getpeername(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t*>(Arguments[2]));
-          break;
-        }
-        case OP_SOCKETPAIR: {
-          Result = ::socketpair(Arguments[0], Arguments[1], Arguments[2], reinterpret_cast<int32_t*>(Arguments[3]));
-          break;
-        }
-        case OP_SEND: {
-          Result = ::send(Arguments[0], reinterpret_cast<const void*>(Arguments[1]), Arguments[2], Arguments[3]);
-          break;
-        }
-        case OP_RECV: {
-          Result = ::recv(Arguments[0], reinterpret_cast<void*>(Arguments[1]), Arguments[2], Arguments[3]);
-          break;
-        }
-        case OP_SENDTO: {
-          Result = ::sendto(
-            Arguments[0],
-            reinterpret_cast<const void*>(Arguments[1]),
-            Arguments[2],
-            Arguments[3],
-            reinterpret_cast<struct sockaddr *>(Arguments[4]), reinterpret_cast<socklen_t>(Arguments[5])
-            );
-          break;
-        }
-        case OP_RECVFROM: {
-          Result = ::recvfrom(
-            Arguments[0],
-            reinterpret_cast<void*>(Arguments[1]),
-            Arguments[2],
-            Arguments[3],
-            reinterpret_cast<struct sockaddr *>(Arguments[4]), reinterpret_cast<socklen_t*>(Arguments[5])
-            );
-          break;
-        }
-        case OP_SHUTDOWN: {
-          Result = ::shutdown(Arguments[0], Arguments[1]);
-          break;
-        }
-        case OP_SETSOCKOPT: {
-          return SetSockOpt(
-            Arguments[0],
-            Arguments[1],
-            Arguments[2],
-            Arguments[3],
-            reinterpret_cast<socklen_t>(Arguments[4])
-            );
-          break;
-        }
-        case OP_GETSOCKOPT: {
-          return GetSockOpt(
-            Arguments[0],
-            Arguments[1],
-            Arguments[2],
-            reinterpret_cast<void*>(Arguments[3]),
-            reinterpret_cast<socklen_t*>(Arguments[4])
-            );
-          break;
-        }
-        case OP_SENDMSG: {
-          return SendMsg(Arguments[0], reinterpret_cast<const struct msghdr32*>(Arguments[1]), Arguments[2]);
-          break;
-        }
-        case OP_RECVMSG: {
-          return RecvMsg(Arguments[0], reinterpret_cast<struct msghdr32*>(Arguments[1]), Arguments[2]);
-          break;
-        }
-        case OP_ACCEPT4: {
-          return ::accept4(Arguments[0], reinterpret_cast<struct sockaddr *>(Arguments[1]), reinterpret_cast<socklen_t*>(Arguments[2]), Arguments[3]);
-          break;
-        }
-        case OP_RECVMMSG: {
-          timespec32 *timeout_ts = reinterpret_cast<timespec32 *>(Arguments[4]);
-          struct timespec tp64{};
-          struct timespec *timed_ptr{};
-          if (timeout_ts) {
-            tp64 = *timeout_ts;
-            timed_ptr = &tp64;
-          }
 
-          uint64_t Result = RecvMMsg(Arguments[0], Arguments[1], Arguments[2], Arguments[3], timed_ptr);
+        uint64_t Result = RecvMMsg(Arguments[0], Arguments[1], Arguments[2], Arguments[3], timed_ptr);
 
-          if (timeout_ts) {
-            *timeout_ts = tp64;
-          }
+        if (timeout_ts) {
+          *timeout_ts = tp64;
+        }
 
-          return Result;
-          break;
-        }
-        case OP_SENDMMSG: {
-          return SendMMsg(Arguments[0], reinterpret_cast<mmsghdr_32*>(Arguments[1]), Arguments[2], Arguments[3]);
-          break;
-        }
-        default:
-          LOGMAN_MSG_A_FMT("Unsupported socketcall op: {}", call);
-          break;
+        return Result;
+        break;
+      }
+      case OP_SENDMMSG: {
+        return SendMMsg(Arguments[0], reinterpret_cast<mmsghdr_32 *>(Arguments[1]), Arguments[2], Arguments[3]);
+        break;
+      }
+      default: LOGMAN_MSG_A_FMT("Unsupported socketcall op: {}", call); break;
       }
       SYSCALL_ERRNO();
     });
@@ -831,8 +754,10 @@ namespace FEX::HLE::x32 {
       return SendMMsg(sockfd, msgvec, vlen, flags);
     });
 
-    REGISTER_SYSCALL_IMPL_X32(recvmmsg, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, compat_ptr<mmsghdr_32> msgvec, uint32_t vlen, int flags, timespec32 *timeout_ts) -> uint64_t {
-      struct timespec tp64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    recvmmsg,
+    [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, compat_ptr<mmsghdr_32> msgvec, uint32_t vlen, int flags, timespec32 *timeout_ts) -> uint64_t {
+      struct timespec tp64 {};
       struct timespec *timed_ptr{};
       if (timeout_ts) {
         tp64 = *timeout_ts;
@@ -848,7 +773,9 @@ namespace FEX::HLE::x32 {
       return Result;
     });
 
-    REGISTER_SYSCALL_IMPL_X32(recvmmsg_time64, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, compat_ptr<mmsghdr_32> msgvec, uint32_t vlen, int flags, struct timespec *timeout_ts) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    recvmmsg_time64,
+    [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, compat_ptr<mmsghdr_32> msgvec, uint32_t vlen, int flags, struct timespec *timeout_ts) -> uint64_t {
       return RecvMMsg(sockfd, msgvec, vlen, flags, timeout_ts);
     });
 
@@ -856,12 +783,15 @@ namespace FEX::HLE::x32 {
       return RecvMsg(sockfd, msg, flags);
     });
 
-    REGISTER_SYSCALL_IMPL_X32(setsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, compat_ptr<void> optval, socklen_t optlen) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    setsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, compat_ptr<void> optval, socklen_t optlen) -> uint64_t {
       return SetSockOpt(sockfd, level, optname, optval, optlen);
     });
 
-    REGISTER_SYSCALL_IMPL_X32(getsockopt, [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, compat_ptr<void> optval, compat_ptr<socklen_t> optlen) -> uint64_t {
-        return GetSockOpt(sockfd, level, optname, optval, optlen);
+    REGISTER_SYSCALL_IMPL_X32(
+    getsockopt,
+    [](FEXCore::Core::CpuStateFrame *Frame, int sockfd, int level, int optname, compat_ptr<void> optval, compat_ptr<socklen_t> optlen) -> uint64_t {
+      return GetSockOpt(sockfd, level, optname, optval, optlen);
     });
   }
 }

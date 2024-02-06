@@ -46,10 +46,10 @@ namespace FEX::HLE::x32 {
   // 7/13 = wine fs
   // 8/14 = etc
   constexpr uint32_t TLS_NextEntry = 12;
-  constexpr uint32_t TLS_MaxEntry = TLS_NextEntry+3;
+  constexpr uint32_t TLS_MaxEntry = TLS_NextEntry + 3;
 
   uint64_t SetThreadArea(FEXCore::Core::CpuStateFrame *Frame, void *tls) {
-    struct x32::user_desc* u_info = reinterpret_cast<struct x32::user_desc*>(tls);
+    struct x32::user_desc *u_info = reinterpret_cast<struct x32::user_desc *>(tls);
     if (u_info->entry_number == -1) {
       for (uint32_t i = TLS_NextEntry; i < TLS_MaxEntry; ++i) {
         auto GDT = &Frame->State.gdt[i];
@@ -71,9 +71,7 @@ namespace FEX::HLE::x32 {
     GDT->base = u_info->base_addr;
 
     // With the segment register optimization we need to check all of the segment registers and update.
-    const auto GetEntry = [](auto value) {
-      return value >> 3;
-    };
+    const auto GetEntry = [](auto value) { return value >> 3; };
     if (GetEntry(Frame->State.cs_idx) == u_info->entry_number) {
       Frame->State.cs_cached = GDT->base;
     }
@@ -95,9 +93,7 @@ namespace FEX::HLE::x32 {
     return 0;
   }
 
-  void AdjustRipForNewThread(FEXCore::Core::CpuStateFrame *Frame) {
-    Frame->State.rip += 2;
-  }
+  void AdjustRipForNewThread(FEXCore::Core::CpuStateFrame *Frame) { Frame->State.rip += 2; }
 
   void RegisterThread(FEX::HLE::SyscallHandler *Handler) {
     REGISTER_SYSCALL_IMPL_X32(sigreturn, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t {
@@ -105,23 +101,23 @@ namespace FEX::HLE::x32 {
       FEX_UNREACHABLE;
     });
 
-    REGISTER_SYSCALL_IMPL_X32(clone, ([](FEXCore::Core::CpuStateFrame *Frame, uint32_t flags, void *stack, pid_t *parent_tid, void *tls, pid_t *child_tid) -> uint64_t {
-      FEX::HLE::clone3_args args {
-        .Type = TypeOfClone::TYPE_CLONE2,
-        .args = {
-          .flags = flags & ~CSIGNAL, // This no longer contains CSIGNAL
-          .pidfd = reinterpret_cast<uint64_t>(parent_tid), // For clone, pidfd is duplicated here
-          .child_tid = reinterpret_cast<uint64_t>(child_tid),
-          .parent_tid = reinterpret_cast<uint64_t>(parent_tid),
-          .exit_signal = flags & CSIGNAL,
-          .stack = reinterpret_cast<uint64_t>(stack),
-          .stack_size = 0, // This syscall isn't able to see the stack size
-          .tls = reinterpret_cast<uint64_t>(tls),
-          .set_tid = 0, // This syscall isn't able to select TIDs
-          .set_tid_size = 0,
-          .cgroup = 0, // This syscall can't select cgroups
-        }
-      };
+    REGISTER_SYSCALL_IMPL_X32(
+    clone, ([](FEXCore::Core::CpuStateFrame *Frame, uint32_t flags, void *stack, pid_t *parent_tid, void *tls, pid_t *child_tid) -> uint64_t {
+      FEX::HLE::clone3_args args{
+      .Type = TypeOfClone::TYPE_CLONE2,
+      .args = {
+      .flags = flags & ~CSIGNAL, // This no longer contains CSIGNAL
+      .pidfd = reinterpret_cast<uint64_t>(parent_tid), // For clone, pidfd is duplicated here
+      .child_tid = reinterpret_cast<uint64_t>(child_tid),
+      .parent_tid = reinterpret_cast<uint64_t>(parent_tid),
+      .exit_signal = flags & CSIGNAL,
+      .stack = reinterpret_cast<uint64_t>(stack),
+      .stack_size = 0, // This syscall isn't able to see the stack size
+      .tls = reinterpret_cast<uint64_t>(tls),
+      .set_tid = 0, // This syscall isn't able to select TIDs
+      .set_tid_size = 0,
+      .cgroup = 0, // This syscall can't select cgroups
+      }};
       return CloneHandler(Frame, &args);
     }));
 
@@ -159,8 +155,7 @@ namespace FEX::HLE::x32 {
         u_info->seg_32bit = 1;
         u_info->limit_in_pages = 1;
         u_info->useable = 1;
-      }
-      else {
+      } else {
         u_info->read_exec_only = 1;
         u_info->seg_not_present = 1;
       }
@@ -184,33 +179,24 @@ namespace FEX::HLE::x32 {
       auto Thread = Frame->Thread;
       // Give the robust list back to the application
       // Steam specifically checks to make sure the robust list is set
-      *(uint32_t*)head = (uint32_t)Thread->ThreadManager.robust_list_head;
+      *(uint32_t *)head = (uint32_t)Thread->ThreadManager.robust_list_head;
       *len_ptr = 12;
       return 0;
     });
 
-    REGISTER_SYSCALL_IMPL_X32(futex, [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const timespec32 *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
-      void* timeout_ptr = (void*)timeout;
-      struct timespec tp64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    futex, [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const timespec32 *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
+      void *timeout_ptr = (void *)timeout;
+      struct timespec tp64 {};
       int cmd = futex_op & FUTEX_CMD_MASK;
-      if (timeout &&
-          (cmd == FUTEX_WAIT ||
-           cmd == FUTEX_LOCK_PI ||
-           cmd == FUTEX_WAIT_BITSET ||
-           cmd == FUTEX_WAIT_REQUEUE_PI)) {
+      if (timeout && (cmd == FUTEX_WAIT || cmd == FUTEX_LOCK_PI || cmd == FUTEX_WAIT_BITSET || cmd == FUTEX_WAIT_REQUEUE_PI)) {
         // timeout argument is only handled as timespec in these cases
         // Otherwise just an integer
         tp64 = *timeout;
         timeout_ptr = &tp64;
       }
 
-      uint64_t Result = syscall(SYSCALL_DEF(futex),
-        uaddr,
-        futex_op,
-        val,
-        timeout_ptr,
-        uaddr2,
-        val3);
+      uint64_t Result = syscall(SYSCALL_DEF(futex), uaddr, futex_op, val, timeout_ptr, uaddr2, val3);
       SYSCALL_ERRNO();
     });
 
@@ -321,12 +307,12 @@ namespace FEX::HLE::x32 {
     // launch a new process under fex
     // currently does not propagate argv[0] correctly
     REGISTER_SYSCALL_IMPL_X32(execve, [](FEXCore::Core::CpuStateFrame *Frame, const char *pathname, uint32_t *argv, uint32_t *envp) -> uint64_t {
-      fextl::vector<const char*> Args;
-      fextl::vector<const char*> Envp;
+      fextl::vector<const char *> Args;
+      fextl::vector<const char *> Envp;
 
       if (argv) {
         for (int i = 0; argv[i]; i++) {
-          Args.push_back(reinterpret_cast<const char*>(static_cast<uintptr_t>(argv[i])));
+          Args.push_back(reinterpret_cast<const char *>(static_cast<uintptr_t>(argv[i])));
         }
 
         Args.push_back(nullptr);
@@ -334,26 +320,27 @@ namespace FEX::HLE::x32 {
 
       if (envp) {
         for (int i = 0; envp[i]; i++) {
-          Envp.push_back(reinterpret_cast<const char*>(static_cast<uintptr_t>(envp[i])));
+          Envp.push_back(reinterpret_cast<const char *>(static_cast<uintptr_t>(envp[i])));
         }
         Envp.push_back(nullptr);
       }
 
-      auto* const* ArgsPtr = argv ? const_cast<char* const*>(Args.data()) : nullptr;
-      auto* const* EnvpPtr = envp ? const_cast<char* const*>(Envp.data()) : nullptr;
+      auto * const *ArgsPtr = argv ? const_cast<char * const *>(Args.data()) : nullptr;
+      auto * const *EnvpPtr = envp ? const_cast<char * const *>(Envp.data()) : nullptr;
 
       FEX::HLE::ExecveAtArgs AtArgs = FEX::HLE::ExecveAtArgs::Empty();
 
       return FEX::HLE::ExecveHandler(pathname, ArgsPtr, EnvpPtr, AtArgs);
     });
 
-    REGISTER_SYSCALL_IMPL_X32(execveat, ([](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, uint32_t *argv, uint32_t *envp, int flags) -> uint64_t {
-      fextl::vector<const char*> Args;
-      fextl::vector<const char*> Envp;
+    REGISTER_SYSCALL_IMPL_X32(
+    execveat, ([](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, uint32_t *argv, uint32_t *envp, int flags) -> uint64_t {
+      fextl::vector<const char *> Args;
+      fextl::vector<const char *> Envp;
 
       if (argv) {
         for (int i = 0; argv[i]; i++) {
-          Args.push_back(reinterpret_cast<const char*>(static_cast<uintptr_t>(argv[i])));
+          Args.push_back(reinterpret_cast<const char *>(static_cast<uintptr_t>(argv[i])));
         }
 
         Args.push_back(nullptr);
@@ -361,23 +348,23 @@ namespace FEX::HLE::x32 {
 
       if (envp) {
         for (int i = 0; envp[i]; i++) {
-          Envp.push_back(reinterpret_cast<const char*>(static_cast<uintptr_t>(envp[i])));
+          Envp.push_back(reinterpret_cast<const char *>(static_cast<uintptr_t>(envp[i])));
         }
         Envp.push_back(nullptr);
       }
 
-      FEX::HLE::ExecveAtArgs AtArgs {
-        .dirfd = dirfd,
-        .flags = flags,
+      FEX::HLE::ExecveAtArgs AtArgs{
+      .dirfd = dirfd,
+      .flags = flags,
       };
 
-      auto* const* ArgsPtr = argv ? const_cast<char* const*>(Args.data()) : nullptr;
-      auto* const* EnvpPtr = envp ? const_cast<char* const*>(Envp.data()) : nullptr;
+      auto * const *ArgsPtr = argv ? const_cast<char * const *>(Args.data()) : nullptr;
+      auto * const *EnvpPtr = envp ? const_cast<char * const *>(Envp.data()) : nullptr;
       return FEX::HLE::ExecveHandler(pathname, ArgsPtr, EnvpPtr, AtArgs);
     }));
 
     REGISTER_SYSCALL_IMPL_X32(wait4, [](FEXCore::Core::CpuStateFrame *Frame, pid_t pid, int *wstatus, int options, struct rusage_32 *rusage) -> uint64_t {
-      struct rusage usage64{};
+      struct rusage usage64 {};
       struct rusage *usage64_p{};
 
       if (rusage) {
@@ -391,8 +378,10 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32(waitid, [](FEXCore::Core::CpuStateFrame *Frame, int which, pid_t upid, compat_ptr<FEXCore::x86::siginfo_t> info, int options, struct rusage_32 *rusage) -> uint64_t {
-      struct rusage usage64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    waitid,
+    [](FEXCore::Core::CpuStateFrame *Frame, int which, pid_t upid, compat_ptr<FEXCore::x86::siginfo_t> info, int options, struct rusage_32 *rusage) -> uint64_t {
+      struct rusage usage64 {};
       struct rusage *usage64_p{};
 
       siginfo_t info64{};
@@ -422,14 +411,10 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(futex_time64, futex, [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const struct timespec *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
-      uint64_t Result = syscall(SYSCALL_DEF(futex),
-        uaddr,
-        futex_op,
-        val,
-        timeout,
-        uaddr2,
-        val3);
+    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(
+    futex_time64, futex,
+    [](FEXCore::Core::CpuStateFrame *Frame, int *uaddr, int futex_op, int val, const struct timespec *timeout, int *uaddr2, uint32_t val3) -> uint64_t {
+      uint64_t Result = syscall(SYSCALL_DEF(futex), uaddr, futex_op, val, timeout, uaddr2, val3);
       SYSCALL_ERRNO();
     });
   }

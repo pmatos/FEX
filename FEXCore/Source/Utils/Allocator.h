@@ -2,7 +2,7 @@
 #pragma once
 
 namespace FEXCore::Core {
-struct InternalThreadState;
+  struct InternalThreadState;
 }
 
 namespace FEXCore::Allocator {

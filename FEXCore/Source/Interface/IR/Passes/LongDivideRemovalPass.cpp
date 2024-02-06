@@ -17,99 +17,92 @@ $end_info$
 
 namespace FEXCore::IR {
 
-class LongDivideEliminationPass final : public FEXCore::IR::Pass {
-public:
-  bool Run(IREmitter *IREmit) override;
-private:
-  bool IsZeroOp(IREmitter *IREmit, OrderedNodeWrapper Arg);
-  bool IsSextOp(IREmitter *IREmit, OrderedNodeWrapper Lower, OrderedNodeWrapper Upper);
-};
+  class LongDivideEliminationPass final : public FEXCore::IR::Pass {
+  public:
+    bool Run(IREmitter *IREmit) override;
+  private:
+    bool IsZeroOp(IREmitter *IREmit, OrderedNodeWrapper Arg);
+    bool IsSextOp(IREmitter *IREmit, OrderedNodeWrapper Lower, OrderedNodeWrapper Upper);
+  };
 
-bool LongDivideEliminationPass::IsZeroOp(IREmitter *IREmit, OrderedNodeWrapper Arg) {
-  uint64_t Value;
+  bool LongDivideEliminationPass::IsZeroOp(IREmitter *IREmit, OrderedNodeWrapper Arg) {
+    uint64_t Value;
 
-  if (IREmit->IsValueConstant(Arg, &Value)) {
-    // Zero constant based zero op
-    return Value == 0;
-  }
-  return false;
-}
-
-bool LongDivideEliminationPass::IsSextOp(IREmitter *IREmit, OrderedNodeWrapper Lower, OrderedNodeWrapper Upper) {
-  // We need to check if the upper source is a sext of the lower source
-  auto UpperIROp = IREmit->GetOpHeader(Upper);
-  if (UpperIROp->Op == OP_SBFE) {
-   auto Op = UpperIROp->C<IR::IROp_Sbfe>();
-    if (Op->Width == 1 && Op->lsb == 63) {
-      // CQO: OrderedNode *Upper = _Sbfe(1, Size * 8 - 1, Src);
-      // If the lower is the upper in this case then it can be optimized
-      return Op->Header.Args[0] == Lower;
+    if (IREmit->IsValueConstant(Arg, &Value)) {
+      // Zero constant based zero op
+      return Value == 0;
     }
+    return false;
   }
-  return false;
-}
 
-bool LongDivideEliminationPass::Run(IREmitter *IREmit) {
-  FEXCORE_PROFILE_SCOPED("PassManager::LDE");
+  bool LongDivideEliminationPass::IsSextOp(IREmitter *IREmit, OrderedNodeWrapper Lower, OrderedNodeWrapper Upper) {
+    // We need to check if the upper source is a sext of the lower source
+    auto UpperIROp = IREmit->GetOpHeader(Upper);
+    if (UpperIROp->Op == OP_SBFE) {
+      auto Op = UpperIROp->C<IR::IROp_Sbfe>();
+      if (Op->Width == 1 && Op->lsb == 63) {
+        // CQO: OrderedNode *Upper = _Sbfe(1, Size * 8 - 1, Src);
+        // If the lower is the upper in this case then it can be optimized
+        return Op->Header.Args[0] == Lower;
+      }
+    }
+    return false;
+  }
 
-  bool Changed = false;
-  auto CurrentIR = IREmit->ViewIR();
-  auto OriginalWriteCursor = IREmit->GetWriteCursor();
+  bool LongDivideEliminationPass::Run(IREmitter *IREmit) {
+    FEXCORE_PROFILE_SCOPED("PassManager::LDE");
 
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      if (IROp->Size == 8) {
-        if (IROp->Op == OP_LDIV ||
-            IROp->Op == OP_LREM) {
-          auto Op = IROp->C<IR::IROp_LDiv>();
-          // Check upper Op to see if it came from a CQO
-          // CQO: OrderedNode *Upper = _Sbfe(1, Size * 8 - 1, Src);
-          // If it does then it we only need a 64bit SDIV
-          if (IsSextOp(IREmit, Op->Lower, Op->Upper)) {
-            IREmit->SetWriteCursor(CodeNode);
-            OrderedNode *Lower = CurrentIR.GetNode(Op->Lower);
-            OrderedNode *Divisor = CurrentIR.GetNode(Op->Divisor);
-            OrderedNode *SDivOp{};
-            if (IROp->Op == OP_LDIV) {
-              SDivOp = IREmit->_Div(OpSize::i64Bit, Lower, Divisor);
+    bool Changed = false;
+    auto CurrentIR = IREmit->ViewIR();
+    auto OriginalWriteCursor = IREmit->GetWriteCursor();
+
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        if (IROp->Size == 8) {
+          if (IROp->Op == OP_LDIV || IROp->Op == OP_LREM) {
+            auto Op = IROp->C<IR::IROp_LDiv>();
+            // Check upper Op to see if it came from a CQO
+            // CQO: OrderedNode *Upper = _Sbfe(1, Size * 8 - 1, Src);
+            // If it does then it we only need a 64bit SDIV
+            if (IsSextOp(IREmit, Op->Lower, Op->Upper)) {
+              IREmit->SetWriteCursor(CodeNode);
+              OrderedNode *Lower = CurrentIR.GetNode(Op->Lower);
+              OrderedNode *Divisor = CurrentIR.GetNode(Op->Divisor);
+              OrderedNode *SDivOp{};
+              if (IROp->Op == OP_LDIV) {
+                SDivOp = IREmit->_Div(OpSize::i64Bit, Lower, Divisor);
+              } else {
+                SDivOp = IREmit->_Rem(OpSize::i64Bit, Lower, Divisor);
+              }
+              IREmit->ReplaceAllUsesWith(CodeNode, SDivOp);
+              Changed = true;
             }
-            else {
-              SDivOp = IREmit->_Rem(OpSize::i64Bit, Lower, Divisor);
+          } else if (IROp->Op == OP_LUDIV || IROp->Op == OP_LUREM) {
+            auto Op = IROp->C<IR::IROp_LUDiv>();
+            // Check upper Op to see if it came from a zeroing op
+            // If it does then it we only need a 64bit UDIV
+            if (IsZeroOp(IREmit, Op->Upper)) {
+              IREmit->SetWriteCursor(CodeNode);
+              OrderedNode *Lower = CurrentIR.GetNode(Op->Lower);
+              OrderedNode *Divisor = CurrentIR.GetNode(Op->Divisor);
+              OrderedNode *UDivOp{};
+              if (IROp->Op == OP_LUDIV) {
+                UDivOp = IREmit->_UDiv(OpSize::i64Bit, Lower, Divisor);
+              } else {
+                UDivOp = IREmit->_URem(OpSize::i64Bit, Lower, Divisor);
+              }
+              IREmit->ReplaceAllUsesWith(CodeNode, UDivOp);
+              Changed = true;
             }
-            IREmit->ReplaceAllUsesWith(CodeNode, SDivOp);
-            Changed = true;
-          }
-        }
-        else if (IROp->Op == OP_LUDIV ||
-                 IROp->Op == OP_LUREM) {
-          auto Op = IROp->C<IR::IROp_LUDiv>();
-          // Check upper Op to see if it came from a zeroing op
-          // If it does then it we only need a 64bit UDIV
-          if (IsZeroOp(IREmit, Op->Upper)) {
-            IREmit->SetWriteCursor(CodeNode);
-            OrderedNode *Lower = CurrentIR.GetNode(Op->Lower);
-            OrderedNode *Divisor = CurrentIR.GetNode(Op->Divisor);
-            OrderedNode *UDivOp{};
-            if (IROp->Op == OP_LUDIV) {
-              UDivOp = IREmit->_UDiv(OpSize::i64Bit, Lower, Divisor);
-            }
-            else {
-              UDivOp = IREmit->_URem(OpSize::i64Bit, Lower, Divisor);
-            }
-            IREmit->ReplaceAllUsesWith(CodeNode, UDivOp);
-            Changed = true;
           }
         }
       }
     }
+
+    IREmit->SetWriteCursor(OriginalWriteCursor);
+
+    return Changed;
   }
 
-  IREmit->SetWriteCursor(OriginalWriteCursor);
-
-  return Changed;
-}
-
-fextl::unique_ptr<FEXCore::IR::Pass> CreateLongDivideEliminationPass() {
-  return fextl::make_unique<LongDivideEliminationPass>();
-}
+  fextl::unique_ptr<FEXCore::IR::Pass> CreateLongDivideEliminationPass() { return fextl::make_unique<LongDivideEliminationPass>(); }
 }

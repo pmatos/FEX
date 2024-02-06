@@ -55,11 +55,7 @@ namespace FEX::ArgLoader {
     ProgramArguments.emplace_back(_argv[0]);
   }
 
-  fextl::vector<fextl::string> Get() {
-    return RemainingArgs;
-  }
-  fextl::vector<fextl::string> GetParsedArgs() {
-    return ProgramArguments;
-  }
+  fextl::vector<fextl::string> Get() { return RemainingArgs; }
+  fextl::vector<fextl::string> GetParsedArgs() { return ProgramArguments; }
 
 }

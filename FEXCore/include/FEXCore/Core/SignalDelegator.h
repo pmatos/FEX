@@ -12,29 +12,29 @@
 #include <stddef.h>
 
 namespace FEXCore {
-namespace Core {
-  struct InternalThreadState;
+  namespace Core {
+    struct InternalThreadState;
 
-  enum class SignalEvent {
-    Nothing, // If the guest uses our signal we need to know it was errant on our end
-    Pause,
-    Stop,
-    Return,
-    ReturnRT,
-  };
+    enum class SignalEvent {
+      Nothing, // If the guest uses our signal we need to know it was errant on our end
+      Pause,
+      Stop,
+      Return,
+      ReturnRT,
+    };
 
-  enum SignalNumber {
+    enum SignalNumber {
 #ifndef _WIN32
-    FAULT_SIGSEGV = SIGSEGV,
-    FAULT_SIGTRAP = SIGTRAP,
-    FAULT_SIGILL = SIGILL,
+      FAULT_SIGSEGV = SIGSEGV,
+      FAULT_SIGTRAP = SIGTRAP,
+      FAULT_SIGILL = SIGILL,
 #else
-    FAULT_SIGSEGV = 11,
-    FAULT_SIGTRAP = 5,
-    FAULT_SIGILL = 4,
+      FAULT_SIGSEGV = 11,
+      FAULT_SIGTRAP = 5,
+      FAULT_SIGILL = 4,
 #endif
-  };
-}
+    };
+  }
   class SignalDelegator {
   public:
     virtual ~SignalDelegator() = default;
@@ -79,13 +79,9 @@ namespace Core {
       uint8_t SRAFPRMapping[16];
     };
 
-    void SetConfig(const SignalDelegatorConfig& _Config) {
-      Config = _Config;
-    }
+    void SetConfig(const SignalDelegatorConfig &_Config) { Config = _Config; }
 
-    const SignalDelegatorConfig &GetConfig() const {
-      return Config;
-    }
+    const SignalDelegatorConfig &GetConfig() const { return Config; }
 
     /**
      * @brief Signals a thread with a specific core event.

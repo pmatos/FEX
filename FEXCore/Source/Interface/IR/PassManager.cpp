@@ -16,110 +16,109 @@ $end_info$
 #include <FEXCore/Utils/Profiler.h>
 
 namespace FEXCore::IR {
-class IREmitter;
+  class IREmitter;
 
-void PassManager::Finalize() {
-  if (!PassManagerDumpIR()) {
-    // Not configured to dump any IR, just return.
-    return;
-  }
+  void PassManager::Finalize() {
+    if (!PassManagerDumpIR()) {
+      // Not configured to dump any IR, just return.
+      return;
+    }
 
-  auto it = Passes.begin();
-  // Walk the passes and add them where asked.
-  if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREOPT) {
-    // Insert at the start.
-    it = InsertAt(it, Debug::CreateIRDumper());
-    ++it; // Skip what we inserted.
-  }
+    auto it = Passes.begin();
+    // Walk the passes and add them where asked.
+    if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREOPT) {
+      // Insert at the start.
+      it = InsertAt(it, Debug::CreateIRDumper());
+      ++it; // Skip what we inserted.
+    }
 
-  if ((PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREPASS) ||
-      (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS)) {
+    if ((PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREPASS) || (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS)) {
 
-    bool SkipFirstBefore = PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREOPT;
-    for (; it != Passes.end();) {
-      if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREPASS) {
-        if (SkipFirstBefore) {
-          // If we need to skip the first one, then continue.
-          SkipFirstBefore = false;
-          ++it;
-          continue;
+      bool SkipFirstBefore = PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREOPT;
+      for (; it != Passes.end();) {
+        if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::BEFOREPASS) {
+          if (SkipFirstBefore) {
+            // If we need to skip the first one, then continue.
+            SkipFirstBefore = false;
+            ++it;
+            continue;
+          }
+
+          // Insert before
+          it = InsertAt(it, Debug::CreateIRDumper());
+          ++it; // Skip what we inserted.
         }
 
-        // Insert before
-        it = InsertAt(it, Debug::CreateIRDumper());
-        ++it; // Skip what we inserted.
-      }
-
-      ++it; // Skip current pass.
-      if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS) {
-        // Insert after
-        it = InsertAt(it, Debug::CreateIRDumper());
-        ++it; // Skip what we inserted.
+        ++it; // Skip current pass.
+        if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS) {
+          // Insert after
+          it = InsertAt(it, Debug::CreateIRDumper());
+          ++it; // Skip what we inserted.
+        }
       }
     }
-  }
-  if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTEROPT) {
-    if (!(PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS)) {
-      // Insert final IRDumper.
-      InsertAt(Passes.end(), Debug::CreateIRDumper());
+    if (PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTEROPT) {
+      if (!(PassManagerDumpIR() & FEXCore::Config::PassManagerDumpIR::AFTERPASS)) {
+        // Insert final IRDumper.
+        InsertAt(Passes.end(), Debug::CreateIRDumper());
+      }
     }
   }
-}
 
-void PassManager::AddDefaultPasses(FEXCore::Context::ContextImpl *ctx, bool InlineConstants) {
-  FEX_CONFIG_OPT(DisablePasses, O0);
+  void PassManager::AddDefaultPasses(FEXCore::Context::ContextImpl *ctx, bool InlineConstants) {
+    FEX_CONFIG_OPT(DisablePasses, O0);
 
-  if (!DisablePasses()) {
-    InsertPass(CreateContextLoadStoreElimination(ctx->HostFeatures.SupportsAVX));
+    if (!DisablePasses()) {
+      InsertPass(CreateContextLoadStoreElimination(ctx->HostFeatures.SupportsAVX));
 
-    if (Is64BitMode()) {
-      // This needs to run after RCLSE
-      // This only matters for 64-bit code since these instructions don't exist in 32-bit
-      InsertPass(CreateLongDivideEliminationPass());
+      if (Is64BitMode()) {
+        // This needs to run after RCLSE
+        // This only matters for 64-bit code since these instructions don't exist in 32-bit
+        InsertPass(CreateLongDivideEliminationPass());
+      }
+
+      InsertPass(CreateDeadStoreElimination(ctx->HostFeatures.SupportsAVX));
+      InsertPass(CreatePassDeadCodeElimination());
+      InsertPass(CreateConstProp(InlineConstants, ctx->HostFeatures.SupportsTSOImm9));
+
+      ////// InsertPass(CreateDeadFlagCalculationEliminination());
+
+      InsertPass(CreateInlineCallOptimization(&ctx->CPUID));
+      InsertPass(CreatePassDeadCodeElimination());
     }
 
-    InsertPass(CreateDeadStoreElimination(ctx->HostFeatures.SupportsAVX));
-    InsertPass(CreatePassDeadCodeElimination());
-    InsertPass(CreateConstProp(InlineConstants, ctx->HostFeatures.SupportsTSOImm9));
-
-    ////// InsertPass(CreateDeadFlagCalculationEliminination());
-
-    InsertPass(CreateInlineCallOptimization(&ctx->CPUID));
-    InsertPass(CreatePassDeadCodeElimination());
+    // If the IR is compacted post-RA then the node indexing gets messed up and the backend isn't able to find the register assigned to a node
+    // Compact before IR, don't worry about RA generating spills/fills
+    InsertPass(CreateIRCompaction(ctx->OpDispatcherAllocator), "Compaction");
   }
 
-  // If the IR is compacted post-RA then the node indexing gets messed up and the backend isn't able to find the register assigned to a node
-  // Compact before IR, don't worry about RA generating spills/fills
-  InsertPass(CreateIRCompaction(ctx->OpDispatcherAllocator), "Compaction");
-}
-
-void PassManager::AddDefaultValidationPasses() {
+  void PassManager::AddDefaultValidationPasses() {
 #if defined(ASSERTIONS_ENABLED) && ASSERTIONS_ENABLED
-  InsertValidationPass(Validation::CreateIRValidation(), "IRValidation");
-  InsertValidationPass(Validation::CreateRAValidation());
-  InsertValidationPass(Validation::CreateValueDominanceValidation());
+    InsertValidationPass(Validation::CreateIRValidation(), "IRValidation");
+    InsertValidationPass(Validation::CreateRAValidation());
+    InsertValidationPass(Validation::CreateValueDominanceValidation());
 #endif
-}
-
-void PassManager::InsertRegisterAllocationPass(bool SupportsAVX) {
-  InsertPass(IR::CreateRegisterAllocationPass(GetPass("Compaction"), SupportsAVX), "RA");
-}
-
-bool PassManager::Run(IREmitter *IREmit) {
-  FEXCORE_PROFILE_SCOPED("PassManager::Run");
-
-  bool Changed = false;
-  for (auto const &Pass : Passes) {
-    Changed |= Pass->Run(IREmit);
   }
+
+  void PassManager::InsertRegisterAllocationPass(bool SupportsAVX) {
+    InsertPass(IR::CreateRegisterAllocationPass(GetPass("Compaction"), SupportsAVX), "RA");
+  }
+
+  bool PassManager::Run(IREmitter *IREmit) {
+    FEXCORE_PROFILE_SCOPED("PassManager::Run");
+
+    bool Changed = false;
+    for (auto const &Pass : Passes) {
+      Changed |= Pass->Run(IREmit);
+    }
 
 #if defined(ASSERTIONS_ENABLED) && ASSERTIONS_ENABLED
-  for (auto const &Pass : ValidationPasses) {
-    Changed |= Pass->Run(IREmit);
-  }
+    for (auto const &Pass : ValidationPasses) {
+      Changed |= Pass->Run(IREmit);
+    }
 #endif
 
-  return Changed;
-}
+    return Changed;
+  }
 
 }

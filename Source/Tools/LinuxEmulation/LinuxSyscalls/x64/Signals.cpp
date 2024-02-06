@@ -20,7 +20,8 @@ $end_info$
 
 namespace FEX::HLE::x64 {
   void RegisterSignals(FEX::HLE::SyscallHandler *Handler) {
-    REGISTER_SYSCALL_IMPL_X64(rt_sigaction, [](FEXCore::Core::CpuStateFrame *Frame, int signum, const GuestSigAction *act, GuestSigAction *oldact, size_t sigsetsize) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64(
+    rt_sigaction, [](FEXCore::Core::CpuStateFrame *Frame, int signum, const GuestSigAction *act, GuestSigAction *oldact, size_t sigsetsize) -> uint64_t {
       if (sigsetsize != 8) {
         return -EINVAL;
       }
@@ -28,17 +29,19 @@ namespace FEX::HLE::x64 {
       return FEX::HLE::_SyscallHandler->GetSignalDelegator()->RegisterGuestSignalHandler(signum, act, oldact);
     });
 
-    REGISTER_SYSCALL_IMPL_X64(rt_sigtimedwait, [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, siginfo_t *info, const struct timespec* timeout, size_t sigsetsize) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X64(
+    rt_sigtimedwait,
+    [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, siginfo_t *info, const struct timespec *timeout, size_t sigsetsize) -> uint64_t {
       return FEX::HLE::_SyscallHandler->GetSignalDelegator()->GuestSigTimedWait(set, info, timeout, sigsetsize);
     });
 
     if (Handler->IsHostKernelVersionAtLeast(5, 1, 0)) {
-      REGISTER_SYSCALL_IMPL_X64_PASS(pidfd_send_signal, [](FEXCore::Core::CpuStateFrame *Frame, int pidfd, int sig, siginfo_t *info, unsigned int flags) -> uint64_t {
+      REGISTER_SYSCALL_IMPL_X64_PASS(
+      pidfd_send_signal, [](FEXCore::Core::CpuStateFrame *Frame, int pidfd, int sig, siginfo_t *info, unsigned int flags) -> uint64_t {
         uint64_t Result = ::syscall(SYSCALL_DEF(pidfd_send_signal), pidfd, sig, info, flags);
         SYSCALL_ERRNO();
       });
-    }
-    else {
+    } else {
       REGISTER_SYSCALL_IMPL_X64(pidfd_send_signal, UnimplementedSyscallSafe);
     }
 
@@ -53,4 +56,3 @@ namespace FEX::HLE::x64 {
     });
   }
 }
-

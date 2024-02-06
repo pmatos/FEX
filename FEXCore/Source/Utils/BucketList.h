@@ -13,8 +13,7 @@ namespace FEXCore {
   // To optimize for best performance, Size should be big enough to allocate one or two
   // buckets for the typical case
   // Picking a Size so sizeof(Bucket<...>) is a power of two is also a small win
-  template<size_t _Size, typename T = uint32_t>
-  struct BucketList {
+  template<size_t _Size, typename T = uint32_t> struct BucketList {
     static constexpr size_t Size = _Size;
 
     T Items[Size];
@@ -22,20 +21,17 @@ namespace FEXCore {
 
     void Clear() {
       Items[0] = T{};
-      #if defined(ASSERTIONS_ENABLED) && ASSERTIONS_ENABLED
+#if defined(ASSERTIONS_ENABLED) && ASSERTIONS_ENABLED
       for (size_t i = 1; i < Size; i++) {
         Items[i] = T{0xDEADBEEF};
       }
-      #endif
+#endif
       Next.reset();
     }
 
-    BucketList() {
-      Clear();
-    }
+    BucketList() { Clear(); }
 
-    template<typename EnumeratorFn>
-    void Iterate(EnumeratorFn Enumerator) const {
+    template<typename EnumeratorFn> void Iterate(EnumeratorFn Enumerator) const {
       size_t i = 0;
       auto Bucket = this;
 
@@ -55,8 +51,7 @@ namespace FEXCore {
       }
     }
 
-    template<typename EnumeratorFn>
-    bool Find(EnumeratorFn Enumerator) const {
+    template<typename EnumeratorFn> bool Find(EnumeratorFn Enumerator) const {
       size_t i = 0;
       auto Bucket = this;
 
@@ -66,8 +61,7 @@ namespace FEXCore {
           break;
         }
 
-        if (Enumerator(Item))
-          return true;
+        if (Enumerator(Item)) return true;
 
         if (++i == Size) {
           LOGMAN_THROW_A_FMT(Bucket->Next != nullptr, "Bucket in bad state");
@@ -94,8 +88,8 @@ namespace FEXCore {
         }
       }
 
-      if (i < (Size-1)) {
-        that->Items[i+1] = T{};
+      if (i < (Size - 1)) {
+        that->Items[i + 1] = T{};
       } else {
         that->Next = fextl::make_unique<BucketList<Size, T>>();
       }
@@ -111,8 +105,7 @@ namespace FEXCore {
           foundThat = that;
           foundI = i;
           break;
-        }
-        else if (++i == Size) {
+        } else if (++i == Size) {
           i = 0;
           LOGMAN_THROW_A_FMT(that->Next != nullptr, "Bucket::Erase but element not contained");
           that = that->Next.get();
@@ -121,15 +114,14 @@ namespace FEXCore {
 
       while (true) {
         if (that->Items[i] == T{}) {
-          foundThat->Items[foundI] = that->Items[i-1];
-          that->Items[i-1] = T{};
+          foundThat->Items[foundI] = that->Items[i - 1];
+          that->Items[i - 1] = T{};
           break;
-        }
-        else if (++i == Size) {
+        } else if (++i == Size) {
           if (that->Next->Items[0] == T{}) {
             that->Next.reset();
-            foundThat->Items[foundI] = that->Items[Size-1];
-            that->Items[Size-1] = T{};
+            foundThat->Items[foundI] = that->Items[Size - 1];
+            that->Items[Size - 1] = T{};
             break;
           }
           i = 0;

@@ -5,18 +5,17 @@
 #include <FEXCore/fextl/memory.h>
 
 namespace FEXCore::Context {
-class ContextImpl;
+  class ContextImpl;
 }
 
 namespace FEXCore::Core {
-struct InternalThreadState;
+  struct InternalThreadState;
 }
 
 namespace FEXCore::CPU {
-class CPUBackend;
+  class CPUBackend;
 
-[[nodiscard]] fextl::unique_ptr<CPUBackend> CreateArm64JITCore(FEXCore::Context::ContextImpl *ctx,
-                                                             FEXCore::Core::InternalThreadState *Thread);
-CPUBackendFeatures GetArm64JITBackendFeatures();
+  [[nodiscard]] fextl::unique_ptr<CPUBackend> CreateArm64JITCore(FEXCore::Context::ContextImpl *ctx, FEXCore::Core::InternalThreadState *Thread);
+  CPUBackendFeatures GetArm64JITBackendFeatures();
 
 } // namespace FEXCore::CPU

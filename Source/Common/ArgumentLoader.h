@@ -9,9 +9,9 @@ namespace FEX::ArgLoader {
   class ArgLoader final : public FEXCore::Config::Layer {
   public:
     explicit ArgLoader(int _argc, char **_argv)
-      : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_ARGUMENTS)
-      , argc {_argc}
-      , argv {_argv} {}
+      : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_ARGUMENTS),
+        argc{_argc},
+        argv{_argv} {}
 
     void Load();
 

@@ -28,4 +28,3 @@ namespace FEXCore::FileLoading {
    */
   FEX_DEFAULT_VISIBILITY ssize_t LoadFileToBuffer(const fextl::string &Filepath, std::span<char> Buffer);
 }
-

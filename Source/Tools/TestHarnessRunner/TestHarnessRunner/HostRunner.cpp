@@ -92,7 +92,7 @@ public:
       Label Gate{};
       // Patch gate entry point
       // mov(dword[rip + Gate], edi)
-      jmp(qword [rip + Gate], LabelType::T_FAR);
+      jmp(qword[rip + Gate], LabelType::T_FAR);
 
       L(Gate);
       dd(0x1'0000); // This is a 32-bit offset from the start of the gate. We start at 0x1'0000 + 0
@@ -158,12 +158,11 @@ public:
     for (size_t i = 0; i < FEXCore::Core::CPUState::NUM_XMMS; ++i) {
       memcpy(&OutState->xmm.avx.data[i], &_mcontext->fpregs->_xmm[i], sizeof(_mcontext->fpregs->_xmm[0]));
     }
-    const auto* xstate = reinterpret_cast<FEXCore::x86_64::xstate*>(_mcontext->fpregs);
-    const auto* reserved = &xstate->fpstate.sw_reserved;
+    const auto *xstate = reinterpret_cast<FEXCore::x86_64::xstate *>(_mcontext->fpregs);
+    const auto *reserved = &xstate->fpstate.sw_reserved;
     if (reserved->HasExtendedContext() && reserved->HasYMMH()) {
       for (size_t i = 0; i < FEXCore::Core::CPUState::NUM_XMMS; i++) {
-        memcpy(&OutState->xmm.avx.data[i][2], &xstate->ymmh.ymmh_space[i],
-               sizeof(xstate->ymmh.ymmh_space[0]));
+        memcpy(&OutState->xmm.avx.data[i][2], &xstate->ymmh.ymmh_space[i], sizeof(xstate->ymmh.ymmh_space[0]));
       }
     }
 
@@ -211,7 +210,7 @@ private:
     ldt.entry_number = 1;
     // This is where HarnessCodeLoader loads code to
     ldt.base_addr = 0;
-    ldt.limit = ~0U;   // No limit
+    ldt.limit = ~0U; // No limit
     ldt.seg_32bit = 1; // 32-bit
     ldt.contents = MODIFY_LDT_CONTENTS_CODE;
     ldt.read_exec_only = 0;
@@ -232,7 +231,7 @@ private:
     ldt.entry_number = 2;
     // This is where HarnessCodeLoader loads code to
     ldt.base_addr = 0;
-    ldt.limit = ~0U;   // No limit
+    ldt.limit = ~0U; // No limit
     ldt.seg_32bit = 1; // 32-bit
     ldt.contents = MODIFY_LDT_CONTENTS_DATA;
     ldt.read_exec_only = 0;
@@ -250,7 +249,7 @@ private:
     ldt.entry_number = 3;
     // This is where HarnessCodeLoader loads code to
     ldt.base_addr = 0;
-    ldt.limit = ~0U;   // No limit
+    ldt.limit = ~0U; // No limit
     ldt.seg_32bit = 1; // 32-bit
     ldt.contents = MODIFY_LDT_CONTENTS_STACK;
     ldt.read_exec_only = 0;
@@ -266,22 +265,19 @@ private:
   }
 };
 
-void RunAsHost(fextl::unique_ptr<FEX::HLE::SignalDelegator> &SignalDelegation, uintptr_t InitialRip, uintptr_t StackPointer,
-               FEXCore::Core::CPUState *OutputState) {
+void RunAsHost(fextl::unique_ptr<FEX::HLE::SignalDelegator> &SignalDelegation, uintptr_t InitialRip, uintptr_t StackPointer, FEXCore::Core::CPUState *OutputState) {
   x86HostRunner runner;
   SignalDelegation->RegisterHostSignalHandler(
-    SIGSEGV,
-    [&runner, OutputState](FEXCore::Core::InternalThreadState *Thread, int Signal, void *info, void *ucontext) -> bool {
-      return runner.HandleSIGSEGV(OutputState, Signal, info, ucontext);
-    },
-    true
-  );
+  SIGSEGV,
+  [&runner, OutputState](FEXCore::Core::InternalThreadState *Thread, int Signal, void *info, void *ucontext) -> bool {
+    return runner.HandleSIGSEGV(OutputState, Signal, info, ucontext);
+  },
+  true);
 
   runner.DispatchPtr(InitialRip, StackPointer);
 }
 #else
-void RunAsHost(fextl::unique_ptr<FEX::HLE::SignalDelegator> &SignalDelegation, uintptr_t InitialRip, uintptr_t StackPointer,
-               FEXCore::Core::CPUState *OutputState) {
+void RunAsHost(fextl::unique_ptr<FEX::HLE::SignalDelegator> &SignalDelegation, uintptr_t InitialRip, uintptr_t StackPointer, FEXCore::Core::CPUState *OutputState) {
   LOGMAN_MSG_A_FMT("RunAsHost doesn't exist for this host");
 }
 #endif

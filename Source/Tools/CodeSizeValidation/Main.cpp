@@ -10,47 +10,39 @@
 
 namespace CodeSize {
   class CodeSizeValidation final {
-    public:
-      struct InstructionStats {
-        uint64_t GuestCodeInstructions{};
-        uint64_t HostCodeInstructions{};
+  public:
+    struct InstructionStats {
+      uint64_t GuestCodeInstructions{};
+      uint64_t HostCodeInstructions{};
 
-        uint64_t HeaderSize{};
-        uint64_t TailSize{};
-      };
+      uint64_t HeaderSize{};
+      uint64_t TailSize{};
+    };
 
-      using CodeLines = fextl::vector<fextl::string>;
-      using InstructionData = std::pair<InstructionStats, CodeLines>;
+    using CodeLines = fextl::vector<fextl::string>;
+    using InstructionData = std::pair<InstructionStats, CodeLines>;
 
-      bool ParseMessage(char const *Message);
+    bool ParseMessage(char const *Message);
 
-      InstructionData *GetDataForRIP(uint64_t RIP) {
-        return &RIPToStats[RIP];
-      }
+    InstructionData *GetDataForRIP(uint64_t RIP) { return &RIPToStats[RIP]; }
 
-      bool InfoPrintingDisabled() const {
-        return SetupInfoDisabled;
-      }
+    bool InfoPrintingDisabled() const { return SetupInfoDisabled; }
 
-      void CalculateBaseStats(FEXCore::Context::Context *CTX, FEXCore::Core::InternalThreadState *Thread);
-    private:
-      void ClearStats() {
-        RIPToStats.clear();
-      }
+    void CalculateBaseStats(FEXCore::Context::Context *CTX, FEXCore::Core::InternalThreadState *Thread);
+  private:
+    void ClearStats() { RIPToStats.clear(); }
 
-      void SetBaseStats(InstructionStats const &NewBase) {
-        BaseStats = NewBase;
-      }
+    void SetBaseStats(InstructionStats const &NewBase) { BaseStats = NewBase; }
 
-      void CalculateDifferenceBetweenStats(InstructionData *Nop, InstructionData *Fence);
+    void CalculateDifferenceBetweenStats(InstructionData *Nop, InstructionData *Fence);
 
-      uint64_t CurrentRIPParse{};
-      bool ConsumingDisassembly{};
-      InstructionData *CurrentStats{};
-      InstructionStats BaseStats{};
+    uint64_t CurrentRIPParse{};
+    bool ConsumingDisassembly{};
+    InstructionData *CurrentStats{};
+    InstructionStats BaseStats{};
 
-      fextl::unordered_map<uint64_t, InstructionData> RIPToStats;
-      bool SetupInfoDisabled{};
+    fextl::unordered_map<uint64_t, InstructionData> RIPToStats;
+    bool SetupInfoDisabled{};
   };
 
   constexpr std::string_view RIPMessage = "RIP: 0x";
@@ -64,8 +56,7 @@ namespace CodeSize {
     auto it = Message.find(" (addr");
     // If it contains an address calculation, strip it out.
     Message = Message.substr(0, it);
-    if (Message.find("adrp ") != std::string_view::npos ||
-        Message.find("adr ") != std::string_view::npos) {
+    if (Message.find("adrp ") != std::string_view::npos || Message.find("adr ") != std::string_view::npos) {
       Message = Message.substr(0, Message.find(" #"));
     }
     return Message;
@@ -73,7 +64,7 @@ namespace CodeSize {
 
   bool CodeSizeValidation::ParseMessage(char const *Message) {
     // std::string_view doesn't have contains until c++23.
-    std::string_view MessageView {Message};
+    std::string_view MessageView{Message};
     if (MessageView.find(RIPMessage) != MessageView.npos) {
       // New RIP found
       std::string_view RIPView = std::string_view{Message + RIPMessage.size()};
@@ -172,12 +163,14 @@ namespace CodeSize {
     // Known hardcoded instructions that will generate blocks of particular sizes.
     // NOP will never generate any instructions.
     constexpr static uint8_t NOP[] = {
-      0x90,
+    0x90,
     };
 
     // MFENCE will always generate a block with one instruction.
     constexpr static uint8_t MFENCE[] = {
-      0x0f, 0xae, 0xf0,
+    0x0f,
+    0xae,
+    0xf0,
     };
 
     // Compile the NOP.
@@ -266,10 +259,10 @@ static bool TestInstructions(FEXCore::Context::Context *CTX, FEXCore::Core::Inte
     CTX->CompileRIPCount(Thread, CodeRIP, CurrentTest->x86InstCount);
 
     // Go to the next test.
-    CurrentTest = reinterpret_cast<TestInfo const*>(&CurrentTest->Code[CurrentTest->CodeSize]);
+    CurrentTest = reinterpret_cast<TestInfo const *>(&CurrentTest->Code[CurrentTest->CodeSize]);
   }
 
-  bool TestsPassed {true};
+  bool TestsPassed{true};
 
   // Get all the data for the instructions compiled.
   CurrentTest = TestsStart;
@@ -281,8 +274,7 @@ static bool TestInstructions(FEXCore::Context::Context *CTX, FEXCore::Core::Inte
     LogMan::Msg::IFmt("Testing instruction '{}': {} host instructions", CurrentTest->TestInst, INSTStats->first.HostCodeInstructions);
 
     // Show the code if the count of instructions changed to something we didn't expect.
-    bool ShouldShowCode =
-      INSTStats->first.HostCodeInstructions != CurrentTest->ExpectedInstructionCount;
+    bool ShouldShowCode = INSTStats->first.HostCodeInstructions != CurrentTest->ExpectedInstructionCount;
 
     if (ShouldShowCode) {
       for (auto Line : INSTStats->second) {
@@ -292,14 +284,16 @@ static bool TestInstructions(FEXCore::Context::Context *CTX, FEXCore::Core::Inte
 
     if (INSTStats->first.HostCodeInstructions != CurrentTest->ExpectedInstructionCount) {
       LogMan::Msg::EFmt("Fail: '{}': {} host instructions", CurrentTest->TestInst, INSTStats->first.HostCodeInstructions);
-      LogMan::Msg::EFmt("Fail: Test took {} instructions but we expected {} instructions!", INSTStats->first.HostCodeInstructions, CurrentTest->ExpectedInstructionCount);
+      LogMan::Msg::EFmt(
+      "Fail: Test took {} instructions but we expected {} instructions!", INSTStats->first.HostCodeInstructions,
+      CurrentTest->ExpectedInstructionCount);
 
       // Fail the test if the instruction count has changed at all.
       TestsPassed = false;
     }
 
     // Go to the next test.
-    CurrentTest = reinterpret_cast<TestInfo const*>(&CurrentTest->Code[CurrentTest->CodeSize]);
+    CurrentTest = reinterpret_cast<TestInfo const *>(&CurrentTest->Code[CurrentTest->CodeSize]);
   }
 
   if (UpdatedInstructionCountsPath) {
@@ -339,7 +333,7 @@ static bool TestInstructions(FEXCore::Context::Context *CTX, FEXCore::Core::Inte
       FD.Write(fextl::fmt::format("\t}},\n", CurrentTest->TestInst));
 
       // Go to the next test.
-      CurrentTest = reinterpret_cast<TestInfo const*>(&CurrentTest->Code[CurrentTest->CodeSize]);
+      CurrentTest = reinterpret_cast<TestInfo const *>(&CurrentTest->Code[CurrentTest->CodeSize]);
     }
 
     // Print a null member
@@ -355,77 +349,72 @@ bool LoadTests(const char *Path) {
     return false;
   }
 
-  TestHeaderData = reinterpret_cast<TestHeader const*>(TestData.data());
+  TestHeaderData = reinterpret_cast<TestHeader const *>(TestData.data());
 
   // Need to walk past the environment variables to get to the actual tests.
   const uint8_t *Data = TestHeaderData->Data;
   for (size_t i = 0; i < TestHeaderData->EnvironmentVariableCount; ++i) {
     // Environment variables are a pair of null terminated strings.
-    Data += strlen(reinterpret_cast<const char*>(Data)) + 1;
-    Data += strlen(reinterpret_cast<const char*>(Data)) + 1;
+    Data += strlen(reinterpret_cast<const char *>(Data)) + 1;
+    Data += strlen(reinterpret_cast<const char *>(Data)) + 1;
   }
-  TestsStart = reinterpret_cast<const TestInfo*>(Data);
+  TestsStart = reinterpret_cast<const TestInfo *>(Data);
   return true;
 }
 
 namespace {
-static const fextl::vector<std::pair<const char*, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
+  static const fextl::vector<std::pair<const char *, FEXCore::Config::ConfigOption>> EnvConfigLookup = {{
 #define OPT_BASE(type, group, enum, json, default) {"FEX_" #enum, FEXCore::Config::ConfigOption::CONFIG_##enum},
 #include <FEXCore/Config/ConfigValues.inl>
-}};
+  }};
 
-// Claims to be a local application config layer
-class TestEnvLoader final : public FEXCore::Config::Layer {
-public:
-  explicit TestEnvLoader()
-    : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_LOCAL_APP) {
-    Load();
-  }
+  // Claims to be a local application config layer
+  class TestEnvLoader final : public FEXCore::Config::Layer {
+  public:
+    explicit TestEnvLoader() : FEXCore::Config::Layer(FEXCore::Config::LayerType::LAYER_LOCAL_APP) { Load(); }
 
-  void Load() override {
-    fextl::unordered_map<std::string_view, std::string> EnvMap;
-    const uint8_t *Data = TestHeaderData->Data;
-    for (size_t i = 0; i < TestHeaderData->EnvironmentVariableCount; ++i) {
-      // Environment variables are a pair of null terminated strings.
-      const std::string_view Key = reinterpret_cast<const char*>(Data);
-      Data += strlen(reinterpret_cast<const char*>(Data)) + 1;
+    void Load() override {
+      fextl::unordered_map<std::string_view, std::string> EnvMap;
+      const uint8_t *Data = TestHeaderData->Data;
+      for (size_t i = 0; i < TestHeaderData->EnvironmentVariableCount; ++i) {
+        // Environment variables are a pair of null terminated strings.
+        const std::string_view Key = reinterpret_cast<const char *>(Data);
+        Data += strlen(reinterpret_cast<const char *>(Data)) + 1;
 
-      const std::string_view Value_View = reinterpret_cast<const char*>(Data);
-      Data += strlen(reinterpret_cast<const char*>(Data)) + 1;
-      std::optional<fextl::string> Value;
+        const std::string_view Value_View = reinterpret_cast<const char *>(Data);
+        Data += strlen(reinterpret_cast<const char *>(Data)) + 1;
+        std::optional<fextl::string> Value;
 
 #define ENVLOADER
 #include <FEXCore/Config/ConfigOptions.inl>
 
-      if (Value) {
-        EnvMap.insert_or_assign(Key, *Value);
+        if (Value) {
+          EnvMap.insert_or_assign(Key, *Value);
+        } else {
+          EnvMap.insert_or_assign(Key, Value_View);
+        }
       }
-      else {
-        EnvMap.insert_or_assign(Key, Value_View);
+
+      auto GetVar = [&](const std::string_view id) -> std::optional<std::string_view> {
+        const auto it = EnvMap.find(id);
+        if (it == EnvMap.end()) return std::nullopt;
+
+        return it->second;
+      };
+
+      for (auto &it : EnvConfigLookup) {
+        if (auto Value = GetVar(it.first); Value) {
+          Set(it.second, *Value);
+        }
       }
     }
 
-    auto GetVar = [&](const std::string_view id) -> std::optional<std::string_view> {
-      const auto it = EnvMap.find(id);
-      if (it == EnvMap.end())
-        return std::nullopt;
-
-      return it->second;
-    };
-
-    for (auto &it : EnvConfigLookup) {
-      if (auto Value = GetVar(it.first); Value) {
-        Set(it.second, *Value);
-      }
-    }
-  }
-
-private:
-  fextl::vector<std::pair<std::string_view, std::string_view>> Env;
-};
+  private:
+    fextl::vector<std::pair<std::string_view, std::string_view>> Env;
+  };
 }
 
-int main(int argc, char **argv, char **const envp) {
+int main(int argc, char **argv, char ** const envp) {
   FEXCore::Allocator::GLIBCScopedFault GLIBFaultScope;
   LogMan::Throw::InstallHandler(AssertHandler);
   LogMan::Msg::InstallHandler(MsgHandler);
@@ -451,7 +440,9 @@ int main(int argc, char **argv, char **const envp) {
   // IRJIT. Only works on JITs.
   FEXCore::Config::EraseSet(FEXCore::Config::CONFIG_CORE, fextl::fmt::format("{}", static_cast<uint64_t>(FEXCore::Config::CONFIG_IRJIT)));
   // Enable block disassembly.
-  FEXCore::Config::EraseSet(FEXCore::Config::CONFIG_DISASSEMBLE, fextl::fmt::format("{}", static_cast<uint64_t>(FEXCore::Config::Disassemble::BLOCKS | FEXCore::Config::Disassemble::STATS)));
+  FEXCore::Config::EraseSet(
+  FEXCore::Config::CONFIG_DISASSEMBLE,
+  fextl::fmt::format("{}", static_cast<uint64_t>(FEXCore::Config::Disassemble::BLOCKS | FEXCore::Config::Disassemble::STATS)));
   // Choose bitness.
   FEXCore::Config::EraseSet(FEXCore::Config::CONFIG_IS64BIT_MODE, TestHeaderData->Bitness == 64 ? "1" : "0");
   // Disable telemetry, it can affect instruction counts.
@@ -464,12 +455,12 @@ int main(int argc, char **argv, char **const envp) {
     FEATURE_SVE128 = (1U << 0),
     FEATURE_SVE256 = (1U << 1),
     FEATURE_CLZERO = (1U << 2),
-    FEATURE_RNG    = (1U << 3),
-    FEATURE_FCMA   = (1U << 4),
-    FEATURE_CSSC   = (1U << 5),
-    FEATURE_AFP    = (1U << 6),
-    FEATURE_RPRES  = (1U << 7),
-    FEATURE_FLAGM  = (1U << 8),
+    FEATURE_RNG = (1U << 3),
+    FEATURE_FCMA = (1U << 4),
+    FEATURE_CSSC = (1U << 5),
+    FEATURE_AFP = (1U << 6),
+    FEATURE_RPRES = (1U << 7),
+    FEATURE_FLAGM = (1U << 8),
     FEATURE_FLAGM2 = (1U << 9),
     FEATURE_CRYPTO = (1U << 10),
   };

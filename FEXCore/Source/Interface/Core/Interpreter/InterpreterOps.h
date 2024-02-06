@@ -10,8 +10,8 @@
 #include <FEXCore/IR/IntrusiveIRList.h>
 
 namespace FEXCore::IR {
-    class IRListView;
-    struct IROp_Header;
+  class IRListView;
+  struct IROp_Header;
 }
 
 namespace FEXCore::CPU {
@@ -43,8 +43,8 @@ namespace FEXCore::CPU {
   };
 
   class InterpreterOps {
-    public:
-      static void FillFallbackIndexPointers(uint64_t *Info);
-      static bool GetFallbackHandler(bool SupportsPreserveAllABI, IR::IROp_Header const *IROp, FallbackInfo *Info);
+  public:
+    static void FillFallbackIndexPointers(uint64_t *Info);
+    static bool GetFallbackHandler(bool SupportsPreserveAllABI, IR::IROp_Header const *IROp, FallbackInfo *Info);
   };
 } // namespace FEXCore::CPU

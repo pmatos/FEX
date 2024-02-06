@@ -33,282 +33,276 @@ $end_info$
 
 namespace FEXCore::IR {
 
-template<typename T>
-uint64_t getMask(T Op) {
-  uint64_t NumBits = Op->Header.Size * 8;
-  return (~0ULL) >> (64 - NumBits);
-}
-
-
-template<>
-uint64_t getMask(IROp_Header* Op) {
-  uint64_t NumBits = Op->Size * 8;
-  return (~0ULL) >> (64 - NumBits);
-}
-
-// Returns true if the number bits from [0:width) contain the same bit.
-// Ensuring that the consecutive bits in the range are entirely 0 or 1.
-static bool HasConsecutiveBits(uint64_t imm, unsigned width) {
-  if (width == 0) {
-    return true;
+  template<typename T> uint64_t getMask(T Op) {
+    uint64_t NumBits = Op->Header.Size * 8;
+    return (~0ULL) >> (64 - NumBits);
   }
 
-  // Credit to https://github.com/dougallj for this implementation.
-  return ((imm ^ (imm >> 1)) & ((1ULL << (width - 1)) - 1)) == 0;
-}
 
-//aarch64 heuristics
-static bool IsImmLogical(uint64_t imm, unsigned width) { if (width < 32) width = 32; return vixl::aarch64::Assembler::IsImmLogical(imm, width); }
-static bool IsImmAddSub(uint64_t imm) { return vixl::aarch64::Assembler::IsImmAddSub(imm); }
-static bool IsMemoryScale(uint64_t Scale, uint8_t AccessSize) {
-  return Scale  == AccessSize;
-}
-
-static bool IsSIMM9Range(uint64_t imm) {
-  // AArch64 signed immediate unscaled 9-bit range.
-  // Used for both regular unscaled loadstore instructions
-  // and LRPCPC2 unscaled loadstore instructions.
-  return ((int64_t)imm >= -256) && ((int64_t)imm <= 255);
-}
-
-static bool IsImmMemory(uint64_t imm, uint8_t AccessSize) {
-  if (IsSIMM9Range(imm))
-    return true;
-  else if ( (imm & (AccessSize-1)) == 0 &&  imm/AccessSize <= 4095 )
-    return true;
-  else {
-    return false;
-  }
-}
-
-static bool IsTSOImm9(uint64_t imm) {
-  // RCPC2 only has a 9-bit signed offset
-  if (IsSIMM9Range(imm))
-    return true;
-  else {
-    return false;
-  }
-}
-
-static std::tuple<MemOffsetType, uint8_t, OrderedNode*, OrderedNode*> MemExtendedAddressing(IREmitter *IREmit, uint8_t AccessSize,  IROp_Header* AddressHeader) {
-  auto Src0Header = IREmit->GetOpHeader(AddressHeader->Args[0]);
-  if (Src0Header->Size == 8) {
-    //Try to optimize: Base + MUL(Offset, Scale)
-    if (Src0Header->Op == OP_MUL) {
-      uint64_t Scale;
-      if (IREmit->IsValueConstant(Src0Header->Args[1], &Scale)) {
-        if (IsMemoryScale(Scale, AccessSize)) {
-          // remove mul as it can be folded to the mem op
-          return { MEM_OFFSET_SXTX, (uint8_t)Scale, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-        } else if (Scale == 1) {
-          // remove nop mul
-          return { MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-        }
-      }
-    }
-    //Try to optimize: Base + LSHL(Offset, Scale)
-    else if (Src0Header->Op == OP_LSHL) {
-      uint64_t Constant2;
-      if (IREmit->IsValueConstant(Src0Header->Args[1], &Constant2)) {
-        uint64_t Scale = 1<<Constant2;
-        if (IsMemoryScale(Scale, AccessSize)) {
-          // remove shift as it can be folded to the mem op
-          return { MEM_OFFSET_SXTX, Scale, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-        } else if (Scale == 1) {
-          // remove nop shift
-          return { MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-        }
-      }
-    }
-#if defined(_M_ARM_64) // x86 can't sext or zext on mem ops
-    //Try to optimize: Base + (u32)Offset
-    else if (Src0Header->Op == OP_BFE) {
-      auto Bfe = Src0Header->C<IROp_Bfe>();
-      if (Bfe->lsb == 0 && Bfe->Width == 32) {
-        //todo: arm can also scale here
-        return { MEM_OFFSET_UXTW, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-      }
-    }
-    //Try to optimize: Base + (s32)Offset
-    else if (Src0Header->Op == OP_SBFE) {
-      auto Sbfe = Src0Header->C<IROp_Sbfe>();
-      if (Sbfe->lsb == 0 && Sbfe->Width == 32) {
-        //todo: arm can also scale here
-        return { MEM_OFFSET_SXTW, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0]) };
-      }
-    }
-#endif
+  template<> uint64_t getMask(IROp_Header* Op) {
+    uint64_t NumBits = Op->Size * 8;
+    return (~0ULL) >> (64 - NumBits);
   }
 
-  // no match anywhere, just add
-  return { MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[0]), IREmit->UnwrapNode(AddressHeader->Args[1]) };
-}
-
-static OrderedNodeWrapper RemoveUselessMasking(IREmitter *IREmit, OrderedNodeWrapper src, uint64_t mask) {
-#if 1 // HOTFIX: We need to clear up the meaning of opsize and dest size. See #594
-  return src;
-#else
-  auto IROp = IREmit->GetOpHeader(src);
-  if (IROp->Op == OP_AND) {
-    auto Op = IROp->C<IR::IROp_And>();
-    uint64_t imm;
-    if (IREmit->IsValueConstant(IROp->Args[1], &imm) && ((imm & mask) == mask)) {
-      return RemoveUselessMasking(IREmit, IROp->Args[0], mask);
-    }
-  } else if (IROp->Op == OP_BFE) {
-    auto Op = IROp->C<IR::IROp_Bfe>();
-    if (Op->lsb == 0) {
-      uint64_t imm = 1ULL << (Op->Width-1);
-      imm = (imm-1) *2 + 1;
-
-      if ((imm & mask) == mask) {
-        return RemoveUselessMasking(IREmit, IROp->Args[0], mask);
-      }
-    }
-  }
-
-  return src;
-#endif
-}
-
-static bool IsBfeAlreadyDone(IREmitter *IREmit, OrderedNodeWrapper src, uint64_t Width) {
-  auto IROp = IREmit->GetOpHeader(src);
-  if (IROp->Op == OP_BFE) {
-    auto Op = IROp->C<IR::IROp_Bfe>();
-    if (Width >= Op->Width) {
+  // Returns true if the number bits from [0:width) contain the same bit.
+  // Ensuring that the consecutive bits in the range are entirely 0 or 1.
+  static bool HasConsecutiveBits(uint64_t imm, unsigned width) {
+    if (width == 0) {
       return true;
     }
+
+    // Credit to https://github.com/dougallj for this implementation.
+    return ((imm ^ (imm >> 1)) & ((1ULL << (width - 1)) - 1)) == 0;
   }
-  return false;
-}
 
-class ConstProp final : public FEXCore::IR::Pass {
-public:
-  explicit ConstProp(bool DoInlineConstants, bool SupportsTSOImm9)
-    : InlineConstants(DoInlineConstants)
-    , SupportsTSOImm9 {SupportsTSOImm9} { }
+  //aarch64 heuristics
+  static bool IsImmLogical(uint64_t imm, unsigned width) {
+    if (width < 32) width = 32;
+    return vixl::aarch64::Assembler::IsImmLogical(imm, width);
+  }
+  static bool IsImmAddSub(uint64_t imm) { return vixl::aarch64::Assembler::IsImmAddSub(imm); }
+  static bool IsMemoryScale(uint64_t Scale, uint8_t AccessSize) { return Scale == AccessSize; }
 
-  bool Run(IREmitter *IREmit) override;
+  static bool IsSIMM9Range(uint64_t imm) {
+    // AArch64 signed immediate unscaled 9-bit range.
+    // Used for both regular unscaled loadstore instructions
+    // and LRPCPC2 unscaled loadstore instructions.
+    return ((int64_t)imm >= -256) && ((int64_t)imm <= 255);
+  }
 
-  bool InlineConstants;
-
-private:
-  bool HandleConstantPools(IREmitter *IREmit, const IRListView& CurrentIR);
-  void LoadMemStoreMemImmediatePooling(IREmitter *IREmit, const IRListView& CurrentIR);
-  bool ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& CurrentIR,
-      OrderedNode* CodeNode, IROp_Header* IROp);
-  bool ConstantPropagation(IREmitter *IREmit, const IRListView& CurrentIR,
-      OrderedNode* CodeNode, IROp_Header* IROp);
-  bool ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR);
-
-  struct ConstPoolData {
-    OrderedNode *Node;
-    IR::NodeID NodeID;
-  };
-  fextl::unordered_map<uint64_t, ConstPoolData> ConstPool;
-  fextl::map<OrderedNode*, uint64_t> AddressgenConsts;
-
-  // Pool inline constant generation. These are typically very small and pool efficiently.
-  fextl::robin_map<uint64_t, OrderedNode*> InlineConstantGen;
-  OrderedNode *CreateInlineConstant(IREmitter *IREmit, uint64_t Constant) {
-    const auto it = InlineConstantGen.find(Constant);
-    if (it != InlineConstantGen.end()) {
-      return it->second;
+  static bool IsImmMemory(uint64_t imm, uint8_t AccessSize) {
+    if (IsSIMM9Range(imm))
+      return true;
+    else if ((imm & (AccessSize - 1)) == 0 && imm / AccessSize <= 4095)
+      return true;
+    else {
+      return false;
     }
-    auto Result = InlineConstantGen.insert_or_assign(Constant, IREmit->_InlineConstant(Constant));
-    return Result.first->second;
   }
-  bool SupportsTSOImm9{};
-  // This is a heuristic to limit constant pool live ranges to reduce RA interference pressure.
-  // If the range is unbounded then RA interference pressure seems to increase to the point
-  // that long blocks of constant usage can slow to a crawl.
-  // See https://github.com/FEX-Emu/FEX/issues/2688 for more information.
-  constexpr static uint32_t CONSTANT_POOL_RANGE_LIMIT = 200;
-};
 
-bool ConstProp::HandleConstantPools(IREmitter *IREmit, const IRListView& CurrentIR) {
-  bool Changed = false;
+  static bool IsTSOImm9(uint64_t imm) {
+    // RCPC2 only has a 9-bit signed offset
+    if (IsSIMM9Range(imm))
+      return true;
+    else {
+      return false;
+    }
+  }
 
-  // constants are pooled per block
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      if (IROp->Op == OP_CONSTANT) {
-        auto Op = IROp->C<IR::IROp_Constant>();
-        const auto NewNodeID = CurrentIR.GetID(CodeNode);
-
-        auto it = ConstPool.find(Op->Constant);
-        if (it != ConstPool.end()) {
-          const auto OldNodeID = it->second.NodeID;
-
-          if ((NewNodeID.Value - OldNodeID.Value) > CONSTANT_POOL_RANGE_LIMIT) {
-            // Don't reuse if the live range is beyond the heurstic range.
-            // Update the tracked value to this new constant.
-            it->second.Node = CodeNode;
-            it->second.NodeID = NewNodeID;
-            continue;
+  static std::tuple<MemOffsetType, uint8_t, OrderedNode*, OrderedNode*> MemExtendedAddressing(IREmitter* IREmit, uint8_t AccessSize, IROp_Header* AddressHeader) {
+    auto Src0Header = IREmit->GetOpHeader(AddressHeader->Args[0]);
+    if (Src0Header->Size == 8) {
+      //Try to optimize: Base + MUL(Offset, Scale)
+      if (Src0Header->Op == OP_MUL) {
+        uint64_t Scale;
+        if (IREmit->IsValueConstant(Src0Header->Args[1], &Scale)) {
+          if (IsMemoryScale(Scale, AccessSize)) {
+            // remove mul as it can be folded to the mem op
+            return {MEM_OFFSET_SXTX, (uint8_t)Scale, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
+          } else if (Scale == 1) {
+            // remove nop mul
+            return {MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
           }
+        }
+      }
+      //Try to optimize: Base + LSHL(Offset, Scale)
+      else if (Src0Header->Op == OP_LSHL) {
+        uint64_t Constant2;
+        if (IREmit->IsValueConstant(Src0Header->Args[1], &Constant2)) {
+          uint64_t Scale = 1 << Constant2;
+          if (IsMemoryScale(Scale, AccessSize)) {
+            // remove shift as it can be folded to the mem op
+            return {MEM_OFFSET_SXTX, Scale, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
+          } else if (Scale == 1) {
+            // remove nop shift
+            return {MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
+          }
+        }
+      }
+#if defined(_M_ARM_64) // x86 can't sext or zext on mem ops
+      //Try to optimize: Base + (u32)Offset
+      else if (Src0Header->Op == OP_BFE) {
+        auto Bfe = Src0Header->C<IROp_Bfe>();
+        if (Bfe->lsb == 0 && Bfe->Width == 32) {
+          //todo: arm can also scale here
+          return {MEM_OFFSET_UXTW, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
+        }
+      }
+      //Try to optimize: Base + (s32)Offset
+      else if (Src0Header->Op == OP_SBFE) {
+        auto Sbfe = Src0Header->C<IROp_Sbfe>();
+        if (Sbfe->lsb == 0 && Sbfe->Width == 32) {
+          //todo: arm can also scale here
+          return {MEM_OFFSET_SXTW, 1, IREmit->UnwrapNode(AddressHeader->Args[1]), IREmit->UnwrapNode(Src0Header->Args[0])};
+        }
+      }
+#endif
+    }
 
-          auto CodeIter = CurrentIR.at(CodeNode);
-          IREmit->ReplaceUsesWithAfter(CodeNode, it->second.Node, CodeIter);
-          Changed = true;
-        } else {
-          ConstPool[Op->Constant] = ConstPoolData {
+    // no match anywhere, just add
+    return {MEM_OFFSET_SXTX, 1, IREmit->UnwrapNode(AddressHeader->Args[0]), IREmit->UnwrapNode(AddressHeader->Args[1])};
+  }
+
+  static OrderedNodeWrapper RemoveUselessMasking(IREmitter* IREmit, OrderedNodeWrapper src, uint64_t mask) {
+#if 1 // HOTFIX: We need to clear up the meaning of opsize and dest size. See #594
+    return src;
+#else
+    auto IROp = IREmit->GetOpHeader(src);
+    if (IROp->Op == OP_AND) {
+      auto Op = IROp->C<IR::IROp_And>();
+      uint64_t imm;
+      if (IREmit->IsValueConstant(IROp->Args[1], &imm) && ((imm & mask) == mask)) {
+        return RemoveUselessMasking(IREmit, IROp->Args[0], mask);
+      }
+    } else if (IROp->Op == OP_BFE) {
+      auto Op = IROp->C<IR::IROp_Bfe>();
+      if (Op->lsb == 0) {
+        uint64_t imm = 1ULL << (Op->Width - 1);
+        imm = (imm - 1) * 2 + 1;
+
+        if ((imm & mask) == mask) {
+          return RemoveUselessMasking(IREmit, IROp->Args[0], mask);
+        }
+      }
+    }
+
+    return src;
+#endif
+  }
+
+  static bool IsBfeAlreadyDone(IREmitter* IREmit, OrderedNodeWrapper src, uint64_t Width) {
+    auto IROp = IREmit->GetOpHeader(src);
+    if (IROp->Op == OP_BFE) {
+      auto Op = IROp->C<IR::IROp_Bfe>();
+      if (Width >= Op->Width) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  class ConstProp final : public FEXCore::IR::Pass {
+  public:
+    explicit ConstProp(bool DoInlineConstants, bool SupportsTSOImm9)
+      : InlineConstants(DoInlineConstants),
+        SupportsTSOImm9{SupportsTSOImm9} {}
+
+    bool Run(IREmitter* IREmit) override;
+
+    bool InlineConstants;
+
+  private:
+    bool HandleConstantPools(IREmitter* IREmit, const IRListView& CurrentIR);
+    void LoadMemStoreMemImmediatePooling(IREmitter* IREmit, const IRListView& CurrentIR);
+    bool ZextAndMaskingElimination(IREmitter* IREmit, const IRListView& CurrentIR, OrderedNode* CodeNode, IROp_Header* IROp);
+    bool ConstantPropagation(IREmitter* IREmit, const IRListView& CurrentIR, OrderedNode* CodeNode, IROp_Header* IROp);
+    bool ConstantInlining(IREmitter* IREmit, const IRListView& CurrentIR);
+
+    struct ConstPoolData {
+      OrderedNode* Node;
+      IR::NodeID NodeID;
+    };
+    fextl::unordered_map<uint64_t, ConstPoolData> ConstPool;
+    fextl::map<OrderedNode*, uint64_t> AddressgenConsts;
+
+    // Pool inline constant generation. These are typically very small and pool efficiently.
+    fextl::robin_map<uint64_t, OrderedNode*> InlineConstantGen;
+    OrderedNode* CreateInlineConstant(IREmitter* IREmit, uint64_t Constant) {
+      const auto it = InlineConstantGen.find(Constant);
+      if (it != InlineConstantGen.end()) {
+        return it->second;
+      }
+      auto Result = InlineConstantGen.insert_or_assign(Constant, IREmit->_InlineConstant(Constant));
+      return Result.first->second;
+    }
+    bool SupportsTSOImm9{};
+    // This is a heuristic to limit constant pool live ranges to reduce RA interference pressure.
+    // If the range is unbounded then RA interference pressure seems to increase to the point
+    // that long blocks of constant usage can slow to a crawl.
+    // See https://github.com/FEX-Emu/FEX/issues/2688 for more information.
+    constexpr static uint32_t CONSTANT_POOL_RANGE_LIMIT = 200;
+  };
+
+  bool ConstProp::HandleConstantPools(IREmitter* IREmit, const IRListView& CurrentIR) {
+    bool Changed = false;
+
+    // constants are pooled per block
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        if (IROp->Op == OP_CONSTANT) {
+          auto Op = IROp->C<IR::IROp_Constant>();
+          const auto NewNodeID = CurrentIR.GetID(CodeNode);
+
+          auto it = ConstPool.find(Op->Constant);
+          if (it != ConstPool.end()) {
+            const auto OldNodeID = it->second.NodeID;
+
+            if ((NewNodeID.Value - OldNodeID.Value) > CONSTANT_POOL_RANGE_LIMIT) {
+              // Don't reuse if the live range is beyond the heurstic range.
+              // Update the tracked value to this new constant.
+              it->second.Node = CodeNode;
+              it->second.NodeID = NewNodeID;
+              continue;
+            }
+
+            auto CodeIter = CurrentIR.at(CodeNode);
+            IREmit->ReplaceUsesWithAfter(CodeNode, it->second.Node, CodeIter);
+            Changed = true;
+          } else {
+            ConstPool[Op->Constant] = ConstPoolData{
             .Node = CodeNode,
             .NodeID = NewNodeID,
-          };
-        }
-      }
-    }
-    ConstPool.clear();
-  }
-
-  return Changed;
-}
-
-// LoadMem / StoreMem imm pooling
-// If imms are close by, use address gen to generate the values instead of using a new imm
-void ConstProp::LoadMemStoreMemImmediatePooling(IREmitter *IREmit, const IRListView& CurrentIR) {
-  for (auto [BlockNode, BlockIROp] : CurrentIR.GetBlocks()) {
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      if (IROp->Op == OP_LOADMEM || IROp->Op == OP_STOREMEM) {
-        size_t AddrIndex = 0;
-        size_t OffsetIndex = 0;
-
-        if (IROp->Op == OP_LOADMEM) {
-          AddrIndex = IR::IROp_LoadMem::Addr_Index;
-          OffsetIndex = IR::IROp_LoadMem::Offset_Index;
-        }
-        else {
-          AddrIndex = IR::IROp_StoreMem::Addr_Index;
-          OffsetIndex = IR::IROp_StoreMem::Offset_Index;
-        }
-        uint64_t Addr;
-
-        if (IREmit->IsValueConstant(IROp->Args[AddrIndex], &Addr) && IROp->Args[OffsetIndex].IsInvalid()) {
-          for (auto& Const: AddressgenConsts) {
-            if ((Addr - Const.second) < 65536) {
-              IREmit->ReplaceNodeArgument(CodeNode, AddrIndex, Const.first);
-              IREmit->ReplaceNodeArgument(CodeNode, OffsetIndex, IREmit->_Constant(Addr - Const.second));
-              goto doneOp;
-            }
+            };
           }
-
-          AddressgenConsts[IREmit->UnwrapNode(IROp->Args[AddrIndex])] = Addr;
         }
-        doneOp:
-        ;
       }
-      IREmit->SetWriteCursor(CodeNode);
+      ConstPool.clear();
     }
-    AddressgenConsts.clear();
+
+    return Changed;
   }
-}
 
-bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& CurrentIR,
-                                          OrderedNode* CodeNode, IROp_Header* IROp) {
-  bool Changed = false;
+  // LoadMem / StoreMem imm pooling
+  // If imms are close by, use address gen to generate the values instead of using a new imm
+  void ConstProp::LoadMemStoreMemImmediatePooling(IREmitter* IREmit, const IRListView& CurrentIR) {
+    for (auto [BlockNode, BlockIROp] : CurrentIR.GetBlocks()) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        if (IROp->Op == OP_LOADMEM || IROp->Op == OP_STOREMEM) {
+          size_t AddrIndex = 0;
+          size_t OffsetIndex = 0;
 
-  switch (IROp->Op) {
+          if (IROp->Op == OP_LOADMEM) {
+            AddrIndex = IR::IROp_LoadMem::Addr_Index;
+            OffsetIndex = IR::IROp_LoadMem::Offset_Index;
+          } else {
+            AddrIndex = IR::IROp_StoreMem::Addr_Index;
+            OffsetIndex = IR::IROp_StoreMem::Offset_Index;
+          }
+          uint64_t Addr;
+
+          if (IREmit->IsValueConstant(IROp->Args[AddrIndex], &Addr) && IROp->Args[OffsetIndex].IsInvalid()) {
+            for (auto& Const : AddressgenConsts) {
+              if ((Addr - Const.second) < 65536) {
+                IREmit->ReplaceNodeArgument(CodeNode, AddrIndex, Const.first);
+                IREmit->ReplaceNodeArgument(CodeNode, OffsetIndex, IREmit->_Constant(Addr - Const.second));
+                goto doneOp;
+              }
+            }
+
+            AddressgenConsts[IREmit->UnwrapNode(IROp->Args[AddrIndex])] = Addr;
+          }
+doneOp:;
+        }
+        IREmit->SetWriteCursor(CodeNode);
+      }
+      AddressgenConsts.clear();
+    }
+  }
+
+  bool ConstProp::ZextAndMaskingElimination(IREmitter* IREmit, const IRListView& CurrentIR, OrderedNode* CodeNode, IROp_Header* IROp) {
+    bool Changed = false;
+
+    switch (IROp->Op) {
     // Generic handling
     case OP_OR:
     case OP_XOR:
@@ -336,8 +330,7 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
       // if AND's arguments are imms, they are masking
       for (int i = 0; i < IR::GetArgs(IROp->Op); i++) {
         uint64_t imm = 0;
-        if (!IREmit->IsValueConstant(IROp->Args[i^1], &imm))
-          continue;
+        if (!IREmit->IsValueConstant(IROp->Args[i ^ 1], &imm)) continue;
 
         auto newArg = RemoveUselessMasking(IREmit, IROp->Args[i], imm);
 
@@ -365,9 +358,7 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
         auto source = Op->Src;
         auto sourceHeader = IREmit->GetOpHeader(source);
 
-        if (Op->Width >= (sourceHeader->Size*8)  &&
-          (sourceHeader->Op == OP_LOADMEM || sourceHeader->Op == OP_LOADMEMTSO || sourceHeader->Op == OP_LOADCONTEXT)
-        ) {
+        if (Op->Width >= (sourceHeader->Size * 8) && (sourceHeader->Op == OP_LOADMEM || sourceHeader->Op == OP_LOADMEMTSO || sourceHeader->Op == OP_LOADCONTEXT)) {
           //printf("Eliminated needless zext bfe\n");
           // Load mem / load ctx zexts, no need to vmem
           IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(source));
@@ -376,8 +367,8 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
       }
 
       // BFE does implicit masking, remove any masks leading to this, if possible
-      uint64_t imm = 1ULL << (Op->Width-1);
-      imm = (imm-1) *2 + 1;
+      uint64_t imm = 1ULL << (Op->Width - 1);
+      imm = (imm - 1) * 2 + 1;
       imm <<= Op->lsb;
 
       auto newArg = RemoveUselessMasking(IREmit, Op->Src, imm);
@@ -393,8 +384,8 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
       auto Op = IROp->C<IR::IROp_Sbfe>();
 
       // BFE does implicit masking
-      uint64_t imm = 1ULL << (Op->Width-1);
-      imm = (imm-1) *2 + 1;
+      uint64_t imm = 1ULL << (Op->Width - 1);
+      imm = (imm - 1) * 2 + 1;
       imm <<= Op->lsb;
 
       auto newArg = RemoveUselessMasking(IREmit, Op->Src, imm);
@@ -411,9 +402,7 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
       auto source = IROp->Args[0];
       auto sourceHeader = IREmit->GetOpHeader(source);
 
-      if (IROp->Size >= sourceHeader->Size  &&
-        (sourceHeader->Op == OP_LOADMEM || sourceHeader->Op == OP_LOADMEMTSO || sourceHeader->Op == OP_LOADCONTEXT)
-        ) {
+      if (IROp->Size >= sourceHeader->Size && (sourceHeader->Op == OP_LOADMEM || sourceHeader->Op == OP_LOADMEMTSO || sourceHeader->Op == OP_LOADCONTEXT)) {
         //printf("Eliminated needless zext VMOV\n");
         // Load mem / load ctx zexts, no need to vmem
         IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(source));
@@ -426,20 +415,18 @@ bool ConstProp::ZextAndMaskingElimination(IREmitter *IREmit, const IRListView& C
       }
       break;
     }
-    default:
-      break;
+    default: break;
+    }
+
+    return Changed;
   }
 
-  return Changed;
-}
-
-// constprop + some more per instruction logic
-bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& CurrentIR,
-                                    OrderedNode* CodeNode, IROp_Header* IROp) {
+  // constprop + some more per instruction logic
+  bool ConstProp::ConstantPropagation(IREmitter* IREmit, const IRListView& CurrentIR, OrderedNode* CodeNode, IROp_Header* IROp) {
     bool Changed = false;
 
     switch (IROp->Op) {
-/*
+      /*
     case OP_UMUL:
     case OP_DIV:
     case OP_UDIV:
@@ -563,11 +550,10 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       bool IsConstant2 = IREmit->IsValueConstant(Op->Header.Args[1], &Constant2);
 
       if (IsConstant1 && IsConstant2) {
-        uint64_t NewConstant = (Constant1 + Constant2) & getMask(Op) ;
+        uint64_t NewConstant = (Constant1 + Constant2) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
-      }
-      else if (IsConstant2 && !IsImmAddSub(Constant2) && IsImmAddSub(-Constant2)) {
+      } else if (IsConstant2 && !IsImmAddSub(Constant2) && IsImmAddSub(-Constant2)) {
         // If the second argument is constant, the immediate is not ImmAddSub, but when negated is.
         // This means we can convert the operation in to a subtract.
         // Change the IR operation itself.
@@ -584,28 +570,25 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
         IREmit->ReplaceNodeArgument(CodeNode, Op->Src2_Index, NegConstant);
         Changed = true;
       }
-    break;
+      break;
     }
     case OP_SUB: {
       auto Op = IROp->C<IR::IROp_Sub>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
-        uint64_t NewConstant = (Constant1 - Constant2) & getMask(Op) ;
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+        uint64_t NewConstant = (Constant1 - Constant2) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
       }
-    break;
+      break;
     }
     case OP_SUBSHIFT: {
       auto Op = IROp->C<IR::IROp_SubShift>();
 
       uint64_t Constant1, Constant2;
-      if (IREmit->IsValueConstant(IROp->Args[0], &Constant1) &&
-          IREmit->IsValueConstant(IROp->Args[1], &Constant2) &&
-          Op->Shift == IR::ShiftType::LSL) {
+      if (IREmit->IsValueConstant(IROp->Args[0], &Constant1) && IREmit->IsValueConstant(IROp->Args[1], &Constant2) && Op->Shift == IR::ShiftType::LSL) {
         // Optimize the LSL case when we know both sources are constant.
         // This is a pattern that shows up with direction flag calculations if DF was set just before the operation.
         uint64_t NewConstant = (Constant1 - (Constant2 << Op->ShiftAmount)) & getMask(Op);
@@ -619,9 +602,8 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
-        uint64_t NewConstant = (Constant1 & Constant2) & getMask(Op) ;
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+        uint64_t NewConstant = (Constant1 & Constant2) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
       } else if (Constant2 == 1) {
@@ -629,12 +611,9 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
         auto val = IREmit->GetOpHeader(Op->Header.Args[0]);
 
         uint64_t Constant3;
-        if (val->Op == OP_SELECT &&
-            IREmit->IsValueConstant(val->Args[2], &Constant2) &&
-            IREmit->IsValueConstant(val->Args[3], &Constant3) &&
-            Constant2 == 1 &&
-            Constant3 == 0)
-        {
+        if (
+        val->Op == OP_SELECT && IREmit->IsValueConstant(val->Args[2], &Constant2) && IREmit->IsValueConstant(val->Args[3], &Constant3) &&
+        Constant2 == 1 && Constant3 == 0) {
           IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(Op->Header.Args[0]));
           Changed = true;
         }
@@ -643,7 +622,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
         IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(Op->Header.Args[0]));
         Changed = true;
       }
-    break;
+      break;
     }
     /* TODO: restore this when we have rmif or something? */
 #if 0
@@ -667,8 +646,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         uint64_t NewConstant = Constant1 | Constant2;
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
@@ -677,41 +655,38 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
         IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(Op->Header.Args[0]));
         Changed = true;
       }
-    break;
+      break;
     }
     case OP_ORLSHL: {
       auto Op = IROp->CW<IR::IROp_Orlshl>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         uint64_t NewConstant = Constant1 | (Constant2 << Op->BitShift);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
       }
-    break;
+      break;
     }
     case OP_ORLSHR: {
       auto Op = IROp->CW<IR::IROp_Orlshr>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         uint64_t NewConstant = Constant1 | (Constant2 >> Op->BitShift);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
       }
-    break;
+      break;
     }
     case OP_XOR: {
       auto Op = IROp->C<IR::IROp_Xor>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         uint64_t NewConstant = Constant1 ^ Constant2;
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
@@ -723,38 +698,33 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       } else {
         // XOR with zero results in the nonzero source
         for (unsigned i = 0; i < 2; ++i) {
-          if (!IREmit->IsValueConstant(Op->Header.Args[i], &Constant1))
-            continue;
+          if (!IREmit->IsValueConstant(Op->Header.Args[i], &Constant1)) continue;
 
-          if (Constant1 != 0)
-            continue;
+          if (Constant1 != 0) continue;
 
           IREmit->SetWriteCursor(CodeNode);
-          OrderedNode *Arg = CurrentIR.GetNode(Op->Header.Args[1 - i]);
+          OrderedNode* Arg = CurrentIR.GetNode(Op->Header.Args[1 - i]);
           IREmit->ReplaceAllUsesWith(CodeNode, Arg);
           Changed = true;
           break;
         }
       }
-    break;
+      break;
     }
     case OP_LSHL: {
       auto Op = IROp->CW<IR::IROp_Lshl>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         // Shifts mask the shift amount by 63 or 31 depending on operating size;
         uint64_t ShiftMask = IROp->Size == 8 ? 63 : 31;
         uint64_t NewConstant = (Constant1 << (Constant2 & ShiftMask)) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
-      }
-      else if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) &&
-                Constant2 == 0) {
+      } else if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) && Constant2 == 0) {
         IREmit->SetWriteCursor(CodeNode);
-        OrderedNode *Arg = CurrentIR.GetNode(Op->Header.Args[0]);
+        OrderedNode* Arg = CurrentIR.GetNode(Op->Header.Args[0]);
         IREmit->ReplaceAllUsesWith(CodeNode, Arg);
         Changed = true;
       } else {
@@ -764,25 +734,22 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
           Changed = true;
         }
       }
-    break;
+      break;
     }
     case OP_LSHR: {
       auto Op = IROp->CW<IR::IROp_Lshr>();
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         // Shifts mask the shift amount by 63 or 31 depending on operating size;
         uint64_t ShiftMask = IROp->Size == 8 ? 63 : 31;
         uint64_t NewConstant = (Constant1 >> (Constant2 & ShiftMask)) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
-      }
-      else if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) &&
-                Constant2 == 0) {
+      } else if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) && Constant2 == 0) {
         IREmit->SetWriteCursor(CodeNode);
-        OrderedNode *Arg = CurrentIR.GetNode(Op->Header.Args[0]);
+        OrderedNode* Arg = CurrentIR.GetNode(Op->Header.Args[0]);
         IREmit->ReplaceAllUsesWith(CodeNode, Arg);
         Changed = true;
       } else {
@@ -792,7 +759,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
           Changed = true;
         }
       }
-    break;
+      break;
     }
     case OP_BFE: {
       auto Op = IROp->C<IR::IROp_Bfe>();
@@ -804,9 +771,9 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
         uint64_t NewConstant = (Constant & SourceMask) >> Op->lsb;
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
-      } else if (IROp->Size == CurrentIR.GetOp<IROp_Header>(Op->Header.Args[0])->Size && Op->Width == (IROp->Size * 8) && Op->lsb == 0 ) {
+      } else if (IROp->Size == CurrentIR.GetOp<IROp_Header>(Op->Header.Args[0])->Size && Op->Width == (IROp->Size * 8) && Op->lsb == 0) {
         // A BFE that extracts all bits results in original value
-  // XXX - This is broken for now - see https://github.com/FEX-Emu/FEX/issues/351
+        // XXX - This is broken for now - see https://github.com/FEX-Emu/FEX/issues/351
         // IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(Op->Header.Args[0]));
         // Changed = true;
       } else if (Op->Width == 1 && Op->lsb == 0) {
@@ -815,29 +782,24 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
 
         uint64_t Constant2{};
         uint64_t Constant3{};
-        if (val->Op == OP_SELECT &&
-            IREmit->IsValueConstant(val->Args[2], &Constant2) &&
-            IREmit->IsValueConstant(val->Args[3], &Constant3) &&
-            Constant2 == 1 &&
-            Constant3 == 0)
-        {
+        if (
+        val->Op == OP_SELECT && IREmit->IsValueConstant(val->Args[2], &Constant2) && IREmit->IsValueConstant(val->Args[3], &Constant3) &&
+        Constant2 == 1 && Constant3 == 0) {
           IREmit->ReplaceAllUsesWith(CodeNode, CurrentIR.GetNode(Op->Header.Args[0]));
           Changed = true;
         }
       }
 
-    break;
+      break;
     }
     case OP_SBFE: {
       auto Op = IROp->C<IR::IROp_Bfe>();
       uint64_t Constant;
       if (IREmit->IsValueConstant(Op->Src, &Constant)) {
         // SBFE of a constant can be converted to a constant.
-        uint64_t SourceMask =
-            Op->Width == 64 ? ~0ULL : ((1ULL << Op->Width) - 1);
+        uint64_t SourceMask = Op->Width == 64 ? ~0ULL : ((1ULL << Op->Width) - 1);
         uint64_t DestSizeInBits = IROp->Size * 8;
-        uint64_t DestMask =
-            DestSizeInBits == 64 ? ~0ULL : ((1ULL << DestSizeInBits) - 1);
+        uint64_t DestMask = DestSizeInBits == 64 ? ~0ULL : ((1ULL << DestSizeInBits) - 1);
         SourceMask <<= Op->lsb;
 
         int64_t NewConstant = (Constant & SourceMask) >> Op->lsb;
@@ -864,8 +826,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
 
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
-      }
-      else if (SrcIsConstant && HasConsecutiveBits(ConstantSrc, Op->Width)) {
+      } else if (SrcIsConstant && HasConsecutiveBits(ConstantSrc, Op->Width)) {
         // We are trying to insert constant, if it is a bitfield of only set bits then we can orr or and it.
         IREmit->SetWriteCursor(CodeNode);
         uint64_t SourceMask = Op->Width == 64 ? ~0ULL : ((1ULL << Op->Width) - 1);
@@ -875,8 +836,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
           auto orr = IREmit->_Or(IR::SizeToOpSize(IROp->Size), CurrentIR.GetNode(Op->Header.Args[0]), IREmit->_Constant(NewConstant));
           IREmit->ReplaceAllUsesWith(CodeNode, orr);
           Changed = true;
-        }
-        else {
+        } else {
           // We are wanting to clear the bitfield.
           auto andn = IREmit->_Andn(IR::SizeToOpSize(IROp->Size), CurrentIR.GetNode(Op->Header.Args[0]), IREmit->_Constant(NewConstant));
           IREmit->ReplaceAllUsesWith(CodeNode, andn);
@@ -890,8 +850,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2)) {
         uint64_t NewConstant = (Constant1 * Constant2) & getMask(Op);
         IREmit->ReplaceWithConstant(CodeNode, NewConstant);
         Changed = true;
@@ -911,9 +870,7 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       uint64_t Constant1{};
       uint64_t Constant2{};
 
-      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) &&
-          IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) &&
-          Op->Cond == COND_EQ) {
+      if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant1) && IREmit->IsValueConstant(Op->Header.Args[1], &Constant2) && Op->Cond == COND_EQ) {
 
         Constant1 &= getMask(Op);
         Constant2 &= getMask(Op);
@@ -925,24 +882,22 @@ bool ConstProp::ConstantPropagation(IREmitter *IREmit, const IRListView& Current
       }
       break;
     }
-    default:
-      break;
+    default: break;
     }
 
     return Changed;
-}
+  }
 
-bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR) {
-  InlineConstantGen.clear();
-  bool Changed = false;
+  bool ConstProp::ConstantInlining(IREmitter* IREmit, const IRListView& CurrentIR) {
+    InlineConstantGen.clear();
+    bool Changed = false;
 
-  for (auto [CodeNode, IROp] : CurrentIR.GetAllCode()) {
-    switch(IROp->Op) {
+    for (auto [CodeNode, IROp] : CurrentIR.GetAllCode()) {
+      switch (IROp->Op) {
       case OP_LSHR:
       case OP_ASHR:
       case OP_ROR:
-      case OP_LSHL:
-      {
+      case OP_LSHL: {
         auto Op = IROp->C<IR::IROp_Lshr>();
 
         uint64_t Constant2{};
@@ -950,7 +905,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
           IREmit->SetWriteCursor(CurrentIR.GetNode(Op->Header.Args[1]));
 
           // this shouldn't be here, but rather on the emitter themselves or the constprop transformation?
-          if (IROp->Size <=4)
+          if (IROp->Size <= 4)
             Constant2 &= 31;
           else
             Constant2 &= 63;
@@ -964,8 +919,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
       case OP_ADD:
       case OP_SUB:
       case OP_ADDNZCV:
-      case OP_SUBNZCV:
-      {
+      case OP_SUBNZCV: {
         auto Op = IROp->C<IR::IROp_Add>();
 
         uint64_t Constant2{};
@@ -991,8 +945,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
 
         break;
       }
-      case OP_CONDADDNZCV:
-      {
+      case OP_CONDADDNZCV: {
         auto Op = IROp->C<IR::IROp_CondAddNZCV>();
 
         uint64_t Constant2{};
@@ -1016,8 +969,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_TESTNZ:
-      {
+      case OP_TESTNZ: {
         auto Op = IROp->C<IR::IROp_TestNZ>();
 
         uint64_t Constant1{};
@@ -1032,8 +984,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_SELECT:
-      {
+      case OP_SELECT: {
         auto Op = IROp->C<IR::IROp_Select>();
 
         uint64_t Constant1{};
@@ -1056,11 +1007,9 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
 
         uint64_t Constant2{};
         uint64_t Constant3{};
-        if (IREmit->IsValueConstant(Op->Header.Args[2], &Constant2) &&
-            IREmit->IsValueConstant(Op->Header.Args[3], &Constant3) &&
-            (Constant2 == 1 || (SupportsAllOnes && Constant2 == AllOnes)) &&
-            Constant3 == 0)
-        {
+        if (
+        IREmit->IsValueConstant(Op->Header.Args[2], &Constant2) && IREmit->IsValueConstant(Op->Header.Args[3], &Constant3) &&
+        (Constant2 == 1 || (SupportsAllOnes && Constant2 == AllOnes)) && Constant3 == 0) {
           IREmit->SetWriteCursor(CurrentIR.GetNode(Op->Header.Args[2]));
 
           IREmit->ReplaceNodeArgument(CodeNode, 2, CreateInlineConstant(IREmit, Constant2));
@@ -1069,8 +1018,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
 
         break;
       }
-      case OP_NZCVSELECT:
-      {
+      case OP_NZCVSELECT: {
         auto Op = IROp->C<IR::IROp_NZCVSelect>();
 
         uint64_t AllOnes = IROp->Size == 8 ? 0xffff'ffff'ffff'ffffull : 0xffff'ffffull;
@@ -1079,15 +1027,11 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         // special 1/~0 constant if source 1 is 0.
         uint64_t Constant0{};
         uint64_t Constant1{};
-        if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant1) &&
-            Constant1 == 0)
-        {
+        if (IREmit->IsValueConstant(Op->Header.Args[1], &Constant1) && Constant1 == 0) {
           IREmit->SetWriteCursor(CurrentIR.GetNode(Op->Header.Args[1]));
           IREmit->ReplaceNodeArgument(CodeNode, 1, CreateInlineConstant(IREmit, Constant1));
 
-          if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant0) &&
-              (Constant0 == 1 || Constant0 == AllOnes))
-          {
+          if (IREmit->IsValueConstant(Op->Header.Args[0], &Constant0) && (Constant0 == 1 || Constant0 == AllOnes)) {
             IREmit->SetWriteCursor(CurrentIR.GetNode(Op->Header.Args[0]));
 
             IREmit->ReplaceNodeArgument(CodeNode, 0, CreateInlineConstant(IREmit, Constant0));
@@ -1096,8 +1040,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
 
         break;
       }
-      case OP_CONDJUMP:
-      {
+      case OP_CONDJUMP: {
         auto Op = IROp->C<IR::IROp_CondJump>();
 
         uint64_t Constant2{};
@@ -1112,8 +1055,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_EXITFUNCTION:
-      {
+      case OP_EXITFUNCTION: {
         auto Op = IROp->C<IR::IROp_ExitFunction>();
 
         uint64_t Constant{};
@@ -1139,8 +1081,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
       case OP_OR:
       case OP_XOR:
       case OP_AND:
-      case OP_ANDN:
-      {
+      case OP_ANDN: {
         auto Op = IROp->CW<IR::IROp_Or>();
 
         uint64_t Constant2{};
@@ -1155,8 +1096,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_LOADMEM:
-      {
+      case OP_LOADMEM: {
         auto Op = IROp->CW<IR::IROp_LoadMem>();
 
         uint64_t Constant2{};
@@ -1171,8 +1111,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_STOREMEM:
-      {
+      case OP_STOREMEM: {
         auto Op = IROp->CW<IR::IROp_StoreMem>();
 
         uint64_t Constant2{};
@@ -1187,8 +1126,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_LOADMEMTSO:
-      {
+      case OP_LOADMEMTSO: {
         auto Op = IROp->CW<IR::IROp_LoadMemTSO>();
 
         uint64_t Constant2{};
@@ -1205,8 +1143,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_STOREMEMTSO:
-      {
+      case OP_STOREMEMTSO: {
         auto Op = IROp->CW<IR::IROp_StoreMemTSO>();
 
         uint64_t Constant2{};
@@ -1223,8 +1160,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_MEMCPY:
-      {
+      case OP_MEMCPY: {
         auto Op = IROp->CW<IR::IROp_MemCpy>();
 
         uint64_t Constant{};
@@ -1237,8 +1173,7 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         }
         break;
       }
-      case OP_MEMSET:
-      {
+      case OP_MEMSET: {
         auto Op = IROp->CW<IR::IROp_MemSet>();
 
         uint64_t Constant{};
@@ -1252,46 +1187,45 @@ bool ConstProp::ConstantInlining(IREmitter *IREmit, const IRListView& CurrentIR)
         break;
       }
 
-      default:
-        break;
+      default: break;
+      }
     }
+
+    return Changed;
   }
 
-  return Changed;
-}
+  bool ConstProp::Run(IREmitter* IREmit) {
+    FEXCORE_PROFILE_SCOPED("PassManager::ConstProp");
 
-bool ConstProp::Run(IREmitter *IREmit) {
-  FEXCORE_PROFILE_SCOPED("PassManager::ConstProp");
+    bool Changed = false;
+    auto CurrentIR = IREmit->ViewIR();
+    auto OriginalWriteCursor = IREmit->GetWriteCursor();
 
-  bool Changed = false;
-  auto CurrentIR = IREmit->ViewIR();
-  auto OriginalWriteCursor = IREmit->GetWriteCursor();
-
-  if (HandleConstantPools(IREmit, CurrentIR)) {
-    Changed = true;
-  }
-
-  LoadMemStoreMemImmediatePooling(IREmit, CurrentIR);
-
-  for (auto [CodeNode, IROp] : CurrentIR.GetAllCode()) {
-    if (ZextAndMaskingElimination(IREmit, CurrentIR, CodeNode, IROp)) {
+    if (HandleConstantPools(IREmit, CurrentIR)) {
       Changed = true;
     }
-    if (ConstantPropagation(IREmit, CurrentIR, CodeNode, IROp)) {
+
+    LoadMemStoreMemImmediatePooling(IREmit, CurrentIR);
+
+    for (auto [CodeNode, IROp] : CurrentIR.GetAllCode()) {
+      if (ZextAndMaskingElimination(IREmit, CurrentIR, CodeNode, IROp)) {
+        Changed = true;
+      }
+      if (ConstantPropagation(IREmit, CurrentIR, CodeNode, IROp)) {
+        Changed = true;
+      }
+    }
+
+    if (InlineConstants && ConstantInlining(IREmit, CurrentIR)) {
       Changed = true;
     }
+
+    IREmit->SetWriteCursor(OriginalWriteCursor);
+    return Changed;
   }
 
-  if (InlineConstants && ConstantInlining(IREmit, CurrentIR)) {
-    Changed = true;
+  fextl::unique_ptr<FEXCore::IR::Pass> CreateConstProp(bool InlineConstants, bool SupportsTSOImm9) {
+    return fextl::make_unique<ConstProp>(InlineConstants, SupportsTSOImm9);
   }
-
-  IREmit->SetWriteCursor(OriginalWriteCursor);
-  return Changed;
-}
-
-fextl::unique_ptr<FEXCore::IR::Pass> CreateConstProp(bool InlineConstants, bool SupportsTSOImm9) {
-  return fextl::make_unique<ConstProp>(InlineConstants, SupportsTSOImm9);
-}
 
 }

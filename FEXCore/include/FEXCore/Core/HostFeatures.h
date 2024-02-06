@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace FEXCore {
-class HostFeatures final {
+  class HostFeatures final {
   public:
     HostFeatures();
 
@@ -42,5 +42,5 @@ class HostFeatures final {
     // Float exception behaviour
     bool SupportsAFP{};
     bool SupportsFloatExceptions{};
-};
+  };
 }

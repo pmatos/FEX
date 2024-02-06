@@ -6,8 +6,7 @@
 
 #include <FEXCore/fextl/vector.h>
 
-template<typename SizeType>
-class IntervalList {
+template<typename SizeType> class IntervalList {
 public:
   using DifferenceType = decltype(std::declval<SizeType>() - std::declval<SizeType>());
 
@@ -27,21 +26,18 @@ public:
   struct QueryResult {
     bool Enclosed; ///< If the given offset was enclosed by an interval
     DifferenceType Size; ///< Size of the interval starting from the query offset, or distance to the next interval if
-                         /// `Enclosed` is false (if there is no next interval, size is 0)
+    /// `Enclosed` is false (if there is no next interval, size is 0)
   };
 
-  void Clear() {
-    Intervals.clear();
-  }
+  void Clear() { Intervals.clear(); }
 
   void Insert(Interval Entry) {
     if (Entry.Offset == Entry.End) {
       return;
     }
 
-    auto [FirstIt, EndIt] = std::equal_range(Intervals.begin(), Intervals.end(), Entry, [](const auto &LHS, const auto &RHS) {
-      return LHS.End <= RHS.Offset;
-    });
+    auto [FirstIt, EndIt] =
+    std::equal_range(Intervals.begin(), Intervals.end(), Entry, [](const auto &LHS, const auto &RHS) { return LHS.End <= RHS.Offset; });
 
     if (FirstIt == EndIt) {
       // No overlaps
@@ -70,9 +66,8 @@ public:
       return;
     }
 
-    auto [FirstIt, EndIt] = std::equal_range(Intervals.begin(), Intervals.end(), Entry, [](const auto &LHS, const auto &RHS) {
-      return LHS.End <= RHS.Offset;
-    });
+    auto [FirstIt, EndIt] =
+    std::equal_range(Intervals.begin(), Intervals.end(), Entry, [](const auto &LHS, const auto &RHS) { return LHS.End <= RHS.Offset; });
 
     if (FirstIt == EndIt) {
       // No intersecting intervals present, nothing more to do
@@ -81,7 +76,7 @@ public:
 
     if (FirstIt->Offset < Entry.Offset && FirstIt->End > Entry.End) {
       // The interval to be removed is fully enclosed by an existing interval
-      
+
       // Break the single interval into two smaller intervals on either side on the interval being removed
       const auto FirstPredecessorIt = Intervals.insert(FirstIt, *FirstIt);
       FirstIt = std::next(FirstPredecessorIt);

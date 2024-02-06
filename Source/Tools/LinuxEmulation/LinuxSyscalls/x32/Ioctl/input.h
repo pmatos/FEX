@@ -6,8 +6,7 @@
 #include <sys/ioctl.h>
 
 namespace FEX::HLE::x32 {
-namespace input {
+  namespace input {
 #include "LinuxSyscalls/x32/Ioctl/input.inl"
+  }
 }
-}
-

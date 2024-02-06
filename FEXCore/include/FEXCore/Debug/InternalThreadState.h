@@ -35,7 +35,7 @@ namespace FEXCore::Frontend {
   class Decoder;
 }
 
-namespace FEXCore::IR{
+namespace FEXCore::IR {
   class OpDispatchBuilder;
   class PassManager;
 }
@@ -78,11 +78,9 @@ namespace FEXCore::Core {
     // Maximum distance until the end of the buffer to do a write.
     constexpr static size_t NEEDS_WRITE_DISTANCE = BUFFER_SIZE - 64;
     // Maximum time threshhold to wait before a buffer write occurs.
-    constexpr static std::chrono::milliseconds MAXIMUM_THRESHOLD {100};
+    constexpr static std::chrono::milliseconds MAXIMUM_THRESHOLD{100};
 
-    JITSymbolBuffer()
-      : LastWrite {std::chrono::steady_clock::now()} {
-    }
+    JITSymbolBuffer() : LastWrite{std::chrono::steady_clock::now()} {}
     // stead_clock to ensure a monotonic increasing clock.
     // In highly stressed situations this can still cause >2% CPU time in vdso_clock_gettime.
     // If we need lower CPU time when JIT symbols are enabled then FEX can read the cycle counter directly.
@@ -93,20 +91,20 @@ namespace FEXCore::Core {
   static_assert(sizeof(JITSymbolBuffer) == 4096, "Ensure this is one page in size");
 
   struct InternalThreadState : public FEXCore::Allocator::FEXAllocOperators {
-    FEXCore::Core::CpuStateFrame* const CurrentFrame = &BaseFrameState;
+    FEXCore::Core::CpuStateFrame * const CurrentFrame = &BaseFrameState;
 
     struct {
-      std::atomic_bool Running {false};
-      std::atomic_bool WaitingToStart {true};
-      std::atomic_bool EarlyExit {false};
-      std::atomic_bool ThreadSleeping {false};
+      std::atomic_bool Running{false};
+      std::atomic_bool WaitingToStart{true};
+      std::atomic_bool EarlyExit{false};
+      std::atomic_bool ThreadSleeping{false};
     } RunningEvents;
 
     FEXCore::Context::Context *CTX;
     std::atomic<SignalEvent> SignalReason{SignalEvent::Nothing};
 
     fextl::unique_ptr<FEXCore::Threads::Thread> ExecutionThread;
-    bool StartPaused {false};
+    bool StartPaused{false};
     InterruptableConditionVariable StartRunning;
     Event ThreadWaiting;
 
@@ -123,7 +121,7 @@ namespace FEXCore::Core {
     fextl::unique_ptr<JITSymbolBuffer> SymbolBuffer;
 
     int StatusCode{};
-    FEXCore::Context::ExitReason ExitReason {FEXCore::Context::ExitReason::EXIT_WAITING};
+    FEXCore::Context::ExitReason ExitReason{FEXCore::Context::ExitReason::EXIT_WAITING};
     std::shared_ptr<FEXCore::CompileService> CompileService;
 
     std::shared_mutex ObjectCacheRefCounter{};
@@ -145,10 +143,8 @@ namespace FEXCore::Core {
     // Can be reprotected as RO to trigger an interrupt at generated code block entrypoints
     alignas(FHU::FEX_PAGE_SIZE) uint8_t InterruptFaultPage[FHU::FEX_PAGE_SIZE];
   };
-  static_assert((offsetof(FEXCore::Core::InternalThreadState, InterruptFaultPage) -
-                 offsetof(FEXCore::Core::InternalThreadState, BaseFrameState)) < 4096,
-		"Fault page is outside of immediate range from CPU state");
+  static_assert(
+  (offsetof(FEXCore::Core::InternalThreadState, InterruptFaultPage) - offsetof(FEXCore::Core::InternalThreadState, BaseFrameState)) < 4096,
+  "Fault page is outside of immediate range from CPU state");
   // static_assert(std::is_standard_layout<InternalThreadState>::value, "This needs to be standard layout");
 }
-
-

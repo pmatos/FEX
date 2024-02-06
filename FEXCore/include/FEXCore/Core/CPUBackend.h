@@ -17,52 +17,52 @@ $end_info$
 
 namespace FEXCore {
 
-namespace IR {
-  class IRListView;
-  class RegisterAllocationData;
-}
+  namespace IR {
+    class IRListView;
+    class RegisterAllocationData;
+  }
 
-namespace Core {
-  struct DebugData;
-  struct ThreadState;
-  struct CpuStateFrame;
-  struct InternalThreadState;
-}
+  namespace Core {
+    struct DebugData;
+    struct ThreadState;
+    struct CpuStateFrame;
+    struct InternalThreadState;
+  }
 
-namespace CodeSerialize {
-  struct CodeObjectFileSection;
-}
+  namespace CodeSerialize {
+    struct CodeObjectFileSection;
+  }
 
-namespace CPU {
-  struct CPUBackendFeatures {
-    bool SupportsFlags = false;
-    bool SupportsSaturatingRoundingShifts = false;
-    bool SupportsVTBL2 = false;
-  };
-
-  class CPUBackend {
-  public:
-    struct CodeBuffer {
-      uint8_t *Ptr;
-      size_t Size;
+  namespace CPU {
+    struct CPUBackendFeatures {
+      bool SupportsFlags = false;
+      bool SupportsSaturatingRoundingShifts = false;
+      bool SupportsVTBL2 = false;
     };
 
-    /**
+    class CPUBackend {
+    public:
+      struct CodeBuffer {
+        uint8_t *Ptr;
+        size_t Size;
+      };
+
+      /**
      * @param InitialCodeSize - Initial size for the code buffers
      * @param MaxCodeSize - Max size for the code buffers
     */
-    CPUBackend(FEXCore::Core::InternalThreadState *ThreadState, size_t InitialCodeSize, size_t MaxCodeSize);
+      CPUBackend(FEXCore::Core::InternalThreadState *ThreadState, size_t InitialCodeSize, size_t MaxCodeSize);
 
-    virtual ~CPUBackend();
-    /**
+      virtual ~CPUBackend();
+      /**
      * @return The name of this backend
      */
-    [[nodiscard]] virtual fextl::string GetName() = 0;
+      [[nodiscard]] virtual fextl::string GetName() = 0;
 
-    struct CompiledCode {
-      // Where this code block begins.
-      uint8_t* BlockBegin;
-      /**
+      struct CompiledCode {
+        // Where this code block begins.
+        uint8_t *BlockBegin;
+        /**
        * The function entrypoint to this codeblock.
        *
        * This may or may not equal `BlockBegin` above. Depending on the CPU backend, it may stick data
@@ -70,58 +70,58 @@ namespace CPU {
        *
        * Is actually a function pointer of type `void (FEXCore::Core::ThreadState *Thread)`
        */
-      uint8_t* BlockEntry;
-      // The total size of the codeblock from [BlockBegin, BlockBegin+Size).
-      size_t Size;
-    };
+        uint8_t *BlockEntry;
+        // The total size of the codeblock from [BlockBegin, BlockBegin+Size).
+        size_t Size;
+      };
 
-    // Header that can live at the start of a JIT block.
-    // We want the header to be quite small, with most data living in the tail object.
-    struct JITCodeHeader {
-      // Offset from the start of this header to where the tail lives.
-      // Only 32-bit since the tail block won't ever be more than 4GB away.
-      uint32_t OffsetToBlockTail;
-    };
+      // Header that can live at the start of a JIT block.
+      // We want the header to be quite small, with most data living in the tail object.
+      struct JITCodeHeader {
+        // Offset from the start of this header to where the tail lives.
+        // Only 32-bit since the tail block won't ever be more than 4GB away.
+        uint32_t OffsetToBlockTail;
+      };
 
-    // Header that can live at the end of the JIT block.
-    // For any state reconstruction or other data, this is where it should live.
-    // Any data that is explicitly tied to the JIT code and needs to be cached with it
-    // should end up in this data structure.
-    struct JITCodeTail {
-      // The total size of the codeblock from [BlockBegin, BlockBegin+Size).
-      size_t Size;
-      // RIP that the block's entry comes from.
-      uint64_t RIP;
+      // Header that can live at the end of the JIT block.
+      // For any state reconstruction or other data, this is where it should live.
+      // Any data that is explicitly tied to the JIT code and needs to be cached with it
+      // should end up in this data structure.
+      struct JITCodeTail {
+        // The total size of the codeblock from [BlockBegin, BlockBegin+Size).
+        size_t Size;
+        // RIP that the block's entry comes from.
+        uint64_t RIP;
 
-      // Number of RIP entries for this JIT Code section.
-      uint32_t NumberOfRIPEntries;
+        // Number of RIP entries for this JIT Code section.
+        uint32_t NumberOfRIPEntries;
 
-      // Offset after this block to the start of the RIP entries.
-      uint32_t OffsetToRIPEntries;
+        // Offset after this block to the start of the RIP entries.
+        uint32_t OffsetToRIPEntries;
 
-      // Shared-code modification spin-loop futex.
-      uint32_t SpinLockFutex;
+        // Shared-code modification spin-loop futex.
+        uint32_t SpinLockFutex;
 
-      uint32_t _Pad;
-    };
+        uint32_t _Pad;
+      };
 
-    // Entries that live after the JITCodeTail.
-    // These entries correlate JIT code regions with guest RIP regions.
-    // Using these entries FEX is able to reconstruct the guest RIP accurately when an instruction cause a signal fault.
-    // Packed using 16-bit entries to ensure the size isn't too large.
-    // These smaller sizes means that each entry is relative to each other instead of absolute offset from the start of the JIT block.
-    // When reconstructing the RIP, each entry must be walked linearly and accumulated with the previous entries.
-    // This is a trade-off between compression inside the JIT code space and execution time when reconstruction the RIP.
-    // RIP reconstruction when faulting is less likely so we are requiring the accumulation.
-    struct JITRIPReconstructEntries {
-      // The Host PC offset from the previous entry.
-      uint16_t HostPCOffset;
+      // Entries that live after the JITCodeTail.
+      // These entries correlate JIT code regions with guest RIP regions.
+      // Using these entries FEX is able to reconstruct the guest RIP accurately when an instruction cause a signal fault.
+      // Packed using 16-bit entries to ensure the size isn't too large.
+      // These smaller sizes means that each entry is relative to each other instead of absolute offset from the start of the JIT block.
+      // When reconstructing the RIP, each entry must be walked linearly and accumulated with the previous entries.
+      // This is a trade-off between compression inside the JIT code space and execution time when reconstruction the RIP.
+      // RIP reconstruction when faulting is less likely so we are requiring the accumulation.
+      struct JITRIPReconstructEntries {
+        // The Host PC offset from the previous entry.
+        uint16_t HostPCOffset;
 
-      // How much to offset the RIP from the previous entry.
-      uint16_t GuestRIPOffset;
-    };
+        // How much to offset the RIP from the previous entry.
+        uint16_t GuestRIPOffset;
+      };
 
-    /**
+      /**
      * @brief Tells this CPUBackend to compile code for the provided IR and DebugData
      *
      * The returned pointer needs to be long lived and be executable in the host environment
@@ -137,12 +137,10 @@ namespace CPU {
      *
      * @return Information about the compiled code block.
      */
-    [[nodiscard]] virtual CompiledCode CompileCode(uint64_t Entry,
-                                            FEXCore::IR::IRListView const *IR,
-                                            FEXCore::Core::DebugData *DebugData,
-                                            FEXCore::IR::RegisterAllocationData *RAData) = 0;
+      [[nodiscard]] virtual CompiledCode CompileCode(
+      uint64_t Entry, FEXCore::IR::IRListView const *IR, FEXCore::Core::DebugData *DebugData, FEXCore::IR::RegisterAllocationData *RAData) = 0;
 
-    /**
+      /**
      * @brief Relocates a block of code from the JIT code object cache
      *
      * @param Entry - RIP of the entry
@@ -150,16 +148,18 @@ namespace CPU {
      *
      * @return An executable function pointer relocated from the cache object
      */
-    [[nodiscard]] virtual void *RelocateJITObjectCode(uint64_t Entry, CodeSerialize::CodeObjectFileSection const *SerializationData) { return nullptr; }
+      [[nodiscard]] virtual void *RelocateJITObjectCode(uint64_t Entry, CodeSerialize::CodeObjectFileSection const *SerializationData) {
+        return nullptr;
+      }
 
-    /**
+      /**
      * @brief Function for mapping memory in to the CPUBackend's visible space. Allows setting up virtual mappings if required
      *
      * @return Currently unused
      */
-    [[nodiscard]] virtual void *MapRegion(void *HostPtr, uint64_t GuestPtr, uint64_t Size) = 0;
+      [[nodiscard]] virtual void *MapRegion(void *HostPtr, uint64_t GuestPtr, uint64_t Size) = 0;
 
-    /**
+      /**
      * @brief Lets FEXCore know if this CPUBackend needs IR and DebugData for CompileCode
      *
      * This is useful if the FEXCore Frontend hits an x86-64 instruction that isn't understood but can continue regardless
@@ -168,42 +168,40 @@ namespace CPU {
      *
      * @return true if it needs the IR
      */
-    [[nodiscard]] virtual bool NeedsOpDispatch() = 0;
+      [[nodiscard]] virtual bool NeedsOpDispatch() = 0;
 
-    virtual void ClearCache() {}
+      virtual void ClearCache() {}
 
-    /**
+      /**
      * @brief Clear any relocations after JIT compiling
      */
-    virtual void ClearRelocations() {}
+      virtual void ClearRelocations() {}
 
-    bool IsAddressInCodeBuffer(uintptr_t Address) const;
+      bool IsAddressInCodeBuffer(uintptr_t Address) const;
 
-  protected:
-    // Max spill slot size in bytes. We need at most 32 bytes
-    // to be able to handle a 256-bit vector store to a slot.
-    constexpr static uint32_t MaxSpillSlotSize = 32;
+    protected:
+      // Max spill slot size in bytes. We need at most 32 bytes
+      // to be able to handle a 256-bit vector store to a slot.
+      constexpr static uint32_t MaxSpillSlotSize = 32;
 
-    FEXCore::Core::InternalThreadState *ThreadState;
+      FEXCore::Core::InternalThreadState *ThreadState;
 
-    size_t InitialCodeSize, MaxCodeSize;
-    [[nodiscard]] CodeBuffer *GetEmptyCodeBuffer();
+      size_t InitialCodeSize, MaxCodeSize;
+      [[nodiscard]] CodeBuffer *GetEmptyCodeBuffer();
 
-    // This is the current code buffer that we are tracking
-    CodeBuffer *CurrentCodeBuffer{};
+      // This is the current code buffer that we are tracking
+      CodeBuffer *CurrentCodeBuffer{};
 
-  private:
-    CodeBuffer AllocateNewCodeBuffer(size_t Size);
-    void FreeCodeBuffer(CodeBuffer Buffer);
+    private:
+      CodeBuffer AllocateNewCodeBuffer(size_t Size);
+      void FreeCodeBuffer(CodeBuffer Buffer);
 
-    void EmplaceNewCodeBuffer(CodeBuffer Buffer) {
-      CurrentCodeBuffer = &CodeBuffers.emplace_back(Buffer);
-    }
+      void EmplaceNewCodeBuffer(CodeBuffer Buffer) { CurrentCodeBuffer = &CodeBuffers.emplace_back(Buffer); }
 
-    // This is the array of code buffers. Unless signals force us to keep more than
-    // buffer, there will be only one entry here
-    fextl::vector<CodeBuffer> CodeBuffers{};
-  };
+      // This is the array of code buffers. Unless signals force us to keep more than
+      // buffer, there will be only one entry here
+      fextl::vector<CodeBuffer> CodeBuffers{};
+    };
 
-}
+  }
 }

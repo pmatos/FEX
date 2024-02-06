@@ -33,7 +33,8 @@ TEST_CASE("FutexSpin-Sleep-8bit") {
   });
 
   // Wait until the second thread lets us know to stop waiting sleeping.
-  while(ActualSpinLoop.load() == 0);
+  while (ActualSpinLoop.load() == 0)
+    ;
 
   // sleep this thread for the sleep amount.
   std::this_thread::sleep_for(SleepAmount);

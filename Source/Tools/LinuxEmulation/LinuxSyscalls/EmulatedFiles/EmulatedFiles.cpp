@@ -48,7 +48,7 @@ namespace FEX::EmulatedFile {
    * @return A temporary file that we can use
    */
   static int GenTmpFD(const char *pathname, int flags) {
-    uint32_t memfd_flags {MFD_ALLOW_SEALING};
+    uint32_t memfd_flags{MFD_ALLOW_SEALING};
     if (flags & O_CLOEXEC) memfd_flags |= MFD_CLOEXEC;
 
     return memfd_create(pathname, memfd_flags);
@@ -56,21 +56,14 @@ namespace FEX::EmulatedFile {
 
   // Seal the tmpfd features by sealing them all.
   // Makes the tmpfd read-only.
-  static void SealTmpFD(int fd) {
-    fcntl(fd, F_ADD_SEALS,
-      F_SEAL_SEAL |
-      F_SEAL_SHRINK |
-      F_SEAL_GROW |
-      F_SEAL_WRITE |
-      F_SEAL_FUTURE_WRITE);
-  }
+  static void SealTmpFD(int fd) { fcntl(fd, F_ADD_SEALS, F_SEAL_SEAL | F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_WRITE | F_SEAL_FUTURE_WRITE); }
 
   fextl::string GenerateCPUInfo(FEXCore::Context::Context *ctx, uint32_t CPUCores) {
     fextl::ostringstream cpu_stream{};
-    auto res_0  = ctx->RunCPUIDFunction(0, 0);
-    auto res_1  = ctx->RunCPUIDFunction(1, 0);
-    auto res_6  = ctx->RunCPUIDFunction(6, 0);
-    auto res_7  = ctx->RunCPUIDFunction(7, 0);
+    auto res_0 = ctx->RunCPUIDFunction(0, 0);
+    auto res_1 = ctx->RunCPUIDFunction(1, 0);
+    auto res_6 = ctx->RunCPUIDFunction(6, 0);
+    auto res_7 = ctx->RunCPUIDFunction(7, 0);
     auto res_10 = ctx->RunCPUIDFunction(0x10, 0);
 
     auto res_8000_0001 = ctx->RunCPUIDFunction(0x8000'0001, 0);
@@ -111,22 +104,25 @@ namespace FEX::EmulatedFile {
         unsigned Type       : 4;
         unsigned ExModelID  : 4;
         unsigned ExFamilyID : 8;
-        unsigned : 4;
+        unsigned            : 4;
       };
     };
 
-    VendorID vendorid {};
+    VendorID vendorid{};
     vendorid.cpuid = {res_0.eax, res_0.ebx, res_0.edx, res_0.ecx};
     vendorid.null = 0;
 
-    Info info {res_1};
+    Info info{res_1};
 
     uint32_t Family = info.FamilyID + (info.FamilyID == 0xF ? info.ExFamilyID : 0);
     fextl::ostringstream flags_data{};
     // Generate the flags data up front
     // This is the same per core
     {
-#define FLAG(flag, name) if (flag) { flags_data << name << " "; }
+#define FLAG(flag, name) \
+  if (flag) { \
+    flags_data << name << " "; \
+  }
       FLAG(res_1.edx & (1 << 0), "fpu")
       FLAG(res_1.edx & (1 << 1), "vme")
       FLAG(res_1.edx & (1 << 2), "de")
@@ -158,29 +154,18 @@ namespace FEX::EmulatedFile {
       FLAG(res_1.edx & (1 << 30), "ia64")
       FLAG(res_1.edx & (1 << 31), "pbe")
 
-      FLAG(res_8000_0001.edx & (1 << 11),
-        "syscall")
-      FLAG(res_8000_0001.edx & (1 << 19),
-        "mp")
-      FLAG(res_8000_0001.edx & (1 << 20),
-        "nx")
-      FLAG(res_8000_0001.edx & (1 << 22),
-        "mmxext")
-      FLAG(res_8000_0001.edx & (1 << 25),
-        "fxsr_opt")
-      FLAG(res_8000_0001.edx & (1 << 26),
-        "pdpe1gb")
-      FLAG(res_8000_0001.edx & (1 << 27),
-        "rdtscp")
-      FLAG(res_8000_0001.edx & (1 << 29),
-        "lm")
-      FLAG(res_8000_0001.edx & (1 << 31),
-        "3dnow")
-      FLAG(res_8000_0001.edx & (1 << 30),
-        "3dnowext")
+      FLAG(res_8000_0001.edx & (1 << 11), "syscall")
+      FLAG(res_8000_0001.edx & (1 << 19), "mp")
+      FLAG(res_8000_0001.edx & (1 << 20), "nx")
+      FLAG(res_8000_0001.edx & (1 << 22), "mmxext")
+      FLAG(res_8000_0001.edx & (1 << 25), "fxsr_opt")
+      FLAG(res_8000_0001.edx & (1 << 26), "pdpe1gb")
+      FLAG(res_8000_0001.edx & (1 << 27), "rdtscp")
+      FLAG(res_8000_0001.edx & (1 << 29), "lm")
+      FLAG(res_8000_0001.edx & (1 << 31), "3dnow")
+      FLAG(res_8000_0001.edx & (1 << 30), "3dnowext")
 
-      FLAG(res_8000_0007.edx & (1 << 8),
-        "constant_tsc")
+      FLAG(res_8000_0007.edx & (1 << 8), "constant_tsc")
 
       // We are not a uniprocessor running in SMP mode
       FLAG(false, "up")
@@ -194,8 +179,7 @@ namespace FEX::EmulatedFile {
       FLAG(false, "bts")
 
       FLAG(true, "rep_good")
-      FLAG(res_8000_0007.edx & (1 << 12),
-        "tm")
+      FLAG(res_8000_0007.edx & (1 << 12), "tm")
 
       // Always support long nop
       FLAG(true, "nopl")
@@ -205,16 +189,13 @@ namespace FEX::EmulatedFile {
 
       // Atom/geode only?
       FLAG(false, "tsc_reliable")
-      FLAG(res_8000_0007.edx & (1 << 8),
-        "nonstop_tsc")
+      FLAG(res_8000_0007.edx & (1 << 8), "nonstop_tsc")
 
       // We always support CPUID
       FLAG(true, "cpuid")
-      FLAG(Family > 0x16,
-        "extd_apicid")
+      FLAG(Family > 0x16, "extd_apicid")
       FLAG(false, "amd_dcm") // Never claim to be a multi node processor
-      FLAG(res_8000_0007.edx & (1 << 11),
-        "aperfmperf")
+      FLAG(res_8000_0007.edx & (1 << 11), "aperfmperf")
 
       // Need to check ARM documentation if we can support this?
       FLAG(false, "nonstop_tsc_s3")
@@ -222,165 +203,99 @@ namespace FEX::EmulatedFile {
       // We can calculate this flag on AArch64
       FLAG(true, "tsc_known_freq")
 
-      FLAG(res_1.ecx & (1 << 0),
-        "pni")
-      FLAG(res_1.ecx & (1 << 1),
-        "pclmulqdq")
-      FLAG(res_1.ecx & (1 << 2),
-        "dtes64")
-      FLAG(res_1.ecx & (1 << 3),
-        "monitor")
-      FLAG(res_1.ecx & (1 << 4),
-        "ds_cpl")
-      FLAG(res_1.ecx & (1 << 5),
-        "vmx")
-      FLAG(res_1.ecx & (1 << 6),
-        "smx")
-      FLAG(res_1.ecx & (1 << 7),
-        "est")
-      FLAG(res_1.ecx & (1 << 8),
-        "tm2")
-      FLAG(res_1.ecx & (1 << 9),
-        "ssse3")
-      FLAG(res_1.ecx & (1 << 11),
-        "sdbg")
-      FLAG(res_1.ecx & (1 << 12),
-        "fma")
-      FLAG(res_1.ecx & (1 << 13),
-        "cx16")
-      FLAG(res_1.ecx & (1 << 14),
-        "xptr")
-      FLAG(res_1.ecx & (1 << 15),
-        "pdcm")
-      FLAG(res_1.ecx & (1 << 17),
-        "pcid")
-      FLAG(res_1.ecx & (1 << 18),
-        "dca")
-      FLAG(res_1.ecx & (1 << 19),
-        "sse4_1")
-      FLAG(res_1.ecx & (1 << 20),
-        "sse4_2")
-      FLAG(res_1.ecx & (1 << 21),
-        "x2apic")
-      FLAG(res_1.ecx & (1 << 22),
-        "movbe")
-      FLAG(res_1.ecx & (1 << 23),
-        "popcnt")
-      FLAG(res_1.ecx & (1 << 24),
-        "tsc_deadline_timer")
-      FLAG(res_1.ecx & (1 << 25),
-        "aes")
-      FLAG(res_1.ecx & (1 << 26),
-        "xsave")
-      FLAG(res_1.ecx & (1 << 28),
-        "avx")
-      FLAG(res_1.ecx & (1 << 29),
-        "f16c")
-      FLAG(res_1.ecx & (1 << 30),
-        "rdrand")
-      FLAG(res_1.ecx & (1 << 31),
-        "hypervisor")
+      FLAG(res_1.ecx & (1 << 0), "pni")
+      FLAG(res_1.ecx & (1 << 1), "pclmulqdq")
+      FLAG(res_1.ecx & (1 << 2), "dtes64")
+      FLAG(res_1.ecx & (1 << 3), "monitor")
+      FLAG(res_1.ecx & (1 << 4), "ds_cpl")
+      FLAG(res_1.ecx & (1 << 5), "vmx")
+      FLAG(res_1.ecx & (1 << 6), "smx")
+      FLAG(res_1.ecx & (1 << 7), "est")
+      FLAG(res_1.ecx & (1 << 8), "tm2")
+      FLAG(res_1.ecx & (1 << 9), "ssse3")
+      FLAG(res_1.ecx & (1 << 11), "sdbg")
+      FLAG(res_1.ecx & (1 << 12), "fma")
+      FLAG(res_1.ecx & (1 << 13), "cx16")
+      FLAG(res_1.ecx & (1 << 14), "xptr")
+      FLAG(res_1.ecx & (1 << 15), "pdcm")
+      FLAG(res_1.ecx & (1 << 17), "pcid")
+      FLAG(res_1.ecx & (1 << 18), "dca")
+      FLAG(res_1.ecx & (1 << 19), "sse4_1")
+      FLAG(res_1.ecx & (1 << 20), "sse4_2")
+      FLAG(res_1.ecx & (1 << 21), "x2apic")
+      FLAG(res_1.ecx & (1 << 22), "movbe")
+      FLAG(res_1.ecx & (1 << 23), "popcnt")
+      FLAG(res_1.ecx & (1 << 24), "tsc_deadline_timer")
+      FLAG(res_1.ecx & (1 << 25), "aes")
+      FLAG(res_1.ecx & (1 << 26), "xsave")
+      FLAG(res_1.ecx & (1 << 28), "avx")
+      FLAG(res_1.ecx & (1 << 29), "f16c")
+      FLAG(res_1.ecx & (1 << 30), "rdrand")
+      FLAG(res_1.ecx & (1 << 31), "hypervisor")
 
-      FLAG(res_8000_0001.ecx & (1 << 0),
-        "lahf_lm")
-      FLAG(res_8000_0001.ecx & (1 << 1),
-        "cmp_legacy")
-      FLAG(res_8000_0001.ecx & (1 << 2),
-        "svm")
-      FLAG(res_8000_0001.ecx & (1 << 3),
-        "extapic")
-      FLAG(res_8000_0001.ecx & (1 << 4),
-        "cr8_legacy")
-      FLAG(res_8000_0001.ecx & (1 << 5),
-        "abm")
-      FLAG(res_8000_0001.ecx & (1 << 6),
-        "sse4a")
-      FLAG(res_8000_0001.ecx & (1 << 7),
-        "misalignsse")
-      FLAG(res_8000_0001.ecx & (1 << 8),
-        "3dnowprefetch")
-      FLAG(res_8000_0001.ecx & (1 << 9),
-        "osvw")
-      FLAG(res_8000_0001.ecx & (1 << 10),
-        "ibs")
-      FLAG(res_8000_0001.ecx & (1 << 11),
-        "xop")
-      FLAG(res_8000_0001.ecx & (1 << 12),
-        "skinit")
-      FLAG(res_8000_0001.ecx & (1 << 13),
-        "wdt")
-      FLAG(res_8000_0001.ecx & (1 << 15),
-        "lwp")
-      FLAG(res_8000_0001.ecx & (1 << 16),
-        "fma4")
-      FLAG(res_8000_0001.ecx & (1 << 17),
-        "tce")
-      FLAG(res_8000_0001.ecx & (1 << 19),
-        "nodeid_msr")
-      FLAG(res_8000_0001.ecx & (1 << 21),
-        "tbm")
-      FLAG(res_8000_0001.ecx & (1 << 22),
-        "topoext")
-      FLAG(res_8000_0001.ecx & (1 << 23),
-        "perfctr_core")
-      FLAG(res_8000_0001.ecx & (1 << 24),
-        "perfctr_nb")
-      FLAG(res_8000_0001.ecx & (1 << 26),
-        "bpext")
-      FLAG(res_8000_0001.ecx & (1 << 27),
-        "ptsc")
+      FLAG(res_8000_0001.ecx & (1 << 0), "lahf_lm")
+      FLAG(res_8000_0001.ecx & (1 << 1), "cmp_legacy")
+      FLAG(res_8000_0001.ecx & (1 << 2), "svm")
+      FLAG(res_8000_0001.ecx & (1 << 3), "extapic")
+      FLAG(res_8000_0001.ecx & (1 << 4), "cr8_legacy")
+      FLAG(res_8000_0001.ecx & (1 << 5), "abm")
+      FLAG(res_8000_0001.ecx & (1 << 6), "sse4a")
+      FLAG(res_8000_0001.ecx & (1 << 7), "misalignsse")
+      FLAG(res_8000_0001.ecx & (1 << 8), "3dnowprefetch")
+      FLAG(res_8000_0001.ecx & (1 << 9), "osvw")
+      FLAG(res_8000_0001.ecx & (1 << 10), "ibs")
+      FLAG(res_8000_0001.ecx & (1 << 11), "xop")
+      FLAG(res_8000_0001.ecx & (1 << 12), "skinit")
+      FLAG(res_8000_0001.ecx & (1 << 13), "wdt")
+      FLAG(res_8000_0001.ecx & (1 << 15), "lwp")
+      FLAG(res_8000_0001.ecx & (1 << 16), "fma4")
+      FLAG(res_8000_0001.ecx & (1 << 17), "tce")
+      FLAG(res_8000_0001.ecx & (1 << 19), "nodeid_msr")
+      FLAG(res_8000_0001.ecx & (1 << 21), "tbm")
+      FLAG(res_8000_0001.ecx & (1 << 22), "topoext")
+      FLAG(res_8000_0001.ecx & (1 << 23), "perfctr_core")
+      FLAG(res_8000_0001.ecx & (1 << 24), "perfctr_nb")
+      FLAG(res_8000_0001.ecx & (1 << 26), "bpext")
+      FLAG(res_8000_0001.ecx & (1 << 27), "ptsc")
 
-      FLAG(res_8000_0001.ecx & (1 << 28),
-        "perfctr_llc")
-      FLAG(res_8000_0001.ecx & (1 << 29),
-        "mwaitx")
+      FLAG(res_8000_0001.ecx & (1 << 28), "perfctr_llc")
+      FLAG(res_8000_0001.ecx & (1 << 29), "mwaitx")
 
       // We don't support ring 3 supporting mwait
       FLAG(false, "ring3mwait")
       // We don't support Intel CPUID fault support
       FLAG(false, "cpuid_fault")
-      FLAG(res_8000_0007.edx & (1 << 9),
-        "cpb")
-      FLAG(res_6.ecx & (1 << 3),
-        "epb")
-      FLAG(res_10.ebx & (1 << 1),
-        "cat_l3")
-      FLAG(res_10.ebx & (1 << 2),
-        "cat_l2")
-      FLAG(false, // Needs leaf support
-        "cdp_l3")
+      FLAG(res_8000_0007.edx & (1 << 9), "cpb")
+      FLAG(res_6.ecx & (1 << 3), "epb")
+      FLAG(res_10.ebx & (1 << 1), "cat_l3")
+      FLAG(res_10.ebx & (1 << 2), "cat_l2")
+      FLAG(
+      false, // Needs leaf support
+      "cdp_l3")
       FLAG(false, "invpcid_single")
-      FLAG(res_8000_0007.edx & (1 << 7),
-        "hw_pstate")
-      FLAG(res_8000_001f.eax & (1 << 0),
-        "sme")
+      FLAG(res_8000_0007.edx & (1 << 7), "hw_pstate")
+      FLAG(res_8000_001f.eax & (1 << 0), "sme")
 
       // Kernel page table isolation.
       FLAG(false, "pti")
 
       // We don't support Intel's Protected Processor Inventory Number
       FLAG(false, "intel_ppin")
-      FLAG(false, // Needs leaf support
-        "cdp_l2")
+      FLAG(
+      false, // Needs leaf support
+      "cdp_l2")
 
-      FLAG(res_8000_0008.ebx & (1 << 6),
-        "mba")
-      FLAG(res_8000_001f.eax & (1 << 1),
-        "sev")
+      FLAG(res_8000_0008.ebx & (1 << 6), "mba")
+      FLAG(res_8000_001f.eax & (1 << 1), "sev")
 
       {
-        // Speculative bug workarounds
-        // We don't claim to have these bugs, so we don't need to claim these flags
-        FLAG(res_7.edx & (1 << 31),
-          "ssbd")
-        FLAG(false, "ibrs")
-        FLAG(false, "ibpb")
+      // Speculative bug workarounds
+      // We don't claim to have these bugs, so we don't need to claim these flags
+      FLAG(res_7.edx & (1 << 31), "ssbd") FLAG(false, "ibrs") FLAG(false, "ibpb")
 
-        FLAG(res_7.edx & (1 << 27),
-          "stibp")
+      FLAG(res_7.edx & (1 << 27), "stibp")
 
-        FLAG(false, "ibrs_enhanced")
-      }
+      FLAG(false, "ibrs_enhanced")}
 
       // We don't support Intel's TPR Shadow feature
       FLAG(false, "tpr_shadow")
@@ -396,198 +311,86 @@ namespace FEX::EmulatedFile {
       // Prefer VMMCall to VMCall
       FLAG(false, "vmmcall")
       // Intel extended page table access dirty bit
-      FLAG(false, "ept_ad")
-      FLAG(res_7.ebx & (1 << 0),
-        "fsgsbase")
-      FLAG(res_7.ebx & (1 << 1),
-        "tsc_adjust")
-      FLAG(res_7.ebx & (1 << 3),
-        "bmi1")
-      FLAG(res_7.ebx & (1 << 4),
-        "hle")
-      FLAG(res_7.ebx & (1 << 5),
-        "avx2")
-      FLAG(res_7.ebx & (1 << 7),
-        "smep")
-      FLAG(res_7.ebx & (1 << 8),
-        "bmi2")
-      FLAG(res_7.ebx & (1 << 9),
-        "erms")
-      FLAG(res_7.ebx & (1 << 10),
-        "invpcid")
-      FLAG(res_7.ebx & (1 << 11),
-        "rtm")
-      FLAG(false, // Needs leaf support
-        "cqm")
-      FLAG(res_7.ebx & (1 << 14),
-        "mpx")
-      FLAG(false, // Needs leaf support
-        "rdt_a")
-      FLAG(res_7.ebx & (1 << 16),
-        "avx512f")
-      FLAG(res_7.ebx & (1 << 17),
-        "avx512dq")
-      FLAG(res_7.ebx & (1 << 18),
-        "rdseed")
-      FLAG(res_7.ebx & (1 << 19),
-        "adx")
-      FLAG(res_7.ebx & (1 << 20),
-        "smap")
-      FLAG(res_7.ebx & (1 << 21),
-        "avx512ifma")
-      FLAG(res_7.ebx & (1 << 23),
-        "clflushopt")
-      FLAG(res_7.ebx & (1 << 24),
-        "clwb")
-      FLAG(res_7.ebx & (1 << 25),
-        "intel_pt")
-      FLAG(res_7.ebx & (1 << 26),
-        "avx512pf")
-      FLAG(res_7.ebx & (1 << 27),
-        "avx512er")
-      FLAG(res_7.ebx & (1 << 28),
-        "avx512cd")
-      FLAG(res_7.ebx & (1 << 29),
-        "sha_ni")
-      FLAG(res_7.ebx & (1 << 30),
-        "avx512bw")
-      FLAG(res_7.ebx & (1 << 31),
-        "avx512vl")
-      FLAG(false, // Needs leaf support // res_d.eax & (1 << 0) // Leaf 1h
-        "xsaveopt")
-      FLAG(false, // Needs leaf support // res_d.eax & (1 << 1) // Leaf 1h
-        "xsavec")
-      FLAG(false, // Needs leaf support // res_d.eax & (1 << 2) // Leaf 1h
-        "xgetbv1")
-      FLAG(false, // Needs leaf support // res_d.eax & (1 << 3) // Leaf 1h
-        "xsaves")
+      FLAG(false, "ept_ad") FLAG(res_7.ebx & (1 << 0), "fsgsbase") FLAG(res_7.ebx & (1 << 1), "tsc_adjust")
+      FLAG(res_7.ebx & (1 << 3), "bmi1") FLAG(res_7.ebx & (1 << 4), "hle") FLAG(res_7.ebx & (1 << 5), "avx2")
+      FLAG(res_7.ebx & (1 << 7), "smep") FLAG(res_7.ebx & (1 << 8), "bmi2") FLAG(res_7.ebx & (1 << 9), "erms")
+      FLAG(res_7.ebx & (1 << 10), "invpcid") FLAG(
+      res_7.ebx & (1 << 11),
+      "rtm")
+      FLAG(
+      false, // Needs leaf support
+      "cqm")
+      FLAG(
+      res_7.ebx & (1 << 14),
+      "mpx")
+      FLAG(
+      false, // Needs leaf support
+      "rdt_a") FLAG(res_7.ebx & (1 << 16), "avx512f") FLAG(res_7.ebx & (1 << 17), "avx512dq") FLAG(res_7.ebx & (1 << 18), "rdseed")
+      FLAG(res_7.ebx & (1 << 19), "adx") FLAG(res_7.ebx & (1 << 20), "smap") FLAG(res_7.ebx & (1 << 21), "avx512ifma")
+      FLAG(res_7.ebx & (1 << 23), "clflushopt") FLAG(res_7.ebx & (1 << 24), "clwb") FLAG(res_7.ebx & (1 << 25), "intel_pt")
+      FLAG(res_7.ebx & (1 << 26), "avx512pf") FLAG(res_7.ebx & (1 << 27), "avx512er") FLAG(res_7.ebx & (1 << 28), "avx512cd")
+      FLAG(res_7.ebx & (1 << 29), "sha_ni") FLAG(res_7.ebx & (1 << 30), "avx512bw") FLAG(
+      res_7.ebx & (1 << 31),
+      "avx512vl")
+      FLAG(
+      false, // Needs leaf support // res_d.eax & (1 << 0) // Leaf 1h
+      "xsaveopt")
+      FLAG(
+      false, // Needs leaf support // res_d.eax & (1 << 1) // Leaf 1h
+      "xsavec")
+      FLAG(
+      false, // Needs leaf support // res_d.eax & (1 << 2) // Leaf 1h
+      "xgetbv1")
+      FLAG(
+      false, // Needs leaf support // res_d.eax & (1 << 3) // Leaf 1h
+      "xsaves")
 
-      FLAG(false, // Needs leaf support
-        "avx512_bf16")
-      FLAG(res_8000_0008.ebx & (1 << 0),
-        "clzero")
-      FLAG(res_8000_0008.ebx & (1 << 1),
-        "irperf")
-      FLAG(res_8000_0008.ebx & (1 << 2),
-        "xsaveerptr")
+      FLAG(
+      false, // Needs leaf support
+      "avx512_bf16") FLAG(res_8000_0008.ebx & (1 << 0), "clzero") FLAG(res_8000_0008.ebx & (1 << 1), "irperf")
+      FLAG(res_8000_0008.ebx & (1 << 2), "xsaveerptr")
 
       // Intel digital thermal sensor
       FLAG(false, "dtherm")
       // Intel turbo boost
-      FLAG(false, "ida")
-      FLAG(res_6.eax & (1 << 2),
-        "arat")
+      FLAG(false, "ida") FLAG(res_6.eax & (1 << 2), "arat")
       // Power limit notification controls
       FLAG(false, "pln")
       // Intel package thermal status
       FLAG(false, "pts")
 
       // Intel Hardware P-state features
-      FLAG(false, "hwp")
-      FLAG(false, "hwp_notify")
-      FLAG(false, "hwp_act_window")
-      FLAG(false, "hwp_epp")
-      FLAG(false, "hwp_pkg_req")
+      FLAG(false, "hwp") FLAG(false, "hwp_notify") FLAG(false, "hwp_act_window") FLAG(false, "hwp_epp") FLAG(false, "hwp_pkg_req")
 
-      FLAG(res_8000_000a.ebx & (1 << 0),
-        "npt")
-      FLAG(res_8000_000a.ebx & (1 << 1),
-        "lbrv")
-      FLAG(res_8000_000a.ebx & (1 << 2),
-        "svm_lock")
-      FLAG(res_8000_000a.ebx & (1 << 3),
-        "nrip_save")
-      FLAG(res_8000_000a.ebx & (1 << 4),
-        "tsc_scale")
-      FLAG(res_8000_000a.ebx & (1 << 5),
-        "vmcb_clean")
-      FLAG(res_8000_000a.ebx & (1 << 6),
-        "flushbyasid")
-      FLAG(res_8000_000a.ebx & (1 << 7),
-        "decodeassists")
-      FLAG(res_8000_000a.ebx & (1 << 10),
-        "pausefilter")
-      FLAG(res_8000_000a.ebx & (1 << 12),
-        "pfthreshold")
-      FLAG(res_8000_000a.ebx & (1 << 13),
-        "avic")
-      FLAG(res_8000_000a.ebx & (1 << 15),
-        "v_vmsave_vmload")
-      FLAG(res_8000_000a.ebx & (1 << 16),
-        "vgif")
+      FLAG(res_8000_000a.ebx & (1 << 0), "npt") FLAG(res_8000_000a.ebx & (1 << 1), "lbrv") FLAG(res_8000_000a.ebx & (1 << 2), "svm_lock")
+      FLAG(res_8000_000a.ebx & (1 << 3), "nrip_save") FLAG(res_8000_000a.ebx & (1 << 4), "tsc_scale")
+      FLAG(res_8000_000a.ebx & (1 << 5), "vmcb_clean") FLAG(res_8000_000a.ebx & (1 << 6), "flushbyasid")
+      FLAG(res_8000_000a.ebx & (1 << 7), "decodeassists") FLAG(res_8000_000a.ebx & (1 << 10), "pausefilter")
+      FLAG(res_8000_000a.ebx & (1 << 12), "pfthreshold") FLAG(res_8000_000a.ebx & (1 << 13), "avic")
+      FLAG(res_8000_000a.ebx & (1 << 15), "v_vmsave_vmload") FLAG(res_8000_000a.ebx & (1 << 16), "vgif")
 
-      FLAG(res_7.ecx & (1 << 1),
-        "avx512vbmi")
-      FLAG(res_7.ecx & (1 << 2),
-        "umip")
-      FLAG(res_7.ecx & (1 << 3),
-        "pku")
-      FLAG(res_7.ecx & (1 << 4),
-        "ospke")
-      FLAG(res_7.ecx & (1 << 5),
-        "waitpkg")
-      FLAG(res_7.ecx & (1 << 6),
-        "avx512_vbmi2")
-      FLAG(res_7.ecx & (1 << 8),
-        "gfni")
-      FLAG(res_7.ecx & (1 << 9),
-        "vaes")
-      FLAG(res_7.ecx & (1 << 10),
-        "vpclmulqdq")
-      FLAG(res_7.ecx & (1 << 11),
-        "avx512_vnni")
-      FLAG(res_7.ecx & (1 << 12),
-        "avx512_bitalg")
-      FLAG(res_7.ecx & (1 << 13),
-        "tme")
-      FLAG(res_7.ecx & (1 << 14),
-        "avx512_vpopcntdq")
-      FLAG(res_7.ecx & (1 << 16),
-        "la57")
-      FLAG(res_7.ecx & (1 << 22),
-        "rdpid")
-      FLAG(res_7.ecx & (1 << 25),
-        "cldemote")
-      FLAG(res_7.ecx & (1 << 27),
-        "movdiri")
-      FLAG(res_7.ecx & (1 << 28),
-        "movdir64b")
+      FLAG(res_7.ecx & (1 << 1), "avx512vbmi") FLAG(res_7.ecx & (1 << 2), "umip") FLAG(res_7.ecx & (1 << 3), "pku")
+      FLAG(res_7.ecx & (1 << 4), "ospke") FLAG(res_7.ecx & (1 << 5), "waitpkg") FLAG(res_7.ecx & (1 << 6), "avx512_vbmi2")
+      FLAG(res_7.ecx & (1 << 8), "gfni") FLAG(res_7.ecx & (1 << 9), "vaes") FLAG(res_7.ecx & (1 << 10), "vpclmulqdq")
+      FLAG(res_7.ecx & (1 << 11), "avx512_vnni") FLAG(res_7.ecx & (1 << 12), "avx512_bitalg") FLAG(res_7.ecx & (1 << 13), "tme")
+      FLAG(res_7.ecx & (1 << 14), "avx512_vpopcntdq") FLAG(res_7.ecx & (1 << 16), "la57") FLAG(res_7.ecx & (1 << 22), "rdpid")
+      FLAG(res_7.ecx & (1 << 25), "cldemote") FLAG(res_7.ecx & (1 << 27), "movdiri") FLAG(res_7.ecx & (1 << 28), "movdir64b")
 
-      FLAG(res_8000_0007.ebx & (1 << 0),
-        "overflow_recov")
-      FLAG(res_8000_0007.ebx & (1 << 1),
-        "succor")
-      FLAG(res_8000_0007.ebx & (1 << 3),
-        "smca")
+      FLAG(res_8000_0007.ebx & (1 << 0), "overflow_recov") FLAG(res_8000_0007.ebx & (1 << 1), "succor")
+      FLAG(res_8000_0007.ebx & (1 << 3), "smca")
 
-      FLAG(res_7.edx & (1 << 2),
-        "avx512_4vnniw")
-      FLAG(res_7.edx & (1 << 3),
-        "avx512_4fmaps")
-      FLAG(res_7.edx & (1 << 4),
-        "fsrm")
-      FLAG(res_7.edx & (1 << 8),
-        "avx512_vp2intersect")
-      FLAG(res_7.edx & (1 << 10),
-        "md_clear")
-      FLAG(res_7.edx & (1 << 14),
-        "serialize")
-      FLAG(res_7.edx & (1 << 18),
-        "pconfig")
-      FLAG(res_7.edx & (1 << 19),
-        "arch_lbr")
-      FLAG(res_7.edx & (1 << 28),
-        "flush_l1d")
-      FLAG(res_7.edx & (1 << 29),
-        "arch_capabilities")
+      FLAG(res_7.edx & (1 << 2), "avx512_4vnniw") FLAG(res_7.edx & (1 << 3), "avx512_4fmaps") FLAG(res_7.edx & (1 << 4), "fsrm")
+      FLAG(res_7.edx & (1 << 8), "avx512_vp2intersect") FLAG(res_7.edx & (1 << 10), "md_clear") FLAG(res_7.edx & (1 << 14), "serialize")
+      FLAG(res_7.edx & (1 << 18), "pconfig") FLAG(res_7.edx & (1 << 19), "arch_lbr") FLAG(res_7.edx & (1 << 28), "flush_l1d")
+      FLAG(res_7.edx & (1 << 29), "arch_capabilities")
     }
 
     for (int i = 0; i < CPUCores; ++i) {
       cpu_stream << "processor\t: " << i << std::endl; // Logical id
       cpu_stream << "vendor_id\t: " << vendorid.Str << std::endl;
-      cpu_stream << "cpu family\t: " << Family  << std::endl;
+      cpu_stream << "cpu family\t: " << Family << std::endl;
       cpu_stream << "model\t\t: " << (info.Model + (info.FamilyID >= 6 ? (info.ExModelID << 4) : 0)) << std::endl;
-      ModelName modelname {};
+      ModelName modelname{};
       auto res_8000_0002 = ctx->RunCPUIDFunctionName(0x8000'0002, 0, i);
       auto res_8000_0003 = ctx->RunCPUIDFunctionName(0x8000'0003, 0, i);
       auto res_8000_0004 = ctx->RunCPUIDFunctionName(0x8000'0004, 0, i);
@@ -635,8 +438,8 @@ namespace FEX::EmulatedFile {
   }
 
   EmulatedFDManager::EmulatedFDManager(FEXCore::Context::Context *ctx)
-    : CTX {ctx}
-    , ThreadsConfig { FEXCore::CPUInfo::CalculateNumberOfCPUs() } {
+    : CTX{ctx},
+      ThreadsConfig{FEXCore::CPUInfo::CalculateNumberOfCPUs()} {
     FDReadCreators["/proc/cpuinfo"] = [&](FEXCore::Context::Context *ctx, int32_t fd, const char *pathname, int32_t flags, mode_t mode) -> int32_t {
       // Only allow a single thread to initialize the cpu_info.
       // Jit in-case multiple threads try to initialize at once.
@@ -644,20 +447,20 @@ namespace FEX::EmulatedFile {
       std::call_once(cpu_info_initialized, [&]() { cpu_info = GenerateCPUInfo(ctx, ThreadsConfig); });
 
       int FD = GenTmpFD(pathname, flags);
-      write(FD, (void*)&cpu_info.at(0), cpu_info.size());
+      write(FD, (void *)&cpu_info.at(0), cpu_info.size());
       lseek(FD, 0, SEEK_SET);
       SealTmpFD(FD);
       return FD;
     };
 
-    FDReadCreators["/proc/sys/kernel/osrelease"] = [&](FEXCore::Context::Context *ctx, int32_t fd, const char *pathname, int32_t flags, mode_t mode) -> int32_t {
+    FDReadCreators["/proc/sys/kernel/osrelease"] =
+    [&](FEXCore::Context::Context *ctx, int32_t fd, const char *pathname, int32_t flags, mode_t mode) -> int32_t {
       int FD = GenTmpFD(pathname, flags);
       uint32_t GuestVersion = FEX::HLE::_SyscallHandler->GetGuestKernelVersion();
       char Tmp[64]{};
-      snprintf(Tmp, sizeof(Tmp), "%d.%d.%d\n",
-        FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelMinor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
+      snprintf(
+      Tmp, sizeof(Tmp), "%d.%d.%d\n", FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
+      FEX::HLE::SyscallHandler::KernelMinor(GuestVersion), FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
       // + 1 to ensure null at the end
       write(FD, Tmp, strlen(Tmp) + 1);
       lseek(FD, 0, SEEK_SET);
@@ -672,10 +475,9 @@ namespace FEX::EmulatedFile {
       const char kernel_version[] = "Linux version %d.%d.%d (FEX@FEX) (clang) #" GIT_DESCRIBE_STRING " SMP " __DATE__ " " __TIME__ "\n";
       uint32_t GuestVersion = FEX::HLE::_SyscallHandler->GetGuestKernelVersion();
       char Tmp[sizeof(kernel_version) + 64]{};
-      snprintf(Tmp, sizeof(Tmp), kernel_version,
-        FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelMinor(GuestVersion),
-        FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
+      snprintf(
+      Tmp, sizeof(Tmp), kernel_version, FEX::HLE::SyscallHandler::KernelMajor(GuestVersion),
+      FEX::HLE::SyscallHandler::KernelMinor(GuestVersion), FEX::HLE::SyscallHandler::KernelPatch(GuestVersion));
       // + 1 to ensure null at the end
       write(FD, Tmp, strlen(Tmp) + 1);
       lseek(FD, 0, SEEK_SET);
@@ -685,7 +487,7 @@ namespace FEX::EmulatedFile {
 
     auto NumCPUCores = [&](FEXCore::Context::Context *ctx, int32_t fd, const char *pathname, int32_t flags, mode_t mode) -> int32_t {
       int FD = GenTmpFD(pathname, flags);
-      write(FD, (void*)&cpus_online.at(0), cpus_online.size());
+      write(FD, (void *)&cpus_online.at(0), cpus_online.size());
       lseek(FD, 0, SEEK_SET);
       SealTmpFD(FD);
       return FD;
@@ -724,14 +526,12 @@ namespace FEX::EmulatedFile {
 
     if (ThreadsConfig > 1) {
       cpus_online = fextl::fmt::format("0-{}", ThreadsConfig - 1);
-    }
-    else {
+    } else {
       cpus_online = "0";
     }
   }
 
-  EmulatedFDManager::~EmulatedFDManager() {
-  }
+  EmulatedFDManager::~EmulatedFDManager() {}
 
   int32_t EmulatedFDManager::OpenAt(int dirfs, const char *pathname, int flags, uint32_t mode) {
     char Tmp[PATH_MAX];
@@ -744,9 +544,11 @@ namespace FEX::EmulatedFile {
     }
 
     if (Creator == FDReadCreators.end()) {
-      if (((pathname && pathname[0] != '/') || // If pathname exists then it must not be absolute
-          !pathname) &&
-          dirfs != AT_FDCWD) {
+      if (
+      (
+      (pathname && pathname[0] != '/') || // If pathname exists then it must not be absolute
+      !pathname) &&
+      dirfs != AT_FDCWD) {
         // Passed in a dirfd that isn't magic FDCWD
         // We need to get the path from the fd now
         auto PathLength = FEX::get_fdpath(dirfs, Tmp);
@@ -755,17 +557,14 @@ namespace FEX::EmulatedFile {
             Tmp[PathLength] = '/';
             PathLength += 1;
             strncpy(&Tmp[PathLength], pathname, PATH_MAX - PathLength);
-          }
-          else {
+          } else {
             Tmp[PathLength] = '\0';
           }
           Path = Tmp;
-        }
-        else if (pathname) {
+        } else if (pathname) {
           Path = pathname;
         }
-      }
-      else {
+      } else {
         if (!pathname || pathname[0] == 0) {
           return -1;
         }
@@ -799,9 +598,8 @@ namespace FEX::EmulatedFile {
     return Creator->second(CTX, dirfs, Path, flags, mode);
   }
 
-  int32_t EmulatedFDManager::ProcAuxv(FEXCore::Context::Context* ctx, int32_t fd, const char* pathname, int32_t flags, mode_t mode)
-  {
-    uint64_t auxvBase=0, auxvSize=0;
+  int32_t EmulatedFDManager::ProcAuxv(FEXCore::Context::Context *ctx, int32_t fd, const char *pathname, int32_t flags, mode_t mode) {
+    uint64_t auxvBase = 0, auxvSize = 0;
     FEX::HLE::_SyscallHandler->GetCodeLoader()->GetAuxv(auxvBase, auxvSize);
     if (!auxvBase) {
       LogMan::Msg::DFmt("Failed to get Auxv stack address");
@@ -809,10 +607,9 @@ namespace FEX::EmulatedFile {
     }
 
     int FD = GenTmpFD(pathname, flags);
-    write(FD, (void*)auxvBase, auxvSize);
+    write(FD, (void *)auxvBase, auxvSize);
     lseek(FD, 0, SEEK_SET);
     SealTmpFD(FD);
     return FD;
   }
 }
-

@@ -16,13 +16,13 @@ namespace FEXCore::Core {
 }
 
 namespace FEX::HLE::x32 {
-#define REGISTER_SYSCALL_NOT_IMPL_X32(name) REGISTER_SYSCALL_IMPL_X32(name, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { \
-  LogMan::Msg::DFmt("Using deprecated/removed syscall: " #name); \
-  return -ENOSYS; \
-});
-#define REGISTER_SYSCALL_NO_PERM_X32(name) REGISTER_SYSCALL_IMPL_X32(name, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { \
-  return -EPERM; \
-});
+#define REGISTER_SYSCALL_NOT_IMPL_X32(name) \
+  REGISTER_SYSCALL_IMPL_X32(name, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { \
+    LogMan::Msg::DFmt("Using deprecated/removed syscall: " #name); \
+    return -ENOSYS; \
+  });
+#define REGISTER_SYSCALL_NO_PERM_X32(name) \
+  REGISTER_SYSCALL_IMPL_X32(name, [](FEXCore::Core::CpuStateFrame *Frame) -> uint64_t { return -EPERM; });
 
   // these are removed/not implemented in the linux kernel we present
   void RegisterNotImplemented(FEX::HLE::SyscallHandler *Handler) {

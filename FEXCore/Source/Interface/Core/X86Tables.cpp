@@ -12,16 +12,16 @@ $end_info$
 
 namespace FEXCore::X86Tables {
 
-void InitializeBaseTables(Context::OperatingMode Mode);
-void InitializeSecondaryTables(Context::OperatingMode Mode);
-void InitializePrimaryGroupTables(Context::OperatingMode Mode);
-void InitializeH0F3ATables(Context::OperatingMode Mode);
+  void InitializeBaseTables(Context::OperatingMode Mode);
+  void InitializeSecondaryTables(Context::OperatingMode Mode);
+  void InitializePrimaryGroupTables(Context::OperatingMode Mode);
+  void InitializeH0F3ATables(Context::OperatingMode Mode);
 
-void InitializeInfoTables(Context::OperatingMode Mode) {
-  InitializeBaseTables(Mode);
-  InitializeSecondaryTables(Mode);
-  InitializePrimaryGroupTables(Mode);
-  InitializeH0F3ATables(Mode);
-}
+  void InitializeInfoTables(Context::OperatingMode Mode) {
+    InitializeBaseTables(Mode);
+    InitializeSecondaryTables(Mode);
+    InitializePrimaryGroupTables(Mode);
+    InitializeH0F3ATables(Mode);
+  }
 
 }

@@ -65,10 +65,8 @@ namespace FEX::LinuxEmulation::Threads {
     void *InitializeThread(void *Ptr);
 
     class PThread final : public FEXCore::Threads::Thread {
-      public:
-      PThread(FEXCore::Threads::ThreadFunc Func, void *Arg)
-        : UserFunc {Func}
-        , UserArg {Arg} {
+    public:
+      PThread(FEXCore::Threads::ThreadFunc Func, void *Arg) : UserFunc{Func}, UserArg{Arg} {
         pthread_attr_t Attr{};
         Stack = AllocateStackObject();
         // pthreads allocates its dtv region behind our back and there is nothing we can do about it.
@@ -97,28 +95,20 @@ namespace FEX::LinuxEmulation::Threads {
         return false;
       }
 
-      bool join(void **ret) override {
-        return pthread_join(Thread, ret) == 0;
-      }
+      bool join(void **ret) override { return pthread_join(Thread, ret) == 0; }
 
-      bool detach() override {
-        return pthread_detach(Thread) == 0;
-      }
+      bool detach() override { return pthread_detach(Thread) == 0; }
 
       bool IsSelf() override {
         auto self = pthread_self();
         return self == Thread;
       }
 
-      void *Execute() {
-        return UserFunc(UserArg);
-      }
+      void *Execute() { return UserFunc(UserArg); }
 
-      void FreeStack() {
-        DeallocateStackObject(Stack);
-      }
+      void FreeStack() { DeallocateStackObject(Stack); }
 
-      private:
+    private:
       pthread_t Thread;
       FEXCore::Threads::ThreadFunc UserFunc;
       void *UserArg;
@@ -126,7 +116,7 @@ namespace FEX::LinuxEmulation::Threads {
     };
 
     void *InitializeThread(void *Ptr) {
-      PThread *Thread{reinterpret_cast<PThread*>(Ptr)};
+      PThread *Thread{reinterpret_cast<PThread *>(Ptr)};
 
       // Run the user function
       void *Result = Thread->Execute();
@@ -140,9 +130,7 @@ namespace FEX::LinuxEmulation::Threads {
       return Result;
     }
 
-    fextl::unique_ptr<FEXCore::Threads::Thread> CreateThread_PThread(
-      FEXCore::Threads::ThreadFunc Func,
-      void* Arg) {
+    fextl::unique_ptr<FEXCore::Threads::Thread> CreateThread_PThread(FEXCore::Threads::ThreadFunc Func, void *Arg) {
       return fextl::make_unique<PThread>(Func, Arg);
     }
 
@@ -153,14 +141,13 @@ namespace FEX::LinuxEmulation::Threads {
       uintptr_t StackLocation = reinterpret_cast<uintptr_t>(alloca(0));
 
       auto ClearStackPool = [&](auto &StackPool) {
-        for (auto it = StackPool.begin(); it != StackPool.end(); ) {
+        for (auto it = StackPool.begin(); it != StackPool.end();) {
           StackPoolItem &Item = *it;
           uintptr_t ItemStack = reinterpret_cast<uintptr_t>(Item.Ptr);
           if (ItemStack <= StackLocation && (ItemStack + Item.Size) > StackLocation) {
             // This is our stack item, skip it
             ++it;
-          }
-          else {
+          } else {
             // Untracked stack. Clean it up
             FEXCore::Allocator::munmap(Item.Ptr, Item.Size);
             it = StackPool.erase(it);
@@ -172,15 +159,14 @@ namespace FEX::LinuxEmulation::Threads {
       ClearStackPool(DeadStackPool);
       ClearStackPool(LiveStackPool);
 
-      LogMan::Throw::AFmt((DeadStackPool.size() + LiveStackPool.size()) <= 1,
-                          "After fork we should only have zero or one tracked stacks!");
+      LogMan::Throw::AFmt((DeadStackPool.size() + LiveStackPool.size()) <= 1, "After fork we should only have zero or one tracked stacks!");
     }
   };
 
   void SetupThreadHandlers() {
     FEXCore::Threads::Pointers Ptrs = {
-      .CreateThread = PThreads::CreateThread_PThread,
-      .CleanupAfterFork = PThreads::CleanupAfterFork_PThread,
+    .CreateThread = PThreads::CreateThread_PThread,
+    .CleanupAfterFork = PThreads::CleanupAfterFork_PThread,
     };
 
     FEXCore::Threads::Thread::SetInternalPointers(Ptrs);

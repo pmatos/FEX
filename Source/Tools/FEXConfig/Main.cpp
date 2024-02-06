@@ -20,9 +20,7 @@
 
 namespace fextl {
   // Helper to convert a std::filesystem::path to a fextl::string.
-  inline fextl::string string_from_path(std::filesystem::path const &Path) {
-    return Path.string().c_str();
-  }
+  inline fextl::string string_from_path(std::filesystem::path const &Path) { return Path.string().c_str(); }
 }
 namespace {
   static std::chrono::time_point<std::chrono::high_resolution_clock> GlobalTime{};
@@ -72,13 +70,11 @@ namespace {
     ConfigOpen = true;
     ConfigFilename = {};
     LoadedConfig = fextl::make_unique<FEX::Config::EmptyMapper>();
-#define OPT_BASE(type, group, enum, json, default) \
-    LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(default));
-#define OPT_STR(group, enum, json, default) \
-    LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, default);
-#define OPT_STRARRAY(group, enum, json, default)  // Do nothing
+#define OPT_BASE(type, group, enum, json, default) LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(default));
+#define OPT_STR(group, enum, json, default) LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, default);
+#define OPT_STRARRAY(group, enum, json, default) // Do nothing
 #define OPT_STRENUM(group, enum, json, default) \
-    LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(FEXCore::ToUnderlying(default)));
+  LoadedConfig->Set(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(FEXCore::ToUnderlying(default)));
 #include <FEXCore/Config/ConfigValues.inl>
 
     // Erase unnamed options which shouldn't be set
@@ -89,7 +85,7 @@ namespace {
     LoadedConfig->Erase(FEXCore::Config::ConfigOption::CONFIG_IS64BIT_MODE);
   }
 
-  bool OpenFile(fextl::string Filename,  bool LoadDefault = false) {
+  bool OpenFile(fextl::string Filename, bool LoadDefault = false) {
     std::error_code ec{};
     if (!std::filesystem::exists(Filename, ec)) {
       if (LoadDefault) {
@@ -108,12 +104,18 @@ namespace {
 
     // Load default options and only overwrite only if the option didn't exist
 #define OPT_BASE(type, group, enum, json, default) \
-    if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(default)); }
+  if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { \
+    LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(default)); \
+  }
 #define OPT_STR(group, enum, json, default) \
-    if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, default); }
-#define OPT_STRARRAY(group, enum, json, default)  // Do nothing
+  if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { \
+    LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, default); \
+  }
+#define OPT_STRARRAY(group, enum, json, default) // Do nothing
 #define OPT_STRENUM(group, enum, json, default) \
-    if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(FEXCore::ToUnderlying(default))); }
+  if (!LoadedConfig->OptionExists(FEXCore::Config::ConfigOption::CONFIG_##enum)) { \
+    LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_##enum, std::to_string(FEXCore::ToUnderlying(default))); \
+  }
 #include <FEXCore/Config/ConfigValues.inl>
 
     // Erase unnamed options which shouldn't be set
@@ -141,15 +143,11 @@ namespace {
     for (auto &it : std::filesystem::directory_iterator(RootFS)) {
       if (it.is_directory()) {
         NamedRootFS.emplace_back(it.path().filename());
-      }
-      else if (it.is_regular_file()) {
+      } else if (it.is_regular_file()) {
         // If it is a regular file then we need to check if it is a valid archive
-        if (it.path().extension() == ".sqsh" &&
-            FEX::FormatCheck::IsSquashFS(fextl::string_from_path(it.path()))) {
+        if (it.path().extension() == ".sqsh" && FEX::FormatCheck::IsSquashFS(fextl::string_from_path(it.path()))) {
           NamedRootFS.emplace_back(it.path().filename());
-        }
-        else if (it.path().extension() == ".ero" &&
-            FEX::FormatCheck::IsEroFS(fextl::string_from_path(it.path()))) {
+        } else if (it.path().extension() == ".ero" && FEX::FormatCheck::IsEroFS(fextl::string_from_path(it.path()))) {
           NamedRootFS.emplace_back(it.path().filename());
         }
       }
@@ -166,7 +164,7 @@ namespace {
         fd_set Set{};
         FD_ZERO(&Set);
         FD_SET(INotifyFD, &Set);
-        struct timeval tv{};
+        struct timeval tv {};
         // 50 ms
         tv.tv_usec = 50000;
         Ret = select(INotifyFD + 1, &Set, nullptr, nullptr, &tv);
@@ -179,7 +177,8 @@ namespace {
       }
 
       // Spin through the events, we don't actually care what they are
-      while (read(INotifyFD, buf, DATA_SIZE) > 0);
+      while (read(INotifyFD, buf, DATA_SIZE) > 0)
+        ;
 
       // Now update the named vector
       LoadNamedRootFSFolder();
@@ -245,7 +244,7 @@ namespace {
     char BlockSize[32]{};
 
     if (ImGui::BeginTabItem("CPU")) {
-      std::optional<fextl::string*> Value{};
+      std::optional<fextl::string *> Value{};
       Value = LoadedConfig->Get(FEXCore::Config::ConfigOption::CONFIG_MAXINST);
       if (Value.has_value() && !(*Value)->empty()) {
         strncpy(BlockSize, &(*Value)->at(0), 32);
@@ -266,8 +265,7 @@ namespace {
     }
   }
 
-  template<FEXCore::Config::ConfigOption Option>
-  bool EnvironmentVariableFiller(void *data, int idx, const char** out_text) {
+  template<FEXCore::Config::ConfigOption Option> bool EnvironmentVariableFiller(void *data, int idx, const char **out_text) {
     static char TmpString[256];
     auto Value = LoadedConfig->All(Option);
     if (Value.has_value()) {
@@ -288,7 +286,7 @@ namespace {
     return false;
   }
 
-  bool NamedRootFSVariableFiller(void *data, int idx, const char** out_text) {
+  bool NamedRootFSVariableFiller(void *data, int idx, const char **out_text) {
     std::scoped_lock<std::mutex> lk{NamedRootFSUpdator};
     static char TmpString[256];
     if (idx >= 0 && idx < NamedRootFS.size()) {
@@ -304,8 +302,7 @@ namespace {
   }
 
 
-  template<FEXCore::Config::ConfigOption Option>
-  void DeleteEnvironmentVariable(int idx) {
+  template<FEXCore::Config::ConfigOption Option> void DeleteEnvironmentVariable(int idx) {
     auto Value = LoadedConfig->All(Option);
     auto List = (*Value);
     auto it = List->begin();
@@ -414,7 +411,9 @@ namespace {
 
       ImGui::Text("Number of environment variables: %d", NumEnvironmentVariables);
 
-      ImGui::ListBox("Environment variables", &EnvironmentVariableSelected, EnvironmentVariableFiller<FEXCore::Config::ConfigOption::CONFIG_ENV>, nullptr, NumEnvironmentVariables);
+      ImGui::ListBox(
+      "Environment variables", &EnvironmentVariableSelected, EnvironmentVariableFiller<FEXCore::Config::ConfigOption::CONFIG_ENV>, nullptr,
+      NumEnvironmentVariables);
 
       if (ImGui::SmallButton("+")) {
         ImGui::OpenPopup(EnvironmentPopupName);
@@ -432,7 +431,9 @@ namespace {
       ImGui::PushID(1);
       ImGui::Text("Number of Host environment variables: %d", NumHostEnvironmentVariables);
 
-      ImGui::ListBox("Host Env variables", &HostEnvironmentVariableSelected, EnvironmentVariableFiller<FEXCore::Config::ConfigOption::CONFIG_HOSTENV>, nullptr, NumHostEnvironmentVariables);
+      ImGui::ListBox(
+      "Host Env variables", &HostEnvironmentVariableSelected, EnvironmentVariableFiller<FEXCore::Config::ConfigOption::CONFIG_HOSTENV>,
+      nullptr, NumHostEnvironmentVariables);
 
       if (ImGui::SmallButton("+")) {
         ImGui::OpenPopup(HostEnvironmentPopupName);
@@ -497,8 +498,10 @@ namespace {
       }
 
       bool CacheChanged = false;
-      CacheChanged |= ImGui::RadioButton("Off", &CacheJITObjectCode, FEXCore::Config::ConfigObjectCodeHandler::CONFIG_NONE); ImGui::SameLine();
-      CacheChanged |= ImGui::RadioButton("Read-only", &CacheJITObjectCode, FEXCore::Config::ConfigObjectCodeHandler::CONFIG_READ); ImGui::SameLine();
+      CacheChanged |= ImGui::RadioButton("Off", &CacheJITObjectCode, FEXCore::Config::ConfigObjectCodeHandler::CONFIG_NONE);
+      ImGui::SameLine();
+      CacheChanged |= ImGui::RadioButton("Read-only", &CacheJITObjectCode, FEXCore::Config::ConfigObjectCodeHandler::CONFIG_READ);
+      ImGui::SameLine();
       CacheChanged |= ImGui::RadioButton("Read/Write", &CacheJITObjectCode, FEXCore::Config::ConfigObjectCodeHandler::CONFIG_READWRITE);
 
       if (CacheChanged) {
@@ -584,10 +587,13 @@ namespace {
       }
 
       bool SMCChanged = false;
-      SMCChanged |= ImGui::RadioButton("None", &SMCChecks, FEXCore::Config::CONFIG_SMC_NONE); ImGui::SameLine();
-      SMCChanged |= ImGui::RadioButton("MTrack (Default)", &SMCChecks, FEXCore::Config::CONFIG_SMC_MTRACK); ImGui::SameLine();
+      SMCChanged |= ImGui::RadioButton("None", &SMCChecks, FEXCore::Config::CONFIG_SMC_NONE);
+      ImGui::SameLine();
+      SMCChanged |= ImGui::RadioButton("MTrack (Default)", &SMCChecks, FEXCore::Config::CONFIG_SMC_MTRACK);
+      ImGui::SameLine();
       SMCChanged |= ImGui::RadioButton("Full", &SMCChecks, FEXCore::Config::CONFIG_SMC_FULL);
-      SMCChanged |= ImGui::RadioButton("MMan (Deprecated)", &SMCChecks, FEXCore::Config::CONFIG_SMC_MMAN); ImGui::SameLine();
+      SMCChanged |= ImGui::RadioButton("MMan (Deprecated)", &SMCChecks, FEXCore::Config::CONFIG_SMC_MMAN);
+      ImGui::SameLine();
 
       if (SMCChanged) {
         LoadedConfig->EraseSet(FEXCore::Config::ConfigOption::CONFIG_SMCCHECKS, std::to_string(SMCChecks));
@@ -624,7 +630,7 @@ namespace {
     size_t i = 0;
     for (auto &Option : Options) {
       auto ConfigName = ConfigToNameLookup.find(Option.first);
-      auto &AdvancedOption  = AdvancedOptions.at(i);
+      auto &AdvancedOption = AdvancedOptions.at(i);
       AdvancedOption.resize(Option.second.size());
       size_t j = 0;
       for (auto &OptionList : Option.second) {
@@ -664,8 +670,7 @@ namespace {
             if (ImGui::InputText(OptionList.Name.c_str(), OptionList.Str, sizeof(TmpString), ImGuiInputTextFlags_EnterReturnsTrue)) {
               if (Option.second.size() == 1) {
                 LoadedConfig->EraseSet(Option.first, OptionList.Str);
-              }
-              else {
+              } else {
                 auto &All = Option.second;
                 auto Iter = All.begin();
                 std::advance(Iter, j);
@@ -675,7 +680,6 @@ namespace {
                 for (auto &Value : All) {
                   LoadedConfig->Set(Option.first, Value);
                 }
-
               }
               ConfigChanged = true;
               UpdateAdvancedOptionsVector();
@@ -687,8 +691,7 @@ namespace {
             if (ImGui::SmallButton("-")) {
               if (Option.second.size() == 1) {
                 LoadedConfig->Erase(Option.first);
-              }
-              else {
+              } else {
                 auto &All = Option.second;
                 auto Iter = All.begin();
                 std::advance(Iter, j);
@@ -730,10 +733,10 @@ namespace {
   }
 
   bool DrawUI() {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     auto current_time = std::chrono::high_resolution_clock::now();
     auto Diff = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - GlobalTime);
-    io.DeltaTime = Diff.count() > 0 ? Diff.count() : 1.0f/60.0f;
+    io.DeltaTime = Diff.count() > 0 ? Diff.count() : 1.0f / 60.0f;
     GlobalTime = current_time;
 
     ImGui::NewFrame();
@@ -741,7 +744,7 @@ namespace {
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
     // because it would be confusing to have two docking targets within each others.
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
     ImGui::SetNextWindowViewport(viewport->ID);
@@ -788,16 +791,14 @@ namespace {
 
       if (ConfigOpen) {
         if (ConfigChanged) {
-          ImGui::PushStyleColor(ImGuiCol_FrameBg,   ImVec4(1.0, 1.0, 0.0, 1.0));
+          ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0, 1.0, 0.0, 1.0));
           ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(1.0, 1.0, 0.0, 1.0));
-        }
-        else {
-          ImGui::PushStyleColor(ImGuiCol_FrameBg,   ImVec4(0.0, 1.0, 0.0, 1.0));
+        } else {
+          ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0, 1.0, 0.0, 1.0));
           ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.0, 1.0, 0.0, 1.0));
         }
-      }
-      else {
-        ImGui::PushStyleColor(ImGuiCol_FrameBg,   ImVec4(1.0, 0.0, 0.0, 1.0));
+      } else {
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0, 0.0, 0.0, 1.0));
         ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(1.0, 0.0, 0.0, 1.0));
       }
 
@@ -816,7 +817,8 @@ namespace {
         ImGui::OpenPopup(SavedPopupAppName);
       }
 
-      ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + viewport->Size.x / 2, viewport->Pos.y + viewport->Size.y / 2), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+      ImGui::SetNextWindowPos(
+      ImVec2(viewport->Pos.x + viewport->Size.x / 2, viewport->Pos.y + viewport->Size.y / 2), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
       if (ImGui::BeginPopupModal(SavedPopupAppName)) {
         ImGui::SetKeyboardFocusHere();
         if (ImGui::InputText("App name", AppName, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -841,8 +843,7 @@ namespace {
       OpenMsgPopup = false;
     }
 
-    if (Selected.OpenAppProfile ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_I) && io.KeyCtrl && !io.KeyShift)) {
+    if (Selected.OpenAppProfile || (ImGui::IsKeyPressed(SDL_SCANCODE_I) && io.KeyCtrl && !io.KeyShift)) {
       ImGui::OpenPopup(OpenedPopupAppName);
     }
 
@@ -855,8 +856,7 @@ namespace {
         ImGui::CloseCurrentPopup();
       }
       ImGui::EndPopup();
-    }
-    else if (SaveMsgIsOpen) {
+    } else if (SaveMsgIsOpen) {
       SaveMsgIsOpen = false;
     }
 
@@ -877,39 +877,32 @@ namespace {
       ImGui::EndPopup();
     }
 
-    if (Selected.Open ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_O) && io.KeyCtrl && !io.KeyShift)) {
+    if (Selected.Open || (ImGui::IsKeyPressed(SDL_SCANCODE_O) && io.KeyCtrl && !io.KeyShift)) {
       SelectedOpenFile = true;
     }
-    if (Selected.OpenDefault ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_O) && io.KeyCtrl && io.KeyShift)) {
+    if (Selected.OpenDefault || (ImGui::IsKeyPressed(SDL_SCANCODE_O) && io.KeyCtrl && io.KeyShift)) {
       if (OpenFile(FEXCore::Config::GetConfigFileLocation(), true)) {
         LoadNamedRootFSFolder();
         SetupINotify();
       }
     }
 
-    if (Selected.Save ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_S) && io.KeyCtrl && !io.KeyShift)) {
+    if (Selected.Save || (ImGui::IsKeyPressed(SDL_SCANCODE_S) && io.KeyCtrl && !io.KeyShift)) {
       SaveFile(ConfigFilename);
     }
-    if (Selected.SaveAs ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_S) && io.KeyCtrl && io.KeyShift)) {
+    if (Selected.SaveAs || (ImGui::IsKeyPressed(SDL_SCANCODE_S) && io.KeyCtrl && io.KeyShift)) {
       SelectedSaveFileAs = true;
     }
 
-    if (Selected.SaveDefault ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_P) && io.KeyCtrl && io.KeyShift)) {
+    if (Selected.SaveDefault || (ImGui::IsKeyPressed(SDL_SCANCODE_P) && io.KeyCtrl && io.KeyShift)) {
       SaveFile(FEXCore::Config::GetConfigFileLocation());
     }
-    if (Selected.Close ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_W) && io.KeyCtrl && !io.KeyShift)) {
+    if (Selected.Close || (ImGui::IsKeyPressed(SDL_SCANCODE_W) && io.KeyCtrl && !io.KeyShift)) {
       CloseConfig();
       ShutdownINotify();
     }
 
-    if (Selected.Quit ||
-        (ImGui::IsKeyPressed(SDL_SCANCODE_Q) && io.KeyCtrl && !io.KeyShift)) {
+    if (Selected.Quit || (ImGui::IsKeyPressed(SDL_SCANCODE_Q) && io.KeyCtrl && !io.KeyShift)) {
       Selected.Quit = true;
     }
 
@@ -954,8 +947,7 @@ int main(int argc, char **argv) {
       LoadNamedRootFSFolder();
       SetupINotify();
     }
-  }
-  else {
+  } else {
     if (OpenFile(FEXCore::Config::GetConfigFileLocation(), true)) {
       LoadNamedRootFSFolder();
       SetupINotify();

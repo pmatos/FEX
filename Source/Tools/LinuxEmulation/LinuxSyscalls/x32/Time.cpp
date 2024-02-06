@@ -44,7 +44,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(times, [](FEXCore::Core::CpuStateFrame *Frame, struct FEX::HLE::x32::compat_tms *buf) -> uint64_t {
-      struct tms Host{};
+      struct tms Host {};
       uint64_t Result = ::times(&Host);
       if (buf) {
         *buf = Host;
@@ -52,8 +52,8 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32(utime, [](FEXCore::Core::CpuStateFrame *Frame, char* filename, const FEX::HLE::x32::old_utimbuf32* times) -> uint64_t {
-      struct utimbuf Host{};
+    REGISTER_SYSCALL_IMPL_X32(utime, [](FEXCore::Core::CpuStateFrame *Frame, char *filename, const FEX::HLE::x32::old_utimbuf32 *times) -> uint64_t {
+      struct utimbuf Host {};
       struct utimbuf *Host_p{};
       if (times) {
         Host = *times;
@@ -64,7 +64,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(gettimeofday, [](FEXCore::Core::CpuStateFrame *Frame, timeval32 *tv, struct timezone *tz) -> uint64_t {
-      struct timeval tv64{};
+      struct timeval tv64 {};
       struct timeval *tv_ptr{};
       if (tv) {
         tv_ptr = &tv64;
@@ -79,7 +79,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(settimeofday, [](FEXCore::Core::CpuStateFrame *Frame, const timeval32 *tv, const struct timezone *tz) -> uint64_t {
-      struct timeval tv64{};
+      struct timeval tv64 {};
       struct timeval *tv_ptr{};
       if (tv) {
         tv64 = *tv;
@@ -91,7 +91,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(nanosleep, [](FEXCore::Core::CpuStateFrame *Frame, const timespec32 *req, timespec32 *rem) -> uint64_t {
-      struct timespec rem64{};
+      struct timespec rem64 {};
       struct timespec *rem64_ptr{};
 
       if (rem) {
@@ -114,7 +114,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(clock_gettime, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clk_id, timespec32 *tp) -> uint64_t {
-      struct timespec tp64{};
+      struct timespec tp64 {};
       uint64_t Result = ::clock_gettime(clk_id, &tp64);
       if (tp) {
         *tp = tp64;
@@ -123,7 +123,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(clock_getres, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clk_id, timespec32 *tp) -> uint64_t {
-      struct timespec tp64{};
+      struct timespec tp64 {};
       uint64_t Result = ::clock_getres(clk_id, &tp64);
       if (tp) {
         *tp = tp64;
@@ -131,11 +131,12 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32(clock_nanosleep, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const timespec32 *request, timespec32 *remain) -> uint64_t {
-      struct timespec req64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    clock_nanosleep, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const timespec32 *request, timespec32 *remain) -> uint64_t {
+      struct timespec req64 {};
       struct timespec *req64_ptr{};
 
-      struct timespec rem64{};
+      struct timespec rem64 {};
       struct timespec *rem64_ptr{};
 
       if (request) {
@@ -151,8 +152,7 @@ namespace FEX::HLE::x32 {
       // Can't use glibc helper here since it does additional validation and data munging that breaks games.
       uint64_t Result = ::syscall(SYSCALL_DEF(clock_nanosleep), clockid, flags, req64_ptr, rem64_ptr);
 
-      if (remain &&
-          (flags & TIMER_ABSTIME) == 0) {
+      if (remain && (flags & TIMER_ABSTIME) == 0) {
         // Remain is completely ignored if TIMER_ABSTIME is set.
         *remain = rem64;
       }
@@ -184,7 +184,8 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32(utimensat, [](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, const compat_ptr<timespec32> times, int flags) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    utimensat, [](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, const compat_ptr<timespec32> times, int flags) -> uint64_t {
       uint64_t Result = 0;
       if (times) {
         timespec times64[2]{};
@@ -207,7 +208,8 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(clock_settime64, clock_settime, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, const struct timespec *tp) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(
+    clock_settime64, clock_settime, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, const struct timespec *tp) -> uint64_t {
       uint64_t Result = ::clock_settime(clockid, tp);
       SYSCALL_ERRNO();
     });
@@ -217,12 +219,16 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(clock_nanosleep_time64, clock_nanosleep, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const struct timespec *request, struct timespec *remain) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(
+    clock_nanosleep_time64, clock_nanosleep,
+    [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clockid, int flags, const struct timespec *request, struct timespec *remain) -> uint64_t {
       uint64_t Result = ::clock_nanosleep(clockid, flags, request, remain);
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(utimensat_time64, utimensat, [](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, const struct timespec times[2], int flags) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS_MANUAL(
+    utimensat_time64, utimensat,
+    [](FEXCore::Core::CpuStateFrame *Frame, int dirfd, const char *pathname, const struct timespec times[2], int flags) -> uint64_t {
       uint64_t Result = ::utimensat(dirfd, pathname, times, flags);
       SYSCALL_ERRNO();
     });
@@ -241,7 +247,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(adjtimex, [](FEXCore::Core::CpuStateFrame *Frame, compat_ptr<FEX::HLE::x32::timex32> buf) -> uint64_t {
-      struct timex Host{};
+      struct timex Host {};
       Host = *buf;
       uint64_t Result = ::adjtimex(&Host);
       if (Result != -1) {
@@ -251,7 +257,7 @@ namespace FEX::HLE::x32 {
     });
 
     REGISTER_SYSCALL_IMPL_X32(clock_adjtime, [](FEXCore::Core::CpuStateFrame *Frame, clockid_t clk_id, compat_ptr<FEX::HLE::x32::timex32> buf) -> uint64_t {
-      struct timex Host{};
+      struct timex Host {};
       Host = *buf;
       uint64_t Result = ::clock_adjtime(clk_id, &Host);
       if (Result != -1) {

@@ -32,26 +32,26 @@ namespace {
 }
 
 namespace FEXCore::IR::Validation {
-class ValueDominanceValidation final : public FEXCore::IR::Pass {
-public:
-  bool Run(IREmitter *IREmit) override;
-};
+  class ValueDominanceValidation final : public FEXCore::IR::Pass {
+  public:
+    bool Run(IREmitter *IREmit) override;
+  };
 
-bool ValueDominanceValidation::Run(IREmitter *IREmit) {
-  FEXCORE_PROFILE_SCOPED("PassManager::ValueDominanceValidation");
+  bool ValueDominanceValidation::Run(IREmitter *IREmit) {
+    FEXCORE_PROFILE_SCOPED("PassManager::ValueDominanceValidation");
 
-  bool HadError = false;
-  auto CurrentIR = IREmit->ViewIR();
+    bool HadError = false;
+    auto CurrentIR = IREmit->ViewIR();
 
-  fextl::ostringstream Errors;
-  fextl::unordered_map<IR::NodeID, BlockInfo> OffsetToBlockMap;
+    fextl::ostringstream Errors;
+    fextl::unordered_map<IR::NodeID, BlockInfo> OffsetToBlockMap;
 
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
 
-    BlockInfo *CurrentBlock = &OffsetToBlockMap.try_emplace(CurrentIR.GetID(BlockNode)).first->second;
+      BlockInfo *CurrentBlock = &OffsetToBlockMap.try_emplace(CurrentIR.GetID(BlockNode)).first->second;
 
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      switch (IROp->Op) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        switch (IROp->Op) {
         case IR::OP_CONDJUMP: {
           auto Op = IROp->CW<IR::IROp_CondJump>();
 
@@ -85,131 +85,127 @@ bool ValueDominanceValidation::Run(IREmitter *IREmit) {
           break;
         }
         default: break;
+        }
       }
     }
-  }
 
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
-    auto BlockIROp = BlockHeader->CW<FEXCore::IR::IROp_CodeBlock>();
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+      auto BlockIROp = BlockHeader->CW<FEXCore::IR::IROp_CodeBlock>();
 
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      const auto CodeID = CurrentIR.GetID(CodeNode);
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        const auto CodeID = CurrentIR.GetID(CodeNode);
 
-      const uint8_t NumArgs = IR::GetRAArgs(IROp->Op);
-      for (uint32_t i = 0; i < NumArgs; ++i) {
-        if (IROp->Args[i].IsInvalid()) continue;
-        if (CurrentIR.GetOp<IROp_Header>(IROp->Args[i])->Op == OP_IRHEADER) continue;
+        const uint8_t NumArgs = IR::GetRAArgs(IROp->Op);
+        for (uint32_t i = 0; i < NumArgs; ++i) {
+          if (IROp->Args[i].IsInvalid()) continue;
+          if (CurrentIR.GetOp<IROp_Header>(IROp->Args[i])->Op == OP_IRHEADER) continue;
 
-        OrderedNodeWrapper Arg = IROp->Args[i];
+          OrderedNodeWrapper Arg = IROp->Args[i];
 
-        // We must ensure domininance of all SSA arguments
-        if (Arg.ID() >= BlockIROp->Begin.ID() &&
-            Arg.ID() < BlockIROp->Last.ID()) {
-          // If the SSA argument is defined INSIDE this block
-          // then it must only be declared prior to this instruction
-          // Eg: Valid
-          // CodeBlock_1:
-          // %_1 = Load
-          // %_2 = Load
-          // %_3 = <Op> %_1, %_2
-          //
-          // Eg: Invalid
-          // CodeBlock_1:
-          // %_1 = Load
-          // %_2 = <Op> %_1, %_3
-          // %_3 = Load
-          if (Arg.ID() > CodeID) {
+          // We must ensure domininance of all SSA arguments
+          if (Arg.ID() >= BlockIROp->Begin.ID() && Arg.ID() < BlockIROp->Last.ID()) {
+            // If the SSA argument is defined INSIDE this block
+            // then it must only be declared prior to this instruction
+            // Eg: Valid
+            // CodeBlock_1:
+            // %_1 = Load
+            // %_2 = Load
+            // %_3 = <Op> %_1, %_2
+            //
+            // Eg: Invalid
+            // CodeBlock_1:
+            // %_1 = Load
+            // %_2 = <Op> %_1, %_3
+            // %_3 = Load
+            if (Arg.ID() > CodeID) {
+              HadError |= true;
+              Errors << "Inst %" << CodeID << ": Arg[" << i << "] %" << Arg.ID() << " definition does not dominate this use!" << std::endl;
+            }
+          } else if (Arg.ID() < BlockIROp->Begin.ID()) {
+            // If the SSA argument is defined BEFORE this block
+            // then THIS block needs to be dominated by the flow of blocks up until this point
+
+            // Eg: Valid
+            // CodeBlock_1:
+            // %_1 = Load
+            // %_2 = Load
+            // Jump %CodeBlock_2
+            //
+            // CodeBlock_2:
+            // %_3 = <Op> %_1, %_2
+            //
+            // Eg: Invalid
+            // CodeBlock_1:
+            // %_1 = Load
+            // %_2 = Load
+            // Jump %CodeBlock_3
+            //
+            // CodeBlock_2:
+            // %_3 = <Op> %_1, %_2
+            //
+            // CodeBlock_3:
+            // ...
+
+            // We need to walk the predecessors to see if the value comes from there
+            fextl::set<IR::OrderedNode *> Predecessors{BlockNode};
+            // Recursively gather all predecessors of BlockNode
+            for (auto NodeIt = Predecessors.begin(); NodeIt != Predecessors.end();) {
+              auto PredBlock = &OffsetToBlockMap.try_emplace(CurrentIR.GetID(*NodeIt)).first->second;
+              ++NodeIt;
+
+              for (auto *Pred : PredBlock->Predecessors) {
+                if (Predecessors.insert(Pred).second) {
+                  // New blocks added, so repeat from the beginning to pull in their predecessors
+                  NodeIt = Predecessors.begin();
+                }
+              }
+            }
+
+            bool FoundPredDefine = false;
+
+            for (auto *Pred : Predecessors) {
+              auto PredIROp = CurrentIR.GetOp<FEXCore::IR::IROp_CodeBlock>(Pred);
+
+              if (Arg.ID() >= PredIROp->Begin.ID() && Arg.ID() < PredIROp->Last.ID()) {
+                FoundPredDefine = true;
+                break;
+              }
+              Errors << "\tChecking Pred %" << CurrentIR.GetID(Pred) << std::endl;
+            }
+
+            if (!FoundPredDefine) {
+              HadError |= true;
+              Errors
+              << "Inst %" << CodeID << ": Arg[" << i << "] %" << Arg.ID()
+              << " definition does not dominate this use! But was defined before this block!" << std::endl;
+            }
+          } else if (Arg.ID() > BlockIROp->Last.ID()) {
+            // If this SSA argument is defined AFTER this block then it is just completely broken
+            // Eg: Invalid
+            // CodeBlock_1:
+            // %_1 = Load
+            // %_2 = <Op> %_1, %_3
+            // Jump %CodeBlock_2
+            //
+            // CodeBlock_2:
+            // %_3 = Load
             HadError |= true;
             Errors << "Inst %" << CodeID << ": Arg[" << i << "] %" << Arg.ID() << " definition does not dominate this use!" << std::endl;
           }
         }
-        else if (Arg.ID() < BlockIROp->Begin.ID()) {
-          // If the SSA argument is defined BEFORE this block
-          // then THIS block needs to be dominated by the flow of blocks up until this point
-
-          // Eg: Valid
-          // CodeBlock_1:
-          // %_1 = Load
-          // %_2 = Load
-          // Jump %CodeBlock_2
-          //
-          // CodeBlock_2:
-          // %_3 = <Op> %_1, %_2
-          //
-          // Eg: Invalid
-          // CodeBlock_1:
-          // %_1 = Load
-          // %_2 = Load
-          // Jump %CodeBlock_3
-          //
-          // CodeBlock_2:
-          // %_3 = <Op> %_1, %_2
-          //
-          // CodeBlock_3:
-          // ...
-
-          // We need to walk the predecessors to see if the value comes from there
-          fextl::set<IR::OrderedNode *> Predecessors { BlockNode };
-          // Recursively gather all predecessors of BlockNode
-          for (auto NodeIt = Predecessors.begin(); NodeIt != Predecessors.end();) {
-            auto PredBlock = &OffsetToBlockMap.try_emplace(CurrentIR.GetID(*NodeIt)).first->second;
-            ++NodeIt;
-
-            for (auto *Pred : PredBlock->Predecessors) {
-              if (Predecessors.insert(Pred).second) {
-                // New blocks added, so repeat from the beginning to pull in their predecessors
-                NodeIt = Predecessors.begin();
-              }
-            }
-          }
-
-          bool FoundPredDefine = false;
-
-          for (auto* Pred : Predecessors) {
-            auto PredIROp = CurrentIR.GetOp<FEXCore::IR::IROp_CodeBlock>(Pred);
-
-            if (Arg.ID() >= PredIROp->Begin.ID() &&
-                Arg.ID() < PredIROp->Last.ID()) {
-              FoundPredDefine = true;
-              break;
-            }
-            Errors << "\tChecking Pred %" << CurrentIR.GetID(Pred) << std::endl;
-          }
-
-          if (!FoundPredDefine) {
-            HadError |= true;
-            Errors << "Inst %" << CodeID << ": Arg[" << i << "] %" << Arg.ID() << " definition does not dominate this use! But was defined before this block!" << std::endl;
-          }
-        }
-        else if (Arg.ID() > BlockIROp->Last.ID()) {
-          // If this SSA argument is defined AFTER this block then it is just completely broken
-          // Eg: Invalid
-          // CodeBlock_1:
-          // %_1 = Load
-          // %_2 = <Op> %_1, %_3
-          // Jump %CodeBlock_2
-          //
-          // CodeBlock_2:
-          // %_3 = Load
-          HadError |= true;
-          Errors << "Inst %" << CodeID << ": Arg[" << i << "] %" << Arg.ID() << " definition does not dominate this use!" << std::endl;
-        }
       }
     }
+
+    if (HadError) {
+      fextl::stringstream Out;
+      FEXCore::IR::Dump(&Out, &CurrentIR, nullptr);
+      Out << "Errors:" << std::endl << Errors.str() << std::endl;
+      LogMan::Msg::EFmt("{}", Out.str());
+    }
+
+    return false;
   }
 
-  if (HadError) {
-    fextl::stringstream Out;
-    FEXCore::IR::Dump(&Out, &CurrentIR, nullptr);
-    Out << "Errors:" << std::endl << Errors.str() << std::endl;
-    LogMan::Msg::EFmt("{}", Out.str());
-  }
-
-  return false;
-}
-
-fextl::unique_ptr<FEXCore::IR::Pass> CreateValueDominanceValidation() {
-  return fextl::make_unique<ValueDominanceValidation>();
-}
+  fextl::unique_ptr<FEXCore::IR::Pass> CreateValueDominanceValidation() { return fextl::make_unique<ValueDominanceValidation>(); }
 
 }

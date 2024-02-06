@@ -25,10 +25,10 @@
 
 namespace FEXServerClient {
   int RequestPIDFDPacket(int ServerSocket, PacketType Type) {
-    FEXServerRequestPacket Req {
-      .Header {
-        .Type = Type,
-      },
+    FEXServerRequestPacket Req{
+    .Header{
+    .Type = Type,
+    },
     };
 
     int Result = write(ServerSocket, &Req, sizeof(Req.BasicRequest));
@@ -37,15 +37,11 @@ namespace FEXServerClient {
 
       FEXServerResultPacket Res{};
       struct iovec iov {
-        .iov_base = &Res,
-        .iov_len = sizeof(Res),
+        .iov_base = &Res, .iov_len = sizeof(Res),
       };
 
       struct msghdr msg {
-        .msg_name = nullptr,
-        .msg_namelen = 0,
-        .msg_iov = &iov,
-        .msg_iovlen = 1,
+        .msg_name = nullptr, .msg_namelen = 0, .msg_iov = &iov, .msg_iovlen = 1,
       };
 
       // Setup the ancillary buffer. This is where we will be getting pipe FDs
@@ -67,13 +63,9 @@ namespace FEXServerClient {
         struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
 
         // Do some error checking
-        if (cmsg == nullptr ||
-            cmsg->cmsg_len != CMSG_LEN(sizeof(int)) ||
-            cmsg->cmsg_level != SOL_SOCKET ||
-            cmsg->cmsg_type != SCM_RIGHTS) {
+        if (cmsg == nullptr || cmsg->cmsg_len != CMSG_LEN(sizeof(int)) || cmsg->cmsg_level != SOL_SOCKET || cmsg->cmsg_type != SCM_RIGHTS) {
           // Couldn't get a socket
-        }
-        else {
+        } else {
           // Check for Success.
           // If type error was returned then the FEXServer doesn't have a log to pipe in to
           if (Res.Header.Type == PacketType::TYPE_SUCCESS) {
@@ -89,19 +81,13 @@ namespace FEXServerClient {
     return -1;
   }
 
-  static int ServerFD {-1};
+  static int ServerFD{-1};
 
-  fextl::string GetServerLockFolder() {
-    return FEXCore::Config::GetDataDirectory() + "Server/";
-  }
+  fextl::string GetServerLockFolder() { return FEXCore::Config::GetDataDirectory() + "Server/"; }
 
-  fextl::string GetServerLockFile() {
-    return GetServerLockFolder() + "Server.lock";
-  }
+  fextl::string GetServerLockFile() { return GetServerLockFolder() + "Server.lock"; }
 
-  fextl::string GetServerRootFSLockFile() {
-    return GetServerLockFolder() + "RootFS.lock";
-  }
+  fextl::string GetServerRootFSLockFile() { return GetServerLockFolder() + "RootFS.lock"; }
 
   fextl::string GetTempFolder() {
     auto XDGRuntimeEnv = getenv("XDG_RUNTIME_DIR");
@@ -151,9 +137,7 @@ namespace FEXServerClient {
     return ServerSocketPath;
   }
 
-  int GetServerFD() {
-    return ServerFD;
-  }
+  int GetServerFD() { return ServerFD; }
 
   int ConnectToServer(ConnectionOption ConnectionOption) {
     auto ServerSocketName = GetServerSocketName();
@@ -168,7 +152,7 @@ namespace FEXServerClient {
     // AF_UNIX has a special feature for named socket paths.
     // If the name of the socket begins with `\0` then it is an "abstract" socket address.
     // The entirety of the name is used as a path to a socket that doesn't have any filesystem backing.
-    struct sockaddr_un addr{};
+    struct sockaddr_un addr {};
     addr.sun_family = AF_UNIX;
     size_t SizeOfSocketString = std::min(ServerSocketName.size() + 1, sizeof(addr.sun_path) - 1);
     addr.sun_path[0] = 0; // Abstract AF_UNIX sockets start with \0
@@ -176,7 +160,7 @@ namespace FEXServerClient {
     // Include final null character.
     size_t SizeOfAddr = sizeof(addr.sun_family) + SizeOfSocketString;
 
-    if (connect(SocketFD, reinterpret_cast<struct sockaddr*>(&addr), SizeOfAddr) == -1) {
+    if (connect(SocketFD, reinterpret_cast<struct sockaddr *>(&addr), SizeOfAddr) == -1) {
       if (ConnectionOption == ConnectionOption::Default || errno != ECONNREFUSED) {
         LogMan::Msg::EFmt("Couldn't connect to FEXServer socket {} {} {}", ServerSocketName, errno, strerror(errno));
       }
@@ -229,9 +213,8 @@ namespace FEXServerClient {
       //
       // We want to ignore the signal so that if FEXServer starts in daemon mode, it
       // doesn't leave a zombie process around waiting for something to get the result.
-      struct sigaction action{};
-      action.sa_handler = SIG_IGN,
-      sigaction(SIGCHLD, &action, &action);
+      struct sigaction action {};
+      action.sa_handler = SIG_IGN, sigaction(SIGCHLD, &action, &action);
 
       pid_t pid = fork();
       if (pid == 0) {
@@ -243,7 +226,7 @@ namespace FEXServerClient {
         argv[0] = FEXServerPath.c_str();
         argv[1] = nullptr;
 
-        if (execvp(argv[0], (char * const*)argv) == -1) {
+        if (execvp(argv[0], (char * const *)argv) == -1) {
           // Let the parent know that we couldn't execute for some reason
           uint64_t error{1};
           write(fds[1], &error, sizeof(error));
@@ -257,8 +240,7 @@ namespace FEXServerClient {
         }
 
         FEX_UNREACHABLE;
-      }
-      else {
+      } else {
         // Parent
         // Wait for the child to exit so we can check if it is mounted or not
         close(fds[1]); // Close write end of the pipe
@@ -269,7 +251,8 @@ namespace FEXServerClient {
         PollFD.events = POLLIN | POLLOUT | POLLRDHUP | POLLERR | POLLHUP | POLLNVAL;
 
         // Wait for a result on the pipe that isn't EINTR
-        while (poll(&PollFD, 1, -1) == -1 && errno == EINTR);
+        while (poll(&PollFD, 1, -1) == -1 && errno == EINTR)
+          ;
 
         for (size_t i = 0; i < 5; ++i) {
           ServerFD = ConnectToServer(ConnectionOption::Default);
@@ -297,24 +280,22 @@ namespace FEXServerClient {
    * @name Packet request functions
    * @{ */
   void RequestServerKill(int ServerSocket) {
-    FEXServerRequestPacket Req {
-      .Header {
-        .Type = PacketType::TYPE_KILL,
-      },
+    FEXServerRequestPacket Req{
+    .Header{
+    .Type = PacketType::TYPE_KILL,
+    },
     };
 
     write(ServerSocket, &Req, sizeof(Req.BasicRequest));
   }
 
-  int RequestLogFD(int ServerSocket) {
-    return RequestPIDFDPacket(ServerSocket, PacketType::TYPE_GET_LOG_FD);
-  }
+  int RequestLogFD(int ServerSocket) { return RequestPIDFDPacket(ServerSocket, PacketType::TYPE_GET_LOG_FD); }
 
   fextl::string RequestRootFSPath(int ServerSocket) {
-    FEXServerRequestPacket Req {
-      .Header {
-        .Type = PacketType::TYPE_GET_ROOTFS_PATH,
-      },
+    FEXServerRequestPacket Req{
+    .Header{
+    .Type = PacketType::TYPE_GET_ROOTFS_PATH,
+    },
     };
 
     int Result = write(ServerSocket, &Req, sizeof(Req.BasicRequest));
@@ -324,9 +305,8 @@ namespace FEXServerClient {
 
       ssize_t DataResult = recv(ServerSocket, Data.data(), Data.size(), 0);
       if (DataResult >= sizeof(FEXServerResultPacket)) {
-        FEXServerResultPacket *ResultPacket = reinterpret_cast<FEXServerResultPacket*>(Data.data());
-        if (ResultPacket->Header.Type == PacketType::TYPE_GET_ROOTFS_PATH &&
-            ResultPacket->MountPath.Length > 0) {
+        FEXServerResultPacket *ResultPacket = reinterpret_cast<FEXServerResultPacket *>(Data.data());
+        if (ResultPacket->Header.Type == PacketType::TYPE_GET_ROOTFS_PATH && ResultPacket->MountPath.Length > 0) {
           return fextl::string(ResultPacket->MountPath.Mount);
         }
       }
@@ -335,9 +315,7 @@ namespace FEXServerClient {
     return {};
   }
 
-  int RequestPIDFD(int ServerSocket) {
-    return RequestPIDFDPacket(ServerSocket, PacketType::TYPE_GET_PID_FD);
-  }
+  int RequestPIDFD(int ServerSocket) { return RequestPIDFDPacket(ServerSocket, PacketType::TYPE_GET_PID_FD); }
 
   /**  @} */
 
@@ -354,21 +332,19 @@ namespace FEXServerClient {
     Msg.Level = Level;
 
     const iovec vec[2] = {
-      {
-        .iov_base = &Msg,
-        .iov_len = sizeof(Msg),
-      },
-      {
-        .iov_base = const_cast<char*>(Message),
-        .iov_len = Msg.MessageLength,
-      },
+    {
+    .iov_base = &Msg,
+    .iov_len = sizeof(Msg),
+    },
+    {
+    .iov_base = const_cast<char *>(Message),
+    .iov_len = Msg.MessageLength,
+    },
     };
 
     writev(FD, vec, 2);
   }
 
-  void AssertHandler(int FD, char const *Message) {
-    MsgHandler(FD, LogMan::DebugLevels::ASSERT, Message);
-  }
+  void AssertHandler(int FD, char const *Message) { MsgHandler(FD, LogMan::DebugLevels::ASSERT, Message); }
   /**  @} */
 }

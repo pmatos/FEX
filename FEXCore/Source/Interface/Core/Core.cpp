@@ -78,9 +78,7 @@ $end_info$
 #include <xxhash.h>
 
 namespace FEXCore::Context {
-  ContextImpl::ContextImpl()
-  : CPUID {this}
-  , IRCaptureCache {this} {
+  ContextImpl::ContextImpl() : CPUID{this}, IRCaptureCache{this} {
 #ifdef BLOCKSTATS
     BlockData = std::make_unique<FEXCore::BlockSamplingData>();
 #endif
@@ -92,9 +90,7 @@ namespace FEXCore::Context {
       Config.VirtualMemSize = 1ULL << 32;
     }
 
-    if (Config.BlockJITNaming() ||
-        Config.GlobalJITNaming() ||
-        Config.LibraryJITNaming()) {
+    if (Config.BlockJITNaming() || Config.GlobalJITNaming() || Config.LibraryJITNaming()) {
       // Only initialize symbols file if enabled. Ensures we don't pollute /tmp with empty files.
       Symbols.InitFile();
     }
@@ -118,13 +114,13 @@ namespace FEXCore::Context {
 
     if (InlineHeader) {
       auto InlineTail = reinterpret_cast<const CPU::CPUBackend::JITCodeTail *>(Frame->State.InlineJITBlockHeader + InlineHeader->OffsetToBlockTail);
-      auto RIPEntries = reinterpret_cast<const CPU::CPUBackend::JITRIPReconstructEntries *>(Frame->State.InlineJITBlockHeader + InlineHeader->OffsetToBlockTail + InlineTail->OffsetToRIPEntries);
+      auto RIPEntries = reinterpret_cast<const CPU::CPUBackend::JITRIPReconstructEntries *>(
+      Frame->State.InlineJITBlockHeader + InlineHeader->OffsetToBlockTail + InlineTail->OffsetToRIPEntries);
 
       // Check if the host PC is currently within a code block.
       // If it is then RIP can be reconstructed from the beginning of the code block.
       // This is currently as close as FEX can get RIP reconstructions.
-      if (HostPC >= reinterpret_cast<uint64_t>(BlockBegin) &&
-          HostPC < reinterpret_cast<uint64_t>(BlockBegin + InlineTail->Size)) {
+      if (HostPC >= reinterpret_cast<uint64_t>(BlockBegin) && HostPC < reinterpret_cast<uint64_t>(BlockBegin + InlineTail->Size)) {
 
         // Reconstruct RIP from JIT entries for this block.
         uint64_t StartingHostPC = BlockBegin;
@@ -136,8 +132,7 @@ namespace FEXCore::Context {
             // We are beyond this entry, keep going forward.
             StartingHostPC += RIPEntry.HostPCOffset;
             StartingGuestRIP += RIPEntry.GuestRIPOffset;
-          }
-          else {
+          } else {
             // Passed where the Host PC is at. Break now.
             break;
           }
@@ -157,18 +152,16 @@ namespace FEXCore::Context {
     // Currently these flags just map 1:1 inside of the resulting value.
     for (size_t i = 0; i < FEXCore::Core::CPUState::NUM_EFLAG_BITS; ++i) {
       switch (i) {
-        case X86State::RFLAG_CF_RAW_LOC:
-        case X86State::RFLAG_PF_RAW_LOC:
-        case X86State::RFLAG_AF_RAW_LOC:
-        case X86State::RFLAG_ZF_RAW_LOC:
-        case X86State::RFLAG_SF_RAW_LOC:
-        case X86State::RFLAG_OF_RAW_LOC:
-          // Intentionally do nothing.
-          // These contain multiple bits which can corrupt other members when compacted.
-          break;
-        default:
-          EFLAGS |= uint32_t{Frame->State.flags[i]} << i;
-          break;
+      case X86State::RFLAG_CF_RAW_LOC:
+      case X86State::RFLAG_PF_RAW_LOC:
+      case X86State::RFLAG_AF_RAW_LOC:
+      case X86State::RFLAG_ZF_RAW_LOC:
+      case X86State::RFLAG_SF_RAW_LOC:
+      case X86State::RFLAG_OF_RAW_LOC:
+        // Intentionally do nothing.
+        // These contain multiple bits which can corrupt other members when compacted.
+        break;
+      default: EFLAGS |= uint32_t{Frame->State.flags[i]} << i; break;
       }
     }
 
@@ -182,8 +175,7 @@ namespace FEXCore::Context {
       // Move them to the CPUState frame now.
       Frame->State.pf_raw = HostGPRs[CPU::REG_PF.Idx()];
       Frame->State.af_raw = HostGPRs[CPU::REG_AF.Idx()];
-    }
-    else {
+    } else {
       // If we were not in the JIT then the NZCV state is stored in the CPUState RFLAG_NZCV_LOC.
       // SF/ZF/CF/OF are packed in a 32-bit value in RFLAG_NZCV_LOC.
       memcpy(&Packed_NZCV, &Frame->State.flags[X86State::RFLAG_NZCV_LOC], sizeof(Packed_NZCV));
@@ -218,25 +210,23 @@ namespace FEXCore::Context {
     const auto Frame = Thread->CurrentFrame;
     for (size_t i = 0; i < FEXCore::Core::CPUState::NUM_EFLAG_BITS; ++i) {
       switch (i) {
-        case X86State::RFLAG_OF_RAW_LOC:
-        case X86State::RFLAG_CF_RAW_LOC:
-        case X86State::RFLAG_ZF_RAW_LOC:
-        case X86State::RFLAG_SF_RAW_LOC:
-          // Intentionally do nothing.
+      case X86State::RFLAG_OF_RAW_LOC:
+      case X86State::RFLAG_CF_RAW_LOC:
+      case X86State::RFLAG_ZF_RAW_LOC:
+      case X86State::RFLAG_SF_RAW_LOC:
+        // Intentionally do nothing.
         break;
-        case X86State::RFLAG_AF_RAW_LOC:
-          // AF stored in bit 4 in our internal representation. It is also
-          // XORed with byte 4 of the PF byte, but we write that as zero here so
-          // we don't need any special handling for that.
-          Frame->State.af_raw = (EFLAGS & (1U << i)) ? (1 << 4) : 0;
-          break;
-        case X86State::RFLAG_PF_RAW_LOC:
-          // PF is inverted in our internal representation.
-          Frame->State.pf_raw = (EFLAGS & (1U << i)) ? 0 : 1;
-          break;
-        default:
-          Frame->State.flags[i] = (EFLAGS & (1U << i)) ? 1 : 0;
+      case X86State::RFLAG_AF_RAW_LOC:
+        // AF stored in bit 4 in our internal representation. It is also
+        // XORed with byte 4 of the PF byte, but we write that as zero here so
+        // we don't need any special handling for that.
+        Frame->State.af_raw = (EFLAGS & (1U << i)) ? (1 << 4) : 0;
         break;
+      case X86State::RFLAG_PF_RAW_LOC:
+        // PF is inverted in our internal representation.
+        Frame->State.pf_raw = (EFLAGS & (1U << i)) ? 0 : 1;
+        break;
+      default: Frame->State.flags[i] = (EFLAGS & (1U << i)) ? 1 : 0; break;
       }
     }
 
@@ -257,41 +247,37 @@ namespace FEXCore::Context {
   bool ContextImpl::InitCore() {
     // Initialize the CPU core signal handlers & DispatcherConfig
     switch (Config.Core) {
-    case FEXCore::Config::CONFIG_IRJIT:
-      BackendFeatures = FEXCore::CPU::GetArm64JITBackendFeatures();
-      break;
+    case FEXCore::Config::CONFIG_IRJIT: BackendFeatures = FEXCore::CPU::GetArm64JITBackendFeatures(); break;
     case FEXCore::Config::CONFIG_CUSTOM:
       // Do nothing
       break;
-    default:
-      LogMan::Msg::EFmt("Unknown core configuration");
-      return false;
+    default: LogMan::Msg::EFmt("Unknown core configuration"); return false;
     }
 
     Dispatcher = FEXCore::CPU::Dispatcher::Create(this);
 
     // Set up the SignalDelegator config since core is initialized.
-    FEXCore::SignalDelegator::SignalDelegatorConfig SignalConfig {
-      .SupportsAVX = HostFeatures.SupportsAVX,
+    FEXCore::SignalDelegator::SignalDelegatorConfig SignalConfig{
+    .SupportsAVX = HostFeatures.SupportsAVX,
 
-      .DispatcherBegin = Dispatcher->Start,
-      .DispatcherEnd = Dispatcher->End,
+    .DispatcherBegin = Dispatcher->Start,
+    .DispatcherEnd = Dispatcher->End,
 
-      .AbsoluteLoopTopAddressFillSRA = Dispatcher->AbsoluteLoopTopAddressFillSRA,
-      .SignalHandlerReturnAddress = Dispatcher->SignalHandlerReturnAddress,
-      .SignalHandlerReturnAddressRT = Dispatcher->SignalHandlerReturnAddressRT,
+    .AbsoluteLoopTopAddressFillSRA = Dispatcher->AbsoluteLoopTopAddressFillSRA,
+    .SignalHandlerReturnAddress = Dispatcher->SignalHandlerReturnAddress,
+    .SignalHandlerReturnAddressRT = Dispatcher->SignalHandlerReturnAddressRT,
 
-      .PauseReturnInstruction = Dispatcher->PauseReturnInstruction,
-      .ThreadPauseHandlerAddressSpillSRA = Dispatcher->ThreadPauseHandlerAddressSpillSRA,
-      .ThreadPauseHandlerAddress = Dispatcher->ThreadPauseHandlerAddress,
+    .PauseReturnInstruction = Dispatcher->PauseReturnInstruction,
+    .ThreadPauseHandlerAddressSpillSRA = Dispatcher->ThreadPauseHandlerAddressSpillSRA,
+    .ThreadPauseHandlerAddress = Dispatcher->ThreadPauseHandlerAddress,
 
-      // Stop handlers.
-      .ThreadStopHandlerAddressSpillSRA = Dispatcher->ThreadStopHandlerAddressSpillSRA,
-      .ThreadStopHandlerAddress = Dispatcher->ThreadStopHandlerAddress,
+    // Stop handlers.
+    .ThreadStopHandlerAddressSpillSRA = Dispatcher->ThreadStopHandlerAddressSpillSRA,
+    .ThreadStopHandlerAddress = Dispatcher->ThreadStopHandlerAddress,
 
-      // SRA information.
-      .SRAGPRCount = Dispatcher->GetSRAGPRCount(),
-      .SRAFPRCount = Dispatcher->GetSRAFPRCount(),
+    // SRA information.
+    .SRAGPRCount = Dispatcher->GetSRAGPRCount(),
+    .SRAFPRCount = Dispatcher->GetSRAFPRCount(),
     };
 
     Dispatcher->GetSRAGPRMapping(SignalConfig.SRAGPRMapping);
@@ -318,12 +304,12 @@ namespace FEXCore::Context {
   }
 
   void ContextImpl::HandleCallback(FEXCore::Core::InternalThreadState *Thread, uint64_t RIP) {
-    static_cast<ContextImpl*>(Thread->CTX)->Dispatcher->ExecuteJITCallback(Thread->CurrentFrame, RIP);
+    static_cast<ContextImpl *>(Thread->CTX)->Dispatcher->ExecuteJITCallback(Thread->CurrentFrame, RIP);
   }
 
   FEXCore::Context::ExitReason ContextImpl::RunUntilExit(FEXCore::Core::InternalThreadState *Thread) {
     ExecutionThread(Thread);
-    while(true) {
+    while (true) {
       auto reason = Thread->ExitReason;
 
       // Don't return if a custom exit handling the exit
@@ -333,9 +319,7 @@ namespace FEXCore::Context {
     }
   }
 
-  void ContextImpl::ExecuteThread(FEXCore::Core::InternalThreadState *Thread) {
-    Dispatcher->ExecuteDispatch(Thread->CurrentFrame);
-  }
+  void ContextImpl::ExecuteThread(FEXCore::Core::InternalThreadState *Thread) { Dispatcher->ExecuteDispatch(Thread->CurrentFrame); }
 
 
   void ContextImpl::InitializeThreadTLSData(FEXCore::Core::InternalThreadState *Thread) {
@@ -343,9 +327,7 @@ namespace FEXCore::Context {
     Thread->ThreadManager.TID = FHU::Syscalls::gettid();
     Thread->ThreadManager.PID = ::getpid();
 
-    if (Config.BlockJITNaming() ||
-        Config.GlobalJITNaming() ||
-        Config.LibraryJITNaming()) {
+    if (Config.BlockJITNaming() || Config.GlobalJITNaming() || Config.LibraryJITNaming()) {
       // Allocate a TLS JIT symbol buffer only if enabled.
       Thread->SymbolBuffer = JITSymbols::AllocateBuffer();
     }
@@ -359,7 +341,7 @@ namespace FEXCore::Context {
 #endif
   }
 
-  void ContextImpl::InitializeCompiler(FEXCore::Core::InternalThreadState* Thread) {
+  void ContextImpl::InitializeCompiler(FEXCore::Core::InternalThreadState *Thread) {
     Thread->OpDispatcher = fextl::make_unique<FEXCore::IR::OpDispatchBuilder>(this);
     Thread->OpDispatcher->SetMultiblock(Config.Multiblock);
     Thread->LookupCache = fextl::make_unique<FEXCore::LookupCache>(this);
@@ -384,18 +366,15 @@ namespace FEXCore::Context {
       Thread->PassManager->InsertRegisterAllocationPass(HostFeatures.SupportsAVX);
       Thread->CPUBackend = FEXCore::CPU::CreateArm64JITCore(this, Thread);
       break;
-    case FEXCore::Config::CONFIG_CUSTOM:
-      Thread->CPUBackend = CustomCPUFactory(this, Thread);
-      break;
-    default:
-      ERROR_AND_DIE_FMT("Unknown core configuration");
-      break;
+    case FEXCore::Config::CONFIG_CUSTOM: Thread->CPUBackend = CustomCPUFactory(this, Thread); break;
+    default: ERROR_AND_DIE_FMT("Unknown core configuration"); break;
     }
 
     Thread->PassManager->Finalize();
   }
 
-  FEXCore::Core::InternalThreadState* ContextImpl::CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) {
+  FEXCore::Core::InternalThreadState *
+  ContextImpl::CreateThread(uint64_t InitialRIP, uint64_t StackPointer, FEXCore::Core::CPUState *NewThreadState, uint64_t ParentTID) {
     FEXCore::Core::InternalThreadState *Thread = new FEXCore::Core::InternalThreadState{};
 
     Thread->CurrentFrame->State.gregs[X86State::REG_RSP] = StackPointer;
@@ -413,7 +392,8 @@ namespace FEXCore::Context {
     InitializeCompiler(Thread);
 
     Thread->CurrentFrame->State.DeferredSignalRefCount.Store(0);
-    Thread->CurrentFrame->State.DeferredSignalFaultAddress = reinterpret_cast<Core::NonAtomicRefCounter<uint64_t>*>(FEXCore::Allocator::VirtualAlloc(4096));
+    Thread->CurrentFrame->State.DeferredSignalFaultAddress =
+    reinterpret_cast<Core::NonAtomicRefCounter<uint64_t> *>(FEXCore::Allocator::VirtualAlloc(4096));
 
     return Thread;
   }
@@ -426,7 +406,7 @@ namespace FEXCore::Context {
       SignalDelegation->UninstallTLSState(Thread);
     }
 
-    FEXCore::Allocator::VirtualFree(reinterpret_cast<void*>(Thread->CurrentFrame->State.DeferredSignalFaultAddress), 4096);
+    FEXCore::Allocator::VirtualFree(reinterpret_cast<void *>(Thread->CurrentFrame->State.DeferredSignalFaultAddress), 4096);
     delete Thread;
   }
 
@@ -436,8 +416,7 @@ namespace FEXCore::Context {
 
     if (Child) {
       CodeInvalidationMutex.StealAndDropActiveLocks();
-    }
-    else {
+    } else {
       CodeInvalidationMutex.unlock();
       return;
     }
@@ -468,7 +447,7 @@ namespace FEXCore::Context {
     Thread->DebugStore.clear();
   }
 
-  static void IRDumper(FEXCore::Core::InternalThreadState *Thread, IR::IREmitter *IREmitter, uint64_t GuestRIP, IR::RegisterAllocationData* RA) {
+  static void IRDumper(FEXCore::Core::InternalThreadState *Thread, IR::IREmitter *IREmitter, uint64_t GuestRIP, IR::RegisterAllocationData *RA) {
     FEXCore::File::File FD = FEXCore::File::File::GetStdERR();
     fextl::stringstream out;
     auto NewIR = IREmitter->ViewIR();
@@ -506,8 +485,8 @@ namespace FEXCore::Context {
     Thread->OpDispatcher->ReownOrClaimBuffer();
     Thread->OpDispatcher->ResetWorkingList();
 
-    uint64_t TotalInstructions {0};
-    uint64_t TotalInstructionsLength {0};
+    uint64_t TotalInstructions{0};
+    uint64_t TotalInstructionsLength{0};
 
     bool HasCustomIR{};
 
@@ -524,13 +503,13 @@ namespace FEXCore::Context {
 
     if (!HasCustomIR) {
       uint8_t const *GuestCode{};
-      GuestCode = reinterpret_cast<uint8_t const*>(GuestRIP);
+      GuestCode = reinterpret_cast<uint8_t const *>(GuestRIP);
 
-      bool HadDispatchError {false};
+      bool HadDispatchError{false};
 
       Thread->FrontendDecoder->DecodeInstructionsAtEntry(GuestCode, GuestRIP, MaxInst, [Thread](uint64_t BlockEntry, uint64_t Start, uint64_t Length) {
         if (Thread->LookupCache->AddBlockExecutableRange(BlockEntry, Start, Length)) {
-          static_cast<ContextImpl*>(Thread->CTX)->SyscallHandler->MarkGuestExecutableRange(Thread, Start, Length);
+          static_cast<ContextImpl *>(Thread->CTX)->SyscallHandler->MarkGuestExecutableRange(Thread, Start, Length);
         }
       });
 
@@ -546,7 +525,7 @@ namespace FEXCore::Context {
         // Set the block entry point
         Thread->OpDispatcher->SetNewBlockIfChanged(Block.Entry);
 
-        uint64_t BlockInstructionsLength {};
+        uint64_t BlockInstructionsLength{};
 
         // Reset any block-specific state
         Thread->OpDispatcher->StartNewBlock();
@@ -554,8 +533,8 @@ namespace FEXCore::Context {
         uint64_t InstsInBlock = Block.NumInstructions;
 
         for (size_t i = 0; i < InstsInBlock; ++i) {
-          FEXCore::X86Tables::X86InstInfo const* TableInfo {nullptr};
-          FEXCore::X86Tables::DecodedInst const* DecodedInfo {nullptr};
+          FEXCore::X86Tables::X86InstInfo const *TableInfo{nullptr};
+          FEXCore::X86Tables::DecodedInst const *DecodedInfo{nullptr};
 
           TableInfo = Block.DecodedInstructions[i].TableInfo;
           DecodedInfo = &Block.DecodedInstructions[i];
@@ -566,9 +545,10 @@ namespace FEXCore::Context {
           }
 
           if (Config.SMCChecks == FEXCore::Config::CONFIG_SMC_FULL) {
-            auto ExistingCodePtr = reinterpret_cast<uint64_t*>(Block.Entry + BlockInstructionsLength);
+            auto ExistingCodePtr = reinterpret_cast<uint64_t *>(Block.Entry + BlockInstructionsLength);
 
-            auto CodeChanged = Thread->OpDispatcher->_ValidateCode(ExistingCodePtr[0], ExistingCodePtr[1], (uintptr_t)ExistingCodePtr - GuestRIP, DecodedInfo->InstSize);
+            auto CodeChanged =
+            Thread->OpDispatcher->_ValidateCode(ExistingCodePtr[0], ExistingCodePtr[1], (uintptr_t)ExistingCodePtr - GuestRIP, DecodedInfo->InstSize);
 
             auto InvalidateCodeCond = Thread->OpDispatcher->_CondJump(CodeChanged);
 
@@ -578,7 +558,8 @@ namespace FEXCore::Context {
 
             Thread->OpDispatcher->SetCurrentCodeBlock(CodeWasChangedBlock);
             Thread->OpDispatcher->_ThreadRemoveCodeEntry();
-            Thread->OpDispatcher->_ExitFunction(Thread->OpDispatcher->_EntrypointOffset(IR::SizeToOpSize(GPRSize), Block.Entry + BlockInstructionsLength - GuestRIP));
+            Thread->OpDispatcher->_ExitFunction(
+            Thread->OpDispatcher->_EntrypointOffset(IR::SizeToOpSize(GPRSize), Block.Entry + BlockInstructionsLength - GuestRIP));
 
             auto NextOpBlock = Thread->OpDispatcher->CreateNewCodeBlockAfter(CurrentBlock);
 
@@ -593,8 +574,7 @@ namespace FEXCore::Context {
             std::invoke(Fn, Thread->OpDispatcher, DecodedInfo);
             if (Thread->OpDispatcher->HadDecodeFailure()) {
               HadDispatchError = true;
-            }
-            else {
+            } else {
               if (Thread->OpDispatcher->HasHandledLock() != IsLocked) {
                 HadDispatchError = true;
                 LogMan::Msg::EFmt("Missing LOCK HANDLER at 0x{:x}{{'{}'}}", Block.Entry + BlockInstructionsLength, TableInfo->Name ?: "UND");
@@ -603,8 +583,7 @@ namespace FEXCore::Context {
               TotalInstructionsLength += DecodedInfo->InstSize;
               ++TotalInstructions;
             }
-          }
-          else {
+          } else {
             if (TableInfo) {
               LogMan::Msg::EFmt("Invalid or Unknown instruction: {} 0x{:x}", TableInfo->Name ?: "UND", Block.Entry - GuestRIP);
             }
@@ -614,20 +593,21 @@ namespace FEXCore::Context {
           }
 
           const bool NeedsBlockEnd = (HadDispatchError && TotalInstructions > 0) ||
-            (Thread->OpDispatcher->NeedsBlockEnder() && i + 1 == InstsInBlock);
+          (Thread->OpDispatcher->NeedsBlockEnder() && i + 1 == InstsInBlock);
 
           // If we had a dispatch error then leave early
           if (HadDispatchError && TotalInstructions == 0) {
             // Couldn't handle any instruction in op dispatcher
             Thread->OpDispatcher->ResetWorkingList();
-            return { nullptr, nullptr, 0, 0, 0, 0 };
+            return {nullptr, nullptr, 0, 0, 0, 0};
           }
 
           if (NeedsBlockEnd) {
             const uint8_t GPRSize = GetGPRSize();
 
             // We had some instructions. Early exit
-            Thread->OpDispatcher->_ExitFunction(Thread->OpDispatcher->_EntrypointOffset(IR::SizeToOpSize(GPRSize), Block.Entry + BlockInstructionsLength - GuestRIP));
+            Thread->OpDispatcher->_ExitFunction(
+            Thread->OpDispatcher->_EntrypointOffset(IR::SizeToOpSize(GPRSize), Block.Entry + BlockInstructionsLength - GuestRIP));
             break;
           }
 
@@ -652,7 +632,7 @@ namespace FEXCore::Context {
         IRDumper(Thread, IREmitter, GuestRIP, nullptr);
       }
 
-      if (static_cast<ContextImpl*>(Thread->CTX)->Config.ValidateIRarser) {
+      if (static_cast<ContextImpl *>(Thread->CTX)->Config.ValidateIRarser) {
         ValidateIR(this, IREmitter);
       }
     }
@@ -663,7 +643,9 @@ namespace FEXCore::Context {
     // Debug
     {
       if (ShouldDump) {
-        IRDumper(Thread, IREmitter, GuestRIP, Thread->PassManager->HasPass("RA") ? Thread->PassManager->GetPass<IR::RegisterAllocationPass>("RA")->GetAllocationData() : nullptr);
+        IRDumper(
+        Thread, IREmitter, GuestRIP,
+        Thread->PassManager->HasPass("RA") ? Thread->PassManager->GetPass<IR::RegisterAllocationPass>("RA")->GetAllocationData() : nullptr);
       }
     }
 
@@ -673,22 +655,22 @@ namespace FEXCore::Context {
     IREmitter->DelayedDisownBuffer();
 
     return {
-      .IRList = IRList,
-      .RAData = std::move(RAData),
-      .TotalInstructions = TotalInstructions,
-      .TotalInstructionsLength = TotalInstructionsLength,
-      .StartAddr = Thread->FrontendDecoder->DecodedMinAddress,
-      .Length = Thread->FrontendDecoder->DecodedMaxAddress - Thread->FrontendDecoder->DecodedMinAddress,
+    .IRList = IRList,
+    .RAData = std::move(RAData),
+    .TotalInstructions = TotalInstructions,
+    .TotalInstructionsLength = TotalInstructionsLength,
+    .StartAddr = Thread->FrontendDecoder->DecodedMinAddress,
+    .Length = Thread->FrontendDecoder->DecodedMaxAddress - Thread->FrontendDecoder->DecodedMinAddress,
     };
   }
 
   ContextImpl::CompileCodeResult ContextImpl::CompileCode(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP, uint64_t MaxInst) {
-    FEXCore::IR::IRListView *IRList {};
-    FEXCore::Core::DebugData *DebugData {};
-    FEXCore::IR::RegisterAllocationData::UniquePtr RAData {};
-    bool GeneratedIR {};
-    uint64_t StartAddr {};
-    uint64_t Length {};
+    FEXCore::IR::IRListView *IRList{};
+    FEXCore::Core::DebugData *DebugData{};
+    FEXCore::IR::RegisterAllocationData::UniquePtr RAData{};
+    bool GeneratedIR{};
+    uint64_t StartAddr{};
+    uint64_t Length{};
 
     // JIT Code object cache lookup
     if (CodeObjectCacheService) {
@@ -697,13 +679,13 @@ namespace FEXCore::Context {
         auto CompiledCode = Thread->CPUBackend->RelocateJITObjectCode(GuestRIP, CodeCacheEntry);
         if (CompiledCode) {
           return {
-              .CompiledCode = CompiledCode,
-              .IRData = nullptr,    // No IR data generated
-              .DebugData = nullptr, // nullptr here ensures that code serialization doesn't occur on from cache read
-              .RAData = nullptr,    // No RA data generated
-              .GeneratedIR = false, // nullptr here ensures IR cache mechanisms won't run
-              .StartAddr = 0,       // Unused
-              .Length = 0,          // Unused
+          .CompiledCode = CompiledCode,
+          .IRData = nullptr, // No IR data generated
+          .DebugData = nullptr, // nullptr here ensures that code serialization doesn't occur on from cache read
+          .RAData = nullptr, // No RA data generated
+          .GeneratedIR = false, // nullptr here ensures IR cache mechanisms won't run
+          .StartAddr = 0, // Unused
+          .Length = 0, // Unused
           };
         }
       }
@@ -712,8 +694,7 @@ namespace FEXCore::Context {
     if (SourcecodeResolver && Config.GDBSymbols()) {
       auto AOTIRCacheEntry = SyscallHandler->LookupAOTIRCacheEntry(Thread, GuestRIP);
       if (AOTIRCacheEntry.Entry && !AOTIRCacheEntry.Entry->ContainsCode) {
-        AOTIRCacheEntry.Entry->SourcecodeMap =
-            SourcecodeResolver->GenerateMap(AOTIRCacheEntry.Entry->Filename, AOTIRCacheEntry.Entry->FileId);
+        AOTIRCacheEntry.Entry->SourcecodeMap = SourcecodeResolver->GenerateMap(AOTIRCacheEntry.Entry->Filename, AOTIRCacheEntry.Entry->FileId);
       }
     }
 
@@ -733,7 +714,8 @@ namespace FEXCore::Context {
 
     if (IRList == nullptr) {
       // Generate IR + Meta Info
-      auto [IRCopy, RACopy, TotalInstructions, TotalInstructionsLength, _StartAddr, _Length] = GenerateIR(Thread, GuestRIP, Config.GDBSymbols(), MaxInst);
+      auto [IRCopy, RACopy, TotalInstructions, TotalInstructionsLength, _StartAddr, _Length] =
+      GenerateIR(Thread, GuestRIP, Config.GDBSymbols(), MaxInst);
 
       // Setup pointers to internal structures
       IRList = IRCopy;
@@ -751,16 +733,16 @@ namespace FEXCore::Context {
     }
     // Attempt to get the CPU backend to compile this code
     return {
-      // FEX currently throws away the CPUBackend::CompiledCode object other than the entrypoint
-      // In the future with code caching getting wired up, we will pass the rest of the data forward.
-      // TODO: Pass the data forward when code caching is wired up to this.
-      .CompiledCode = Thread->CPUBackend->CompileCode(GuestRIP, IRList, DebugData, RAData.get()).BlockEntry,
-      .IRData = IRList,
-      .DebugData = DebugData,
-      .RAData = std::move(RAData),
-      .GeneratedIR = GeneratedIR,
-      .StartAddr = StartAddr,
-      .Length = Length,
+    // FEX currently throws away the CPUBackend::CompiledCode object other than the entrypoint
+    // In the future with code caching getting wired up, we will pass the rest of the data forward.
+    // TODO: Pass the data forward when code caching is wired up to this.
+    .CompiledCode = Thread->CPUBackend->CompileCode(GuestRIP, IRList, DebugData, RAData.get()).BlockEntry,
+    .IRData = IRList,
+    .DebugData = DebugData,
+    .RAData = std::move(RAData),
+    .GeneratedIR = GeneratedIR,
+    .StartAddr = StartAddr,
+    .Length = Length,
     };
   }
 
@@ -777,12 +759,12 @@ namespace FEXCore::Context {
       return HostCode;
     }
 
-    void *CodePtr {};
-    FEXCore::IR::IRListView *IRList {};
-    FEXCore::Core::DebugData *DebugData {};
+    void *CodePtr{};
+    FEXCore::IR::IRListView *IRList{};
+    FEXCore::Core::DebugData *DebugData{};
 
-    bool GeneratedIR {};
-    uint64_t StartAddr {}, Length {};
+    bool GeneratedIR{};
+    uint64_t StartAddr{}, Length{};
 
     auto [Code, IR, Data, RAData, Generated, _StartAddr, _Length] = CompileCode(Thread, GuestRIP, MaxInst);
     CodePtr = Code;
@@ -804,55 +786,47 @@ namespace FEXCore::Context {
         auto GuestRIPLookup = SyscallHandler->LookupAOTIRCacheEntry(Thread, GuestRIP);
 
         if (DebugData->Subblocks.size()) {
-          for (auto& Subblock: DebugData->Subblocks) {
+          for (auto &Subblock : DebugData->Subblocks) {
             auto BlockBasePtr = FragmentBasePtr + Subblock.HostCodeOffset;
             if (GuestRIPLookup.Entry) {
-              Symbols.Register(Thread->SymbolBuffer.get(), BlockBasePtr, DebugData->HostCodeSize, GuestRIPLookup.Entry->Filename, GuestRIP - GuestRIPLookup.VAFileStart);
+              Symbols.Register(
+              Thread->SymbolBuffer.get(), BlockBasePtr, DebugData->HostCodeSize, GuestRIPLookup.Entry->Filename,
+              GuestRIP - GuestRIPLookup.VAFileStart);
             } else {
               Symbols.Register(Thread->SymbolBuffer.get(), BlockBasePtr, GuestRIP, Subblock.HostCodeSize);
             }
           }
         } else {
           if (GuestRIPLookup.Entry) {
-            Symbols.Register(Thread->SymbolBuffer.get(), FragmentBasePtr, DebugData->HostCodeSize, GuestRIPLookup.Entry->Filename, GuestRIP - GuestRIPLookup.VAFileStart);
-        } else {
-          Symbols.Register(Thread->SymbolBuffer.get(), FragmentBasePtr, GuestRIP, DebugData->HostCodeSize);
+            Symbols.Register(
+            Thread->SymbolBuffer.get(), FragmentBasePtr, DebugData->HostCodeSize, GuestRIPLookup.Entry->Filename,
+            GuestRIP - GuestRIPLookup.VAFileStart);
+          } else {
+            Symbols.Register(Thread->SymbolBuffer.get(), FragmentBasePtr, GuestRIP, DebugData->HostCodeSize);
           }
         }
       }
     }
 
     // Tell the object cache service to serialize the code if enabled
-    if (CodeObjectCacheService &&
-        Config.CacheObjectCodeCompilation == FEXCore::Config::ConfigObjectCodeHandler::CONFIG_READWRITE &&
-        DebugData) {
-      CodeObjectCacheService->AsyncAddSerializationJob(fextl::make_unique<CodeSerialize::AsyncJobHandler::SerializationJobData>(
-        CodeSerialize::AsyncJobHandler::SerializationJobData {
-          .GuestRIP = GuestRIP,
-          .GuestCodeLength = Length,
-          .GuestCodeHash = 0,
-          .HostCodeBegin = CodePtr,
-          .HostCodeLength = DebugData->HostCodeSize,
-          .HostCodeHash = 0,
-          .ThreadJobRefCount = &Thread->ObjectCacheRefCounter,
-          .Relocations = std::move(*DebugData->Relocations),
-        }
-      ));
+    if (CodeObjectCacheService && Config.CacheObjectCodeCompilation == FEXCore::Config::ConfigObjectCodeHandler::CONFIG_READWRITE && DebugData) {
+      CodeObjectCacheService->AsyncAddSerializationJob(
+      fextl::make_unique<CodeSerialize::AsyncJobHandler::SerializationJobData>(CodeSerialize::AsyncJobHandler::SerializationJobData{
+      .GuestRIP = GuestRIP,
+      .GuestCodeLength = Length,
+      .GuestCodeHash = 0,
+      .HostCodeBegin = CodePtr,
+      .HostCodeLength = DebugData->HostCodeSize,
+      .HostCodeHash = 0,
+      .ThreadJobRefCount = &Thread->ObjectCacheRefCounter,
+      .Relocations = std::move(*DebugData->Relocations),
+      }));
     }
 
     // Clear any relocations that might have been generated
     Thread->CPUBackend->ClearRelocations();
 
-    if (IRCaptureCache.PostCompileCode(
-        Thread,
-        CodePtr,
-        GuestRIP,
-        StartAddr,
-        Length,
-        std::move(RAData),
-        IRList,
-        DebugData,
-        GeneratedIR)) {
+    if (IRCaptureCache.PostCompileCode(Thread, CodePtr, GuestRIP, StartAddr, Length, std::move(RAData), IRList, DebugData, GeneratedIR)) {
       // Early exit
       return (uintptr_t)CodePtr;
     }
@@ -884,7 +858,7 @@ namespace FEXCore::Context {
 
       Thread->RunningEvents.Running = true;
 
-      static_cast<ContextImpl*>(Thread->CTX)->Dispatcher->ExecuteDispatch(Thread->CurrentFrame);
+      static_cast<ContextImpl *>(Thread->CTX)->Dispatcher->ExecuteDispatch(Thread->CurrentFrame);
 
       Thread->RunningEvents.Running = false;
     }
@@ -920,7 +894,7 @@ namespace FEXCore::Context {
     auto upper = Thread->LookupCache->CodePages.upper_bound((Start + Length - 1) >> 12);
 
     for (auto it = lower; it != upper; it++) {
-      for (auto Address: it->second) {
+      for (auto Address : it->second) {
         ContextImpl::ThreadRemoveCodeEntry(Thread, Address);
       }
       it->second.clear();
@@ -962,14 +936,18 @@ namespace FEXCore::Context {
     }
   }
 
-  void ContextImpl::ThreadAddBlockLink(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestDestination, FEXCore::Context::ExitFunctionLinkData *HostLink, const FEXCore::Context::BlockDelinkerFunc &delinker) {
-    auto lk = GuardSignalDeferringSection<std::shared_lock>(static_cast<ContextImpl*>(Thread->CTX)->CodeInvalidationMutex, Thread);
+  void ContextImpl::ThreadAddBlockLink(
+  FEXCore::Core::InternalThreadState *Thread, uint64_t GuestDestination, FEXCore::Context::ExitFunctionLinkData *HostLink,
+  const FEXCore::Context::BlockDelinkerFunc &delinker) {
+    auto lk = GuardSignalDeferringSection<std::shared_lock>(static_cast<ContextImpl *>(Thread->CTX)->CodeInvalidationMutex, Thread);
 
     Thread->LookupCache->AddBlockLink(GuestDestination, HostLink, delinker);
   }
 
   void ContextImpl::ThreadRemoveCodeEntry(FEXCore::Core::InternalThreadState *Thread, uint64_t GuestRIP) {
-    LogMan::Throw::AFmt(static_cast<ContextImpl*>(Thread->CTX)->CodeInvalidationMutex.try_lock() == false, "CodeInvalidationMutex needs to be unique_locked here");
+    LogMan::Throw::AFmt(
+    static_cast<ContextImpl *>(Thread->CTX)->CodeInvalidationMutex.try_lock() == false,
+    "CodeInvalidationMutex needs to be unique_locked here");
 
     std::lock_guard<std::recursive_mutex> lk(Thread->LookupCache->WriteLock);
 
@@ -999,9 +977,7 @@ namespace FEXCore::Context {
 
     std::scoped_lock lk(CustomIRMutex);
 
-    InvalidateGuestCodeRange(nullptr, Entrypoint, 1, [this](uint64_t Entrypoint, uint64_t) {
-      CustomIRHandlers.erase(Entrypoint);
-    });
+    InvalidateGuestCodeRange(nullptr, Entrypoint, 1, [this](uint64_t Entrypoint, uint64_t) { CustomIRHandlers.erase(Entrypoint); });
 
     HasCustomIRHandlers = !CustomIRHandlers.empty();
   }
@@ -1011,11 +987,9 @@ namespace FEXCore::Context {
     return rv;
   }
 
-  void ContextImpl::UnloadAOTIRCacheEntry(IR::AOTIRCacheEntry *Entry) {
-    IRCaptureCache.UnloadAOTIRCacheEntry(Entry);
-  }
+  void ContextImpl::UnloadAOTIRCacheEntry(IR::AOTIRCacheEntry *Entry) { IRCaptureCache.UnloadAOTIRCacheEntry(Entry); }
 
-  void ContextImpl::AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const& Definitions) {
+  void ContextImpl::AppendThunkDefinitions(fextl::vector<FEXCore::IR::ThunkDefinition> const &Definitions) {
     if (ThunkHandler) {
       ThunkHandler->AppendThunkDefinitions(Definitions);
     }

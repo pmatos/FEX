@@ -37,40 +37,37 @@ namespace FEX::HLE::x32 {
     // Check si_code to determine how we need to interpret this
     if (Info->si_code == SI_TIMER) {
       // SI_TIMER means pid, uid, value
-      Info->_sifields._timer.tid     = Host.si_timerid;
+      Info->_sifields._timer.tid = Host.si_timerid;
       Info->_sifields._timer.overrun = Host.si_overrun;
       Info->_sifields._timer.sigval.sival_int = Host.si_value.sival_int;
-    }
-    else {
+    } else {
       // Now we need to copy over the more complex things
       switch (Info->si_signo) {
-        case SIGSEGV:
-        case SIGBUS:
-          // This is the address trying to be accessed, not the RIP
-          Info->_sifields._sigfault.addr = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(Host.si_addr));
-          break;
-        case SIGFPE:
-        case SIGILL:
-          // Can't really give a real result here. This is the RIP causing a sigill or sigfpe
-          // Claim at RIP 0 for now
-          Info->_sifields._sigfault.addr = 0;
-          break;
-        case SIGCHLD:
-          Info->_sifields._sigchld.pid    = Host.si_pid;
-          Info->_sifields._sigchld.uid    = Host.si_uid;
-          Info->_sifields._sigchld.status = Host.si_status;
-          Info->_sifields._sigchld.utime  = Host.si_utime;
-          Info->_sifields._sigchld.stime  = Host.si_stime;
-          break;
-        case SIGALRM:
-        case SIGVTALRM:
-          Info->_sifields._timer.tid              = Host.si_timerid;
-          Info->_sifields._timer.overrun          = Host.si_overrun;
-          Info->_sifields._timer.sigval.sival_int = Host.si_int;
-          break;
-        default:
-          LogMan::Msg::EFmt("Unhandled siginfo_t for sigtimedwait: {}", Info->si_signo);
-          break;
+      case SIGSEGV:
+      case SIGBUS:
+        // This is the address trying to be accessed, not the RIP
+        Info->_sifields._sigfault.addr = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(Host.si_addr));
+        break;
+      case SIGFPE:
+      case SIGILL:
+        // Can't really give a real result here. This is the RIP causing a sigill or sigfpe
+        // Claim at RIP 0 for now
+        Info->_sifields._sigfault.addr = 0;
+        break;
+      case SIGCHLD:
+        Info->_sifields._sigchld.pid = Host.si_pid;
+        Info->_sifields._sigchld.uid = Host.si_uid;
+        Info->_sifields._sigchld.status = Host.si_status;
+        Info->_sifields._sigchld.utime = Host.si_utime;
+        Info->_sifields._sigchld.stime = Host.si_stime;
+        break;
+      case SIGALRM:
+      case SIGVTALRM:
+        Info->_sifields._timer.tid = Host.si_timerid;
+        Info->_sifields._timer.overrun = Host.si_overrun;
+        Info->_sifields._timer.sigval.sival_int = Host.si_int;
+        break;
+      default: LogMan::Msg::EFmt("Unhandled siginfo_t for sigtimedwait: {}", Info->si_signo); break;
       }
     }
   }
@@ -118,7 +115,8 @@ namespace FEX::HLE::x32 {
       return static_cast<uint32_t>(reinterpret_cast<uint64_t>(oldact.sigaction_handler.handler));
     });
 
-    REGISTER_SYSCALL_IMPL_X32(sigaction, [](FEXCore::Core::CpuStateFrame *Frame, int signum, const OldGuestSigAction_32 *act, OldGuestSigAction_32 *oldact) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    sigaction, [](FEXCore::Core::CpuStateFrame *Frame, int signum, const OldGuestSigAction_32 *act, OldGuestSigAction_32 *oldact) -> uint64_t {
       GuestSigAction *act64_p{};
       GuestSigAction *old64_p{};
 
@@ -141,7 +139,9 @@ namespace FEX::HLE::x32 {
       return Result;
     });
 
-    REGISTER_SYSCALL_IMPL_X32(rt_sigaction, [](FEXCore::Core::CpuStateFrame *Frame, int signum, const GuestSigAction_32 *act, GuestSigAction_32 *oldact, size_t sigsetsize) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    rt_sigaction,
+    [](FEXCore::Core::CpuStateFrame *Frame, int signum, const GuestSigAction_32 *act, GuestSigAction_32 *oldact, size_t sigsetsize) -> uint64_t {
       if (sigsetsize != 8) {
         return -EINVAL;
       }
@@ -168,9 +168,11 @@ namespace FEX::HLE::x32 {
       return Result;
     });
 
-    REGISTER_SYSCALL_IMPL_X32(rt_sigtimedwait, [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, compat_ptr<FEXCore::x86::siginfo_t> info, const struct timespec32* timeout, size_t sigsetsize) -> uint64_t {
-      struct timespec* timeout_ptr{};
-      struct timespec tp64{};
+    REGISTER_SYSCALL_IMPL_X32(
+    rt_sigtimedwait,
+    [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, compat_ptr<FEXCore::x86::siginfo_t> info, const struct timespec32 *timeout, size_t sigsetsize) -> uint64_t {
+      struct timespec *timeout_ptr{};
+      struct timespec tp64 {};
       if (timeout) {
         tp64 = *timeout;
         timeout_ptr = &tp64;
@@ -186,7 +188,9 @@ namespace FEX::HLE::x32 {
     });
 
 
-    REGISTER_SYSCALL_IMPL_X32(rt_sigtimedwait_time64, [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, compat_ptr<FEXCore::x86::siginfo_t> info, const struct timespec* timeout, size_t sigsetsize) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32(
+    rt_sigtimedwait_time64,
+    [](FEXCore::Core::CpuStateFrame *Frame, uint64_t *set, compat_ptr<FEXCore::x86::siginfo_t> info, const struct timespec *timeout, size_t sigsetsize) -> uint64_t {
       siginfo_t HostInfo{};
       uint64_t Result = FEX::HLE::_SyscallHandler->GetSignalDelegator()->GuestSigTimedWait(set, &HostInfo, timeout, sigsetsize);
       if (Result != -1) {
@@ -197,7 +201,9 @@ namespace FEX::HLE::x32 {
     });
 
     if (Handler->IsHostKernelVersionAtLeast(5, 1, 0)) {
-      REGISTER_SYSCALL_IMPL_X32(pidfd_send_signal, [](FEXCore::Core::CpuStateFrame *Frame, int pidfd, int sig, compat_ptr<FEXCore::x86::siginfo_t> info, unsigned int flags) -> uint64_t {
+      REGISTER_SYSCALL_IMPL_X32(
+      pidfd_send_signal,
+      [](FEXCore::Core::CpuStateFrame *Frame, int pidfd, int sig, compat_ptr<FEXCore::x86::siginfo_t> info, unsigned int flags) -> uint64_t {
         siginfo_t *InfoHost_ptr{};
         siginfo_t InfoHost{};
         if (info) {
@@ -208,12 +214,12 @@ namespace FEX::HLE::x32 {
         uint64_t Result = ::syscall(SYSCALL_DEF(pidfd_send_signal), pidfd, sig, InfoHost_ptr, flags);
         SYSCALL_ERRNO();
       });
-    }
-    else {
+    } else {
       REGISTER_SYSCALL_IMPL_X32(pidfd_send_signal, UnimplementedSyscallSafe);
     }
 
-    REGISTER_SYSCALL_IMPL_X32_PASS(rt_sigqueueinfo, [](FEXCore::Core::CpuStateFrame *Frame, pid_t pid, int sig, compat_ptr<FEXCore::x86::siginfo_t> info) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS(
+    rt_sigqueueinfo, [](FEXCore::Core::CpuStateFrame *Frame, pid_t pid, int sig, compat_ptr<FEXCore::x86::siginfo_t> info) -> uint64_t {
       siginfo_t info64{};
       siginfo_t *info64_p{};
 
@@ -225,7 +231,8 @@ namespace FEX::HLE::x32 {
       SYSCALL_ERRNO();
     });
 
-    REGISTER_SYSCALL_IMPL_X32_PASS(rt_tgsigqueueinfo, [](FEXCore::Core::CpuStateFrame *Frame, pid_t tgid, pid_t tid, int sig, compat_ptr<FEXCore::x86::siginfo_t> info) -> uint64_t {
+    REGISTER_SYSCALL_IMPL_X32_PASS(
+    rt_tgsigqueueinfo, [](FEXCore::Core::CpuStateFrame *Frame, pid_t tgid, pid_t tid, int sig, compat_ptr<FEXCore::x86::siginfo_t> info) -> uint64_t {
       siginfo_t info64{};
       siginfo_t *info64_p{};
 

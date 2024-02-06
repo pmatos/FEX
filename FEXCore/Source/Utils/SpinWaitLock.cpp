@@ -6,8 +6,7 @@ namespace FEXCore::Utils::SpinWaitLock {
 
   static uint32_t GetCycleCounterFrequency() {
     uint64_t Result{};
-    __asm("mrs %[Res], CNTFRQ_EL0"
-        : [Res] "=r" (Result));
+    __asm("mrs %[Res], CNTFRQ_EL0" : [Res] "=r"(Result));
     return Result;
   }
 

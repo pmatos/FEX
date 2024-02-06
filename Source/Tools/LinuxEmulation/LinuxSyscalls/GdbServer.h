@@ -23,19 +23,17 @@ $end_info$
 
 namespace FEX {
 
-class GdbServer {
-public:
-    GdbServer(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *SignalDelegation, FEX::HLE::SyscallHandler *const SyscallHandler);
+  class GdbServer {
+  public:
+    GdbServer(FEXCore::Context::Context *ctx, FEX::HLE::SignalDelegator *SignalDelegation, FEX::HLE::SyscallHandler * const SyscallHandler);
     ~GdbServer();
 
     // Public for threading
     void GdbServerLoop();
 
-    void AlertLibrariesChanged() {
-      LibraryMapChanged = true;
-    }
+    void AlertLibrariesChanged() { LibraryMapChanged = true; }
 
-private:
+  private:
     void Break(int signal);
 
     void OpenListenSocket();
@@ -48,7 +46,7 @@ private:
     fextl::unique_ptr<std::iostream> OpenSocket();
     void StartThread();
     fextl::string ReadPacket(std::iostream &stream);
-    void SendPacket(std::ostream &stream, const fextl::string& packet);
+    void SendPacket(std::ostream &stream, const fextl::string &packet);
 
     void SendACK(std::ostream &stream, bool NACK);
 
@@ -68,12 +66,12 @@ private:
       ResponseType TypeResponse{};
     };
 
-    void SendPacketPair(const HandledPacketType& packetPair);
+    void SendPacketPair(const HandledPacketType &packetPair);
     HandledPacketType ProcessPacket(const fextl::string &packet);
     HandledPacketType handleQuery(const fextl::string &packet);
     HandledPacketType handleXfer(const fextl::string &packet);
     HandledPacketType handleMemory(const fextl::string &packet);
-    HandledPacketType handleV(const fextl::string& packet);
+    HandledPacketType handleV(const fextl::string &packet);
     HandledPacketType handleThreadOp(const fextl::string &packet);
     HandledPacketType handleBreakpoint(const fextl::string &packet);
     HandledPacketType handleProgramOffsets();
@@ -81,10 +79,10 @@ private:
     HandledPacketType ThreadAction(char action, uint32_t tid);
 
     fextl::string readRegs();
-    HandledPacketType readReg(const fextl::string& packet);
+    HandledPacketType readReg(const fextl::string &packet);
 
     FEXCore::Context::Context *CTX;
-    FEX::HLE::SyscallHandler *const SyscallHandler;
+    FEX::HLE::SyscallHandler * const SyscallHandler;
     fextl::unique_ptr<FEXCore::Threads::Thread> gdbServerThread;
     fextl::unique_ptr<std::iostream> CommsStream;
     std::mutex sendMutex;
@@ -105,9 +103,6 @@ private:
     fextl::string GdbUnixSocketPath{};
     FEX_CONFIG_OPT(Filename, APP_FILENAME);
     FEX_CONFIG_OPT(Is64BitMode, IS64BIT_MODE);
-};
+  };
 
 }
-
-
-
