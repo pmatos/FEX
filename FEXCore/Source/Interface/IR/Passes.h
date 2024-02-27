@@ -28,6 +28,7 @@ fextl::unique_ptr<FEXCore::IR::RegisterAllocationPass>
 CreateRegisterAllocationPass(FEXCore::IR::Pass *CompactionPass,
                              bool SupportsAVX);
 fextl::unique_ptr<FEXCore::IR::Pass> CreateLongDivideEliminationPass();
+fextl::unique_ptr<FEXCore::IR::Pass> CreateX87StackOptimizationPass();
 
 namespace Validation {
 fextl::unique_ptr<FEXCore::IR::Pass> CreateIRValidation();
