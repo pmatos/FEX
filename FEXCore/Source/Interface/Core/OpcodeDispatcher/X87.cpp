@@ -126,6 +126,7 @@ OrderedNode *OpDispatchBuilder::ReconstructX87StateFromFSW(OrderedNode *FSW) {
   return Top;
 }
 
+#if 0
 template<size_t width>
 void OpDispatchBuilder::FLD(OpcodeArgs) {
   // Update TOP
@@ -167,6 +168,7 @@ template
 void OpDispatchBuilder::FLD<64>(OpcodeArgs);
 template
 void OpDispatchBuilder::FLD<80>(OpcodeArgs);
+#endif
 
 void OpDispatchBuilder::FBLD(OpcodeArgs) {
   // Update TOP
@@ -270,6 +272,7 @@ void OpDispatchBuilder::FILD(OpcodeArgs) {
   _StoreContextIndexed(converted, top, 16, MMBaseOffset(), 16, FPRClass);
 }
 
+#if 0
 template<size_t width>
 void OpDispatchBuilder::FST(OpcodeArgs) {
   auto orig_top = GetX87Top();
@@ -297,6 +300,7 @@ template
 void OpDispatchBuilder::FST<64>(OpcodeArgs);
 template
 void OpDispatchBuilder::FST<80>(OpcodeArgs);
+#endif
 
 template<bool Truncate>
 void OpDispatchBuilder::FIST(OpcodeArgs) {

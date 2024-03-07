@@ -30,9 +30,9 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
 
   bool Changed = false;
   auto CurrentIR = IREmit->ViewIR();
-  auto OriginalWriteCursor = IREmit->GetWriteCursor();
+  auto *OriginalWriteCursor = IREmit->GetWriteCursor();
 
-  auto HeaderOp = CurrentIR.GetHeader();
+  auto *HeaderOp = CurrentIR.GetHeader();
   LOGMAN_THROW_AA_FMT(HeaderOp->Header.Op == OP_IRHEADER, "First op wasn't IRHeader");
 
   if (!HeaderOp->HasX87) {
@@ -46,10 +46,11 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
     for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
       switch (IROp->Op) {
         case IR::OP_PUSHSTACK: {
-          auto Op = IROp->C<IR::IROp_PushStack>();
+          LogMan::Msg::DFmt("OP_PUSHSTACK\n");
+          const auto *Op = IROp->C<IR::IROp_PushStack>();
           auto SourceNodeID = Op->X80Src.ID();
-          auto SourceNode = CurrentIR.GetNode(Op->X80Src);
-          auto SourceNodeOp = CurrentIR.GetOp<IROp_Header>(SourceNode);
+          auto *SourceNode = CurrentIR.GetNode(Op->X80Src);
+          auto *SourceNodeOp = CurrentIR.GetOp<IROp_Header>(SourceNode);
           auto SourceNodeSize = SourceNodeOp->Size;
           StackData.emplace_back(StackMemberInfo {
             .SourceDataSize = IR::SizeToOpSize(SourceNodeSize),
@@ -64,7 +65,8 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           break;
         }
         case IR::OP_POPSTACKMEMORY: {
-          auto Op = IROp->C<IR::IROp_PopStackMemory>();
+          LogMan::Msg::DFmt("OP_POPSTACKMEMORY\n");
+          const auto *Op = IROp->C<IR::IROp_PopStackMemory>();
           auto StackMember = StackData.back();
           if (Op->Float == StackMember.InterpretAsFloat &&
               Op->StoreSize == StackMember.StackDataSize &&
@@ -74,7 +76,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
 
           IREmit->SetWriteCursor(CodeNode);
 
-          auto AddrNode = CurrentIR.GetNode(Op->Addr);
+          auto *AddrNode = CurrentIR.GetNode(Op->Addr);
           if (StackMember.SourceDataSize == OpSize::i128Bit) {
             IREmit->_StoreMem(FPRClass, OpSize::i64Bit, AddrNode, StackMember.SourceDataNode, 1);
             auto NewLocation = IREmit->_Add(OpSize::i64Bit, AddrNode, IREmit->_Constant(8));

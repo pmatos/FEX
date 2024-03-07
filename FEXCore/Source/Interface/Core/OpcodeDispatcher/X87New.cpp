@@ -15,11 +15,8 @@ namespace FEXCore::IR {
 class OrderedNode;
 #define OpcodeArgs [[maybe_unused]] FEXCore::X86Tables::DecodedOp Op
 
-// TODO new x87 ops
-//
-//
-template<size_t width>
-void OpDispatchBuilder::TODO_FLD(OpcodeArgs) {
+// Float LoaD operation
+template <size_t width> void OpDispatchBuilder::FLD(OpcodeArgs) {
   CurrentHeader->HasX87 = true;
 
   size_t read_width = (width == 80) ? 16 : width / 8;
@@ -37,15 +34,11 @@ void OpDispatchBuilder::TODO_FLD(OpcodeArgs) {
   _PushStack(data, OpSize::i128Bit, true, read_width);
 }
 
-template
-void OpDispatchBuilder::TODO_FLD<32>(OpcodeArgs);
-template
-void OpDispatchBuilder::TODO_FLD<64>(OpcodeArgs);
-template
-void OpDispatchBuilder::TODO_FLD<80>(OpcodeArgs);
+template void OpDispatchBuilder::FLD<32>(OpcodeArgs);
+template void OpDispatchBuilder::FLD<64>(OpcodeArgs);
+template void OpDispatchBuilder::FLD<80>(OpcodeArgs);
 
-template<size_t width>
-void OpDispatchBuilder::TODO_FST(OpcodeArgs) {
+template <size_t width> void OpDispatchBuilder::FST(OpcodeArgs) {
   CurrentHeader->HasX87 = true;
   const bool Pop = (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) != 0;
   OrderedNode *Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
@@ -68,11 +61,7 @@ void OpDispatchBuilder::TODO_FST(OpcodeArgs) {
   }
 }
 
-template
-void OpDispatchBuilder::TODO_FST<32>(OpcodeArgs);
-template
-void OpDispatchBuilder::TODO_FST<64>(OpcodeArgs);
-template
-void OpDispatchBuilder::TODO_FST<80>(OpcodeArgs);
-
+template void OpDispatchBuilder::FST<32>(OpcodeArgs);
+template void OpDispatchBuilder::FST<64>(OpcodeArgs);
+template void OpDispatchBuilder::FST<80>(OpcodeArgs);
 }

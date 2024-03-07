@@ -62,6 +62,7 @@ Metadata that drives the frontend x86/64 decoding
 - [Flags.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher/Flags.cpp): Handles x86/64 flag generation
 - [Vector.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp): Handles x86/64 Vector instructions to IR
 - [X87.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp): Handles x86/64 x87 to IR
+- [X87New.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp): New handler of x86/64 x87 to IR
 - [X87F64.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher/X87F64.cpp): Handles x86/64 x87 to IR
 - [OpcodeDispatcher.cpp](../FEXCore/Source/Interface/Core/OpcodeDispatcher.cpp): Handles x86/64 ops to IR, no-pf opt, local-flags opt
 
@@ -120,6 +121,7 @@ IR to IR Optimization
 - [RegisterAllocationPass.cpp](../FEXCore/Source/Interface/IR/Passes/RegisterAllocationPass.cpp)
 - [RegisterAllocationPass.h](../FEXCore/Source/Interface/IR/Passes/RegisterAllocationPass.h)
 - [ValueDominanceValidation.cpp](../FEXCore/Source/Interface/IR/Passes/ValueDominanceValidation.cpp): Sanity Checking
+- [x87StackOptimizationPass.cpp](../FEXCore/Source/Interface/IR/Passes/x87StackOptimizationPass.cpp): x87 stack optimization pass
 
 #### parser
 Text -> IR

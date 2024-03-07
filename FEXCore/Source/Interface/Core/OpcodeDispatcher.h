@@ -686,14 +686,10 @@ public:
   // Returns new x87 stack top from FSW.
   OrderedNode *ReconstructX87StateFromFSW(OrderedNode *FSW);
   /// TODO: New x87 stack machine ops
-  template<size_t width>
-  void TODO_FLD(OpcodeArgs);
-  template<size_t width>
-  void TODO_FST(OpcodeArgs);
+  template <size_t width> void FLD(OpcodeArgs);
+  template <size_t width> void FST(OpcodeArgs);
 
   // Old X87 ops
-  template<size_t width>
-  void FLD(OpcodeArgs);
   template<uint64_t Lower, uint32_t Upper>
   void FLD_Const(OpcodeArgs);
 
@@ -701,9 +697,6 @@ public:
   void FBSTP(OpcodeArgs);
 
   void FILD(OpcodeArgs);
-
-  template<size_t width>
-  void FST(OpcodeArgs);
 
   void FST(OpcodeArgs);
 
