@@ -97,9 +97,11 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
         case IR::OP_F80ADDSTACK: {
           LogMan::Msg::DFmt("OP_F80ADDSTACK\n");
           const auto* Op = IROp->C<IR::IROp_F80AddStack>();
+          (void)Op; // avoid warning for now
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          break;
         }
-        case IR::F80ADDVALUE: {
+        case IR::OP_F80ADDVALUE: {
           LogMan::Msg::DFmt("F80ADDVALUE\n");
           const auto* Op = IROp->C<IR::IROp_F80AddValue>();
           auto* ValueNode = CurrentIR.GetNode(Op->X80Src);
@@ -111,6 +113,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           IREmit->_F80Add(ValueNode, StackNode);
           IREmit->Remove(CodeNode);
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          break;
         }
         default: break;
       }
