@@ -245,15 +245,6 @@ DEF_OP(Yield) {
 }
 
 // New x87
-DEF_OP(PushStack) {
-  LogMan::Msg::DFmt("Backend for PushStack");
-  const auto *Op = IROp->C<IR::IROp_PushStack>();
-
-  // Move TOP of stack down (decrements pointer TOP as stack grows down)
-
-  // Store the value at the new TOP of stack
-}
-
 DEF_OP(PopStackMemory) {
 }
 

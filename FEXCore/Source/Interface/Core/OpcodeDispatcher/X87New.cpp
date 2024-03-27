@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include "FEXCore/IR/IR.h"
 #include "Interface/Core/OpcodeDispatcher.h"
 #include "Interface/Core/X86Tables/X86Tables.h"
 
@@ -17,19 +18,19 @@ class OrderedNode;
 
 // Float LoaD operation
 template <size_t width> void OpDispatchBuilder::FLD(OpcodeArgs) {
+  static_assert(width == 32 || width == 64 || width == 80, "Unsupported FLD width");
+
   CurrentHeader->HasX87 = true;
-
   size_t read_width = (width == 80) ? 16 : width / 8;
-
   OrderedNode *data{};
 
-  if (!Op->Src[0].IsNone()) {
-    // Read from memory
-    data = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], read_width, Op->Flags);
-  }
-  else {
+  if (Op->Src[0].IsNone()) {
     // Implicit arg
     data = _ReadStackValue(Op->OP & 7);
+  } else {
+    // Read from memory
+    data = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], read_width, Op->Flags);
+    data = _F80CVTTo(data, read_width);
   }
   _PushStack(data, OpSize::i128Bit, true, read_width);
 }
@@ -39,6 +40,8 @@ template void OpDispatchBuilder::FLD<64>(OpcodeArgs);
 template void OpDispatchBuilder::FLD<80>(OpcodeArgs);
 
 template <size_t width> void OpDispatchBuilder::FST(OpcodeArgs) {
+  static_assert(width == 32 || width == 64 || width == 80, "Unsupported FST width");
+
   CurrentHeader->HasX87 = true;
   const bool Pop = (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) != 0;
   OrderedNode *Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
@@ -64,4 +67,47 @@ template <size_t width> void OpDispatchBuilder::FST(OpcodeArgs) {
 template void OpDispatchBuilder::FST<32>(OpcodeArgs);
 template void OpDispatchBuilder::FST<64>(OpcodeArgs);
 template void OpDispatchBuilder::FST<80>(OpcodeArgs);
+
+template<size_t width, bool Integer, OpDispatchBuilder::OpResult ResInST0>
+void OpDispatchBuilder::FADD(OpcodeArgs) {
+  static_assert(width == 16 || width == 32 || width == 64 || width == 80, "Unsupported FADD width");
+
+  CurrentHeader->HasX87 = true;
+
+  if (Op->Src[0].IsNone()) { // Implicit argument case
+    auto offset = Op->OP & 7;
+    auto st0 = 0;
+    if constexpr (ResInST0 == OpResult::RES_STI) {
+      _F80AddStack(offset, st0);
+    } else {
+      _F80AddStack(st0, offset);
+    }
+    return;
+  }
+
+  // We have one memory argument
+  OrderedNode* arg {};
+
+  if constexpr (width == 16 || width == 32 || width == 64) {
+    if constexpr (Integer) {
+      arg = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTToInt(arg, width / 8);
+    } else {
+      arg = LoadSource(FPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTTo(arg, width / 8);
+    }
+  }
+
+  // top of stack is at offset zero
+  _F80AddValue(0, arg);
 }
+
+template void OpDispatchBuilder::FADD<32, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FADD<64, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FADD<80, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FADD<80, false, OpDispatchBuilder::OpResult::RES_STI>(OpcodeArgs);
+
+template void OpDispatchBuilder::FADD<16, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FADD<32, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+} // namespace FEXCore::IR

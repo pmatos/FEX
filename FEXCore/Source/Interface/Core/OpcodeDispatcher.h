@@ -703,10 +703,14 @@ public:
   template<bool Truncate>
   void FIST(OpcodeArgs);
 
+  // OpResult is used for Stack operations,
+  // describes if the result of the operation is stored in ST(0) or ST(i),
+  // where ST(i) is one of the arguments to the operation.
   enum class OpResult {
     RES_ST0,
     RES_STI,
   };
+
   template<size_t width, bool Integer, OpResult ResInST0>
   void FADD(OpcodeArgs);
   template<size_t width, bool Integer, OpResult ResInST0>

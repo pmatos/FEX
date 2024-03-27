@@ -15,12 +15,12 @@ public:
 
 private:
   struct StackMemberInfo {
-    IR::OpSize SourceDataSize;
-    IR::OpSize StackDataSize;
-    IR::NodeID SourceDataNodeID;
-    IR::OrderedNode *SourceDataNode;
-    IR::OrderedNode *DataLoadNode;
-    bool InterpretAsFloat{};
+    IR::OpSize SourceDataSize;       // Size of SourceDataNode
+    IR::OpSize StackDataSize;        // Size of the loaded data (??? FIXME)
+    IR::NodeID SourceDataNodeID;     // ID of the node
+    IR::OrderedNode* SourceDataNode; // Reference to the value pushed to stack
+    IR::OrderedNode* DataLoadNode;   // Reference to the IR node that loaded the data
+    bool InterpretAsFloat {};        // True if this is a floating point value, false if integer
   };
   fextl::vector<StackMemberInfo> StackData{8};
 };
@@ -62,12 +62,13 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           });
 
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
           break;
         }
         case IR::OP_POPSTACKMEMORY: {
           LogMan::Msg::DFmt("OP_POPSTACKMEMORY\n");
           const auto *Op = IROp->C<IR::IROp_PopStackMemory>();
-          auto StackMember = StackData.back();
+          const auto& StackMember = StackData.back();
           if (Op->Float == StackMember.InterpretAsFloat &&
               Op->StoreSize == StackMember.StackDataSize &&
               Op->StoreSize == StackMember.SourceDataSize) {
@@ -92,6 +93,24 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           StackData.pop_back();
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
           break;
+        }
+        case IR::OP_F80ADDSTACK: {
+          LogMan::Msg::DFmt("OP_F80ADDSTACK\n");
+          const auto* Op = IROp->C<IR::IROp_F80AddStack>();
+          LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        }
+        case IR::F80ADDVALUE: {
+          LogMan::Msg::DFmt("F80ADDVALUE\n");
+          const auto* Op = IROp->C<IR::IROp_F80AddValue>();
+          auto* ValueNode = CurrentIR.GetNode(Op->X80Src);
+
+          auto StackOffset = Op->SrcStack1;
+          const auto& StackMember = StackData[StackOffset];
+          auto* StackNode = StackMember.SourceDataNode;
+
+          IREmit->_F80Add(ValueNode, StackNode);
+          IREmit->Remove(CodeNode);
+          LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         }
         default: break;
       }
