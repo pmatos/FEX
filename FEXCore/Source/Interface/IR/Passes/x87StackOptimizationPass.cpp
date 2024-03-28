@@ -9,11 +9,17 @@
 #include <stdint.h>
 
 namespace FEXCore::IR {
+
 class X87StackOptimization final : public FEXCore::IR::Pass {
 public:
   bool Run(IREmitter *IREmit) override;
 
 private:
+  // FIXME: copy from OpcodeDispatcher.h
+  [[nodiscard]] uint32_t MMBaseOffset() {
+    return static_cast<uint32_t>(offsetof(Core::CPUState, mm[0][0]));
+  }
+
   struct StackMemberInfo {
     IR::OpSize SourceDataSize;       // Size of SourceDataNode
     IR::OpSize StackDataSize;        // Size of the loaded data (??? FIXME)
@@ -64,6 +70,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
           IREmit->SetWriteCursor(CodeNode);
           IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
+          Changed = true;
           break;
         }
         case IR::OP_POPSTACKMEMORY: {
@@ -90,6 +97,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
 
           IREmit->Remove(StackMember.DataLoadNode);
           IREmit->Remove(CodeNode);
+          Changed = true;
 
           StackData.pop_back();
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
@@ -114,6 +122,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           IREmit->SetWriteCursor(CodeNode);
           IREmit->_F80Add(ValueNode, StackNode);
           IREmit->Remove(CodeNode);
+          Changed = true;
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
           break;
         }
@@ -122,6 +131,16 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
     }
   }
   IREmit->SetWriteCursor(OriginalWriteCursor);
+
+  // Before leaving we need to write the current values in the stack to context
+  // so that the values are correct.
+  // Copy SourceDataNode in the stack to the respective mmX register.
+  for (size_t i = 0; i < StackData.size(); ++i) {
+    auto &StackMember = StackData[i];
+    auto *Node = StackMember.SourceDataNode;
+    IREmit->_StoreContextIndexed(Node, IREmit->_Constant(i), 16, MMBaseOffset(),
+                                 16, FPRClass);
+  }
 
   return Changed;
 }
