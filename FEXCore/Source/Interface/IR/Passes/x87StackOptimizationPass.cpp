@@ -62,6 +62,7 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           });
 
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          IREmit->SetWriteCursor(CodeNode);
           IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
           break;
         }
@@ -107,9 +108,10 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
           auto* ValueNode = CurrentIR.GetNode(Op->X80Src);
 
           auto StackOffset = Op->SrcStack1;
-          const auto& StackMember = StackData[StackOffset];
+          const auto& StackMember = StackData[StackData.size() - StackOffset - 1];
           auto* StackNode = StackMember.SourceDataNode;
 
+          IREmit->SetWriteCursor(CodeNode);
           IREmit->_F80Add(ValueNode, StackNode);
           IREmit->Remove(CodeNode);
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
