@@ -48,6 +48,13 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
 
   StackData.clear();
 
+  // Before any optimizations we need to update our StackData to match the
+  // status at the beginning of the block. We need to load the values from the
+  // context to the stack. We'll do this by checking which values to load
+  // through the x87 tag register.
+  // TODO(pmatos)
+
+  // Run optimization proper
   for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
     for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
       switch (IROp->Op) {
@@ -130,24 +137,41 @@ bool X87StackOptimization::Run(IREmitter *IREmit) {
       }
     }
   }
-  IREmit->SetWriteCursor(OriginalWriteCursor);
 
-  // Before leaving we need to write the current values in the stack to context
-  // so that the values are correct.
-  // Copy SourceDataNode in the stack to the respective mmX register.
-  for (size_t i = 0; i < StackData.size(); ++i) {
-    auto &StackMember = StackData[i];
-    auto *Node = StackMember.SourceDataNode;
-    IREmit->_StoreContextIndexed(Node, IREmit->_Constant(i), 16, MMBaseOffset(),
-                                 16, FPRClass);
+  // FIXME(pmatos) there's probably a better way to do this
+  // TODO(pmatos): we don't need to do this if we don't have any followup
+  // blocks. How can we check that? OTOH, not writing to the proper registers
+  // might screw up testing that expects the values to be in the stack registers
+  // at the end, so maybe we need a testing flag that forces the writing of this
+  // data to the context.
+  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+      if (IROp->Op == OP_ENTRYPOINTOFFSET) {
+        LogMan::Msg::DFmt("OP_ENTRYPOINTOFFSET\n");
+        // Set write cursor to previous instruction
+        IREmit->SetWriteCursor(IREmit->UnwrapNode(CodeNode->Header.Previous));
+
+        // Before leaving we need to write the current values in the stack to
+        // context so that the values are correct. Copy SourceDataNode in the
+        // stack to the respective mmX register.
+        for (size_t i = 0; i < StackData.size(); ++i) {
+          LogMan::Msg::DFmt("Writing stack member {} to context", i);
+          Changed = true;
+          auto &StackMember = StackData[i];
+          auto *Node = StackMember.SourceDataNode;
+          IREmit->_StoreContextIndexed(Node, IREmit->_Constant(i), 16,
+                                       MMBaseOffset(), 16, FPRClass);
+        }
+        break;
+      }
+    }
   }
 
+  IREmit->SetWriteCursor(OriginalWriteCursor);
   return Changed;
 }
 
 fextl::unique_ptr<FEXCore::IR::Pass> CreateX87StackOptimizationPass() {
   return fextl::make_unique<X87StackOptimization>();
 }
-
-
-}
+} // namespace FEXCore::IR
