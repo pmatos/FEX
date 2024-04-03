@@ -1,3 +1,4 @@
+#include "FEXCore/Utils/LogManager.h"
 #include "Interface/IR/IREmitter.h"
 #include "Interface/IR/PassManager.h"
 #include <FEXCore/IR/IR.h>
@@ -5,111 +6,65 @@
 #include <FEXCore/fextl/vector.h>
 
 #include <memory>
+#include <optional>
 #include <stdint.h>
 
 namespace FEXCore::IR {
 
-template<typename T>
-class CircularBuffer {
+
+// FixedSizeStack is a model of the x87 Stack where each element in this
+// fixed size stack lives at an offset from top. The top of the stack is at
+// index 0.
+template<typename T, size_t MaxSize>
+class FixedSizeStack {
 private:
-  using StorageType = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-  fextl::vector<StorageType> buffer;
-  fextl::vector<bool> constructed; // TODO(pmatos): We probably can use something better here
-  int index;                       // Current insertion index
+  fextl::vector<T> buffer;
 
 public:
-  CircularBuffer(std::size_t size)
-    : buffer(size)
-    , constructed(size, false)
-    , index(0) {}
-
-  ~CircularBuffer() {
-    for (std::size_t i = 0; i < size(); ++i) {
-      if (constructed[i]) {
-        reinterpret_cast<T*>(&buffer[i])->~T();
-      }
-    }
+  FixedSizeStack() {
+    buffer.reserve(MaxSize);
   }
 
-  template<typename... Args>
-  void push(Args&&... args) {
-    index = (index - 1 + size()) % size();
-    std::size_t pos = index;
-    if (constructed[pos]) {
-      reinterpret_cast<T*>(&buffer[pos])->~T();
+  void push(T&& value) {
+    if (buffer.size() == MaxSize) {
+      buffer.pop_back();
     }
-    LogMan::Msg::DFmt("Push to {}\n", index);
-    new (&buffer[pos]) T(std::forward<Args>(args)...);
-    constructed[pos] = true;
-  }
-
-  template<typename... Args>
-  void setTop(Args&&... args) {
-    std::size_t pos = index;
-    if (constructed[pos]) {
-      reinterpret_cast<T*>(&buffer[pos])->~T();
-    }
-    LogMan::Msg::DFmt("SetTop to {}\n", index);
-    new (&buffer[pos]) T(std::forward<Args>(args)...);
-    constructed[pos] = true;
+    buffer.insert(buffer.begin(), std::move(value));
   }
 
   void pop() {
-    if (!constructed.empty() && constructed[index]) {
-      LogMan::Msg::DFmt("Pop\n");
-      std::size_t popIndex = (index + 1) % size();
-      reinterpret_cast<T*>(&buffer[popIndex])->~T();
-      constructed[popIndex] = false;
-      index = popIndex;
+    if (!buffer.empty()) {
+      buffer.erase(buffer.begin());
     }
   }
 
-  T& top() {
-    LogMan::Msg::DFmt("Top\n");
-    std::size_t pos = index;
-    return *reinterpret_cast<T*>(&buffer[pos]);
-  }
-
-  const T& top(size_t offset = 0) const {
-    size_t pos = index;
-    return *reinterpret_cast<const T*>(&buffer[(pos + offset) % size()]);
-  }
-
-  inline size_t count() const {
-    size_t sz = 0;
-    for (size_t i = 0; i < constructed.size(); ++i) {
-      if (constructed[i]) {
-        sz++;
-      }
+  std::optional<T> top(size_t offset = 0) const {
+    if (!buffer.empty()) {
+      return buffer[offset];
     }
-    LogMan::Msg::DFmt("Count: {}\n", sz);
-    return sz;
+    return std::nullopt;
+  }
+
+  void setTop(T&& value, size_t offset = 0) {
+    if (!buffer.empty()) {
+      buffer[offset] = std::move(value);
+    }
   }
 
   inline size_t size() const {
-    return constructed.size();
+    return buffer.size();
   }
 
   inline T& operator[](size_t i) {
-    return *reinterpret_cast<T*>(&buffer[i]);
+    return buffer[i];
   }
 
   inline const T& operator[](size_t i) const {
-    return *reinterpret_cast<const T*>(&buffer[i]);
+    return buffer[i];
   }
 
   inline void clear() {
-    for (std::size_t i = 0; i < size(); ++i) {
-      if (constructed[i]) {
-        reinterpret_cast<T*>(&buffer[i])->~T();
-        constructed[i] = false;
-      }
-    }
-    index = 0;
-  }
-
-  inline bool valid(size_t i) const {
-    return constructed[i];
+    buffer.clear();
   }
 };
 
@@ -125,8 +80,12 @@ private:
   }
 
   // Top Management Helpers
+  // FIXME(pmatos): copy from X87.h
+  /// Returns current Top value.
   OrderedNode* GetX87Top(IREmitter* IREmit);
+  /// Sets Top value to Value.
   void SetX87Top(IREmitter* IREmit, OrderedNode* Value);
+  /// Set the valid tag for Value as valid (if Valid is true), or invalid (if Valid is false).
   void SetX87ValidTag(IREmitter* IREmit, OrderedNode* Value, bool Valid);
 
   struct StackMemberInfo {
@@ -136,11 +95,9 @@ private:
     IR::OrderedNode* SourceDataNode; // Reference to the value pushed to stack
     IR::OrderedNode* DataLoadNode;   // Reference to the IR node that loaded the data
     bool InterpretAsFloat {};        // True if this is a floating point value, false if integer
-
-    
   };
   // Index on vector is offset to top value at start of block
-  CircularBuffer<StackMemberInfo> StackData {8};
+  FixedSizeStack<StackMemberInfo, 8> StackData;
 };
 
 OrderedNode* X87StackOptimization::GetX87Top(IREmitter* IREmit) {
@@ -176,21 +133,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
   StackData.clear();
 
-  // Before any optimizations we need to update our StackData to match the
-  // status at the beginning of the block. We need to load the values from the
-  // context to the stack. We'll do this by checking which values to load
-  // through the x87 tag register.
-  // TODO(pmatos)
-
-  // Get beginning of block
-  // FIXME(pmatos): there must be a better way to do this.
-  auto [BlockBegin, BlockBeginHeader] = *CurrentIR.GetBlocks().begin();
-  auto [CodeBegin, IROpBegin] = *CurrentIR.GetCode(BlockBegin).begin();
-
-  // Get Top at beginning of block
-  IREmit->SetWriteCursor(CodeBegin);
-  auto* orig_top = GetX87Top(IREmit);
-
   // Run optimization proper
   for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
     for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
@@ -211,7 +153,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           .InterpretAsFloat = Op->Float,
         });
 
-        LogMan::Msg::DFmt("Stack depth at: {}", StackData.count());
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         IREmit->SetWriteCursor(CodeNode);
         IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
         Changed = true;
@@ -221,34 +163,36 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         LogMan::Msg::DFmt("OP_POPSTACKMEMORY\n");
         const auto* Op = IROp->C<IR::IROp_PopStackMemory>();
         const auto& StackMember = StackData.top();
-        if (Op->Float == StackMember.InterpretAsFloat && Op->StoreSize == StackMember.StackDataSize && Op->StoreSize == StackMember.SourceDataSize) {
+        LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack is empty");
+        if (Op->Float == StackMember->InterpretAsFloat && Op->StoreSize == StackMember->StackDataSize &&
+            Op->StoreSize == StackMember->SourceDataSize) {
           LogMan::Msg::DFmt("Could optimize memcpy!");
         }
 
         IREmit->SetWriteCursor(CodeNode);
 
         auto* AddrNode = CurrentIR.GetNode(Op->Addr);
-        if (StackMember.SourceDataSize == OpSize::i128Bit) {
-          IREmit->_StoreMem(FPRClass, OpSize::i64Bit, AddrNode, StackMember.SourceDataNode, 1);
+        if (StackMember->SourceDataSize == OpSize::i128Bit) {
+          IREmit->_StoreMem(FPRClass, OpSize::i64Bit, AddrNode, StackMember->SourceDataNode, 1);
           auto NewLocation = IREmit->_Add(OpSize::i64Bit, AddrNode, IREmit->_Constant(8));
-          IREmit->_VStoreVectorElement(OpSize::i128Bit, OpSize::i16Bit, StackMember.SourceDataNode, 4, NewLocation);
+          IREmit->_VStoreVectorElement(OpSize::i128Bit, OpSize::i16Bit, StackMember->SourceDataNode, 4, NewLocation);
         } else {
-          IREmit->_StoreMem(FPRClass, StackMember.SourceDataSize, AddrNode, StackMember.SourceDataNode, 1);
+          IREmit->_StoreMem(FPRClass, StackMember->SourceDataSize, AddrNode, StackMember->SourceDataNode, 1);
         }
 
-        IREmit->Remove(StackMember.DataLoadNode);
+        IREmit->Remove(StackMember->DataLoadNode);
         IREmit->Remove(CodeNode);
         Changed = true;
 
         StackData.pop();
-        LogMan::Msg::DFmt("Stack depth at: {}", StackData.count());
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         break;
       }
       case IR::OP_F80ADDSTACK: {
         LogMan::Msg::DFmt("OP_F80ADDSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80AddStack>();
         (void)Op; // avoid warning for now
-        LogMan::Msg::DFmt("Stack depth at: {}", StackData.count());
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         break;
       }
       case IR::OP_F80ADDVALUE: {
@@ -259,22 +203,23 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
         auto StackOffset = Op->SrcStack1;
         const auto& StackMember = StackData.top(StackOffset);
-        auto* StackNode = StackMember.SourceDataNode;
+        LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack is empty");
+        auto* StackNode = StackMember->SourceDataNode;
 
         IREmit->SetWriteCursor(CodeNode);
 
         auto AddNode = IREmit->_F80Add(ValueNode, StackNode);
         // Store it in the stack
-        StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember.SourceDataSize,
-                                          .StackDataSize = StackMember.StackDataSize,
+        StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
+                                          .StackDataSize = StackMember->StackDataSize,
                                           .SourceDataNodeID = SourceNodeID,
                                           .SourceDataNode = AddNode,
                                           .DataLoadNode = CodeNode,
-                                          .InterpretAsFloat = StackMember.InterpretAsFloat});
+                                          .InterpretAsFloat = StackMember->InterpretAsFloat});
 
         IREmit->Remove(CodeNode);
         Changed = true;
-        LogMan::Msg::DFmt("Stack depth at: {}", StackData.count());
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         break;
       }
       default: break;
@@ -295,26 +240,25 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         // Set write cursor to previous instruction
         IREmit->SetWriteCursor(IREmit->UnwrapNode(CodeNode->Header.Previous));
 
-        // Before leaving we need to write the current values in the stack to
-        // context so that the values are correct. Copy SourceDataNode in the
-        // stack to the respective mmX register.
-        for (size_t i = 0; i < StackData.size(); ++i) {
-          if (!StackData.valid(i)) {
-            continue;
-          }
-          LogMan::Msg::DFmt("Writing stack member {} to context", i);
-          Changed = true;
-          auto &StackMember = StackData[i];
-          auto *Node = StackMember.SourceDataNode;
-          IREmit->_StoreContextIndexed(Node, IREmit->_Add(OpSize::i32Bit, orig_top, IREmit->_Constant(i)), 16, MMBaseOffset(), 16, FPRClass);
-        }
-
         // Store new top which is now the original top - the number of elements in stack.
         // Careful with underflow wraparound.
+        auto* orig_top = GetX87Top(IREmit);
         auto mask = IREmit->_Constant(0x7);
         auto new_top = IREmit->_And(OpSize::i32Bit, IREmit->_Sub(OpSize::i32Bit, orig_top, IREmit->_Constant(1)), mask);
         SetX87ValidTag(IREmit, new_top, true);
         SetX87Top(IREmit, new_top);
+
+        // Before leaving we need to write the current values in the stack to
+        // context so that the values are correct. Copy SourceDataNode in the
+        // stack to the respective mmX register.
+        for (size_t i = 0; i < StackData.size(); ++i) {
+          LogMan::Msg::DFmt("Writing stack member {} to context TOP+{}", i, i);
+          Changed = true;
+          const auto StackMember = StackData.top(i);
+          LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack does not have enough elements");
+          auto* Node = StackMember->SourceDataNode;
+          IREmit->_StoreContextIndexed(Node, IREmit->_Add(OpSize::i32Bit, new_top, IREmit->_Constant(i)), 16, MMBaseOffset(), 16, FPRClass);
+        }
 
         break;
       }
