@@ -25,11 +25,11 @@ public:
     buffer.reserve(MaxSize);
   }
 
-  void push(T&& value) {
+  void push(T value) {
     if (buffer.size() == MaxSize) {
       buffer.pop_back();
     }
-    buffer.insert(buffer.begin(), std::move(value));
+    buffer.emplace(buffer.begin(), std::move(value));
   }
 
   void pop() {
@@ -45,26 +45,27 @@ public:
     return std::nullopt;
   }
 
-  void setTop(T&& value, size_t offset = 0) {
+  void setTop(T value, size_t offset = 0) {
     if (!buffer.empty()) {
       buffer[offset] = std::move(value);
+      return;
     }
+    LOGMAN_THROW_A_FMT(offset == 0, "offset needs to be zero when setting empty stack");
+    push(std::move(value));
   }
 
   inline size_t size() const {
     return buffer.size();
   }
 
-  inline T& operator[](size_t i) {
-    return buffer[i];
-  }
-
-  inline const T& operator[](size_t i) const {
-    return buffer[i];
-  }
-
   inline void clear() {
     buffer.clear();
+  }
+
+  void dump() {
+    for (size_t i = 0; i < buffer.size(); ++i) {
+      LogMan::Msg::DFmt("ST{}: 0x{:x}", i, (uintptr_t)(buffer[i].StackDataNode));
+    }
   }
 };
 
@@ -90,10 +91,12 @@ private:
 
   struct StackMemberInfo {
     IR::OpSize SourceDataSize;       // Size of SourceDataNode
-    IR::OpSize StackDataSize;        // Size of the loaded data (??? FIXME)
+    IR::OpSize StackDataSize;        // Size of the data in the stack
     IR::NodeID SourceDataNodeID;     // ID of the node
-    IR::OrderedNode* SourceDataNode; // Reference to the value pushed to stack
-    IR::OrderedNode* DataLoadNode;   // Reference to the IR node that loaded the data
+    IR::OrderedNode* SourceDataNode; // Reference to the source location of the data.
+                                     // In the case of a load, this is the source node of the load.
+                                     // If it's not a load, then it's nullptr.
+    IR::OrderedNode* StackDataNode;  // Reference to the data in the Stack.
     bool InterpretAsFloat {};        // True if this is a floating point value, false if integer
   };
   // Index on vector is offset to top value at start of block
@@ -148,12 +151,13 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           .SourceDataSize = IR::SizeToOpSize(SourceNodeSize),
           .StackDataSize = IR::SizeToOpSize(Op->LoadSize),
           .SourceDataNodeID = SourceNodeID,
-          .SourceDataNode = SourceNode,
-          .DataLoadNode = CodeNode,
+          .SourceDataNode = nullptr,
+          .StackDataNode = SourceNode,
           .InterpretAsFloat = Op->Float,
         });
 
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
         IREmit->SetWriteCursor(CodeNode);
         IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
         Changed = true;
@@ -180,12 +184,13 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           IREmit->_StoreMem(FPRClass, StackMember->SourceDataSize, AddrNode, StackMember->SourceDataNode, 1);
         }
 
-        IREmit->Remove(StackMember->DataLoadNode);
+        IREmit->Remove(StackMember->StackDataNode);
         IREmit->Remove(CodeNode);
         Changed = true;
 
         StackData.pop();
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
         break;
       }
       case IR::OP_F80ADDSTACK: {
@@ -193,6 +198,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         const auto* Op = IROp->C<IR::IROp_F80AddStack>();
         (void)Op; // avoid warning for now
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
         break;
       }
       case IR::OP_F80ADDVALUE: {
@@ -203,23 +209,30 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
         auto StackOffset = Op->SrcStack1;
         const auto& StackMember = StackData.top(StackOffset);
-        LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack is empty");
-        auto* StackNode = StackMember->SourceDataNode;
 
         IREmit->SetWriteCursor(CodeNode);
+
+        IR::OrderedNode* StackNode = nullptr;
+        if (StackMember == std::nullopt) {
+          // Load the current value from the x87 fpu stack and add it to our stack
+          StackNode = IREmit->_LoadContextIndexed(IREmit->_Constant(StackOffset), 16, MMBaseOffset(), 16, FPRClass);
+        } else {
+          StackNode = StackMember->StackDataNode;
+        }
 
         auto AddNode = IREmit->_F80Add(ValueNode, StackNode);
         // Store it in the stack
         StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
                                           .StackDataSize = StackMember->StackDataSize,
                                           .SourceDataNodeID = SourceNodeID,
-                                          .SourceDataNode = AddNode,
-                                          .DataLoadNode = CodeNode,
+                                          .SourceDataNode = nullptr,
+                                          .StackDataNode = AddNode,
                                           .InterpretAsFloat = StackMember->InterpretAsFloat});
 
         IREmit->Remove(CodeNode);
         Changed = true;
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
         break;
       }
       default: break;
@@ -233,6 +246,8 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
   // might screw up testing that expects the values to be in the stack registers
   // at the end, so maybe we need a testing flag that forces the writing of this
   // data to the context.
+  LogMan::Msg::DFmt("Writing stack to context\n");
+  StackData.dump();
   for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
     for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
       if (IROp->Op == OP_ENTRYPOINTOFFSET) {
@@ -256,7 +271,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           Changed = true;
           const auto StackMember = StackData.top(i);
           LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack does not have enough elements");
-          auto* Node = StackMember->SourceDataNode;
+          auto* Node = StackMember->StackDataNode;
           IREmit->_StoreContextIndexed(Node, IREmit->_Add(OpSize::i32Bit, new_top, IREmit->_Constant(i)), 16, MMBaseOffset(), 16, FPRClass);
         }
 
