@@ -260,12 +260,6 @@ DEF_OP(PopStackDestroy) {
 DEF_OP(ReadStackValue) {
 }
 
-DEF_OP(F80AddStack) {
-}
-
-DEF_OP(F80AddValue) {
-}
-
 #undef DEF_OP
 }
 

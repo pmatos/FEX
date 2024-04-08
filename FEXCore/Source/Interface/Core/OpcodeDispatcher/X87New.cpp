@@ -110,4 +110,45 @@ template void OpDispatchBuilder::FADD<80, false, OpDispatchBuilder::OpResult::RE
 template void OpDispatchBuilder::FADD<16, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 template void OpDispatchBuilder::FADD<32, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 
+template<size_t width, bool Integer, OpDispatchBuilder::OpResult ResInST0>
+void OpDispatchBuilder::FMUL(OpcodeArgs) {
+  static_assert(width == 16 || width == 32 || width == 64 || width == 80, "Unsupported FADD width");
+
+  CurrentHeader->HasX87 = true;
+  if (Op->Src[0].IsNone()) { // Implicit argument case
+    auto offset = Op->OP & 7;
+    auto st0 = 0;
+    if constexpr (ResInST0 == OpResult::RES_STI) {
+      _F80MulStack(offset, st0);
+    } else {
+      _F80MulStack(st0, offset);
+    }
+    return;
+  }
+
+  // We have one memory argument
+  OrderedNode* arg {};
+
+  if constexpr (width == 16 || width == 32 || width == 64) {
+    if constexpr (Integer) {
+      arg = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTToInt(arg, width / 8);
+    } else {
+      arg = LoadSource(FPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTTo(arg, width / 8);
+    }
+  }
+
+  // top of stack is at offset zero
+  _F80MulValue(0, arg);
+}
+
+template void OpDispatchBuilder::FMUL<32, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FMUL<64, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FMUL<80, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FMUL<80, false, OpDispatchBuilder::OpResult::RES_STI>(OpcodeArgs);
+
+template void OpDispatchBuilder::FMUL<16, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FMUL<32, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
 } // namespace FEXCore::IR

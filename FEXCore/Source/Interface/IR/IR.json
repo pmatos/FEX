@@ -2417,20 +2417,38 @@
           "Adds two stack locations together, storing the result in to the first stack location"
         ],
         "HasSideEffects": true,
-        "DestSize": "16"
+        "DestSize": "16",
+        "JITDispatch": false
       },
       "FPR = F80AddValue u8:$SrcStack1, FPR:$X80Src": {
         "Desc": [
           "Adds a operand value to a stack location. The result stored in to the stack location provided."
         ],
         "HasSideEffects": true,
-        "DestSize": "16"
+        "DestSize": "16",
+        "JITDispatch": false
       },
       "FPR = F80Add FPR:$X80Src1, FPR:$X80Src2": {
         "DestSize": "16",
         "JITDispatch": false
       },
       "FPR = F80Sub FPR:$X80Src1, FPR:$X80Src2": {
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80MulStack u8:$SrcStack1, u8:$SrcStack2": {
+        "Desc": [
+          "Multiplies two stack locations together, storing the result in to the first stack location"
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80MulValue u8:$SrcStack1, FPR:$X80Src": {
+        "Desc": [
+          "Multiplies a operand value to a stack location. The result stored in to the stack location provided."
+        ],
+        "HasSideEffects": true,
         "DestSize": "16",
         "JITDispatch": false
       },
