@@ -215,13 +215,14 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         if (StackMember == std::nullopt) { // slow path
           LogMan::Msg::DFmt("Slow path F80ADDVALUE\n");
 
+          auto* top = GetX87Top(IREmit);
           // Load the current value from the x87 fpu stack
-          auto StackNode = IREmit->_LoadContextIndexed(IREmit->_Constant(StackOffset), 16, MMBaseOffset(), 16, FPRClass);
+          auto StackNode =
+            IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset)), 16, MMBaseOffset(), 16, FPRClass);
           auto AddNode = IREmit->_F80Add(ValueNode, StackNode);
 
           // Store it in stack TOP
           LogMan::Msg::DFmt("Storing node to TOP of stack\n");
-          auto* top = GetX87Top(IREmit);
           IREmit->_Print(top);
           IREmit->_StoreContextIndexed(AddNode, top, 16, MMBaseOffset(), 16, FPRClass);
         } else {
@@ -234,11 +235,10 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
                                             .SourceDataNode = nullptr,
                                             .StackDataNode = AddNode,
                                             .InterpretAsFloat = StackMember->InterpretAsFloat});
-
-          IREmit->Remove(CodeNode);
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
           StackData.dump();
         }
+        IREmit->Remove(CodeNode);
         Changed = true;
         break;
       }
