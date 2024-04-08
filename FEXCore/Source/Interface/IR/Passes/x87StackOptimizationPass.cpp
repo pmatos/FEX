@@ -212,27 +212,34 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
         IREmit->SetWriteCursor(CodeNode);
 
-        IR::OrderedNode* StackNode = nullptr;
-        if (StackMember == std::nullopt) {
-          // Load the current value from the x87 fpu stack and add it to our stack
-          StackNode = IREmit->_LoadContextIndexed(IREmit->_Constant(StackOffset), 16, MMBaseOffset(), 16, FPRClass);
+        if (StackMember == std::nullopt) { // slow path
+          LogMan::Msg::DFmt("Slow path F80ADDVALUE\n");
+
+          // Load the current value from the x87 fpu stack
+          auto StackNode = IREmit->_LoadContextIndexed(IREmit->_Constant(StackOffset), 16, MMBaseOffset(), 16, FPRClass);
+          auto AddNode = IREmit->_F80Add(ValueNode, StackNode);
+
+          // Store it in stack TOP
+          LogMan::Msg::DFmt("Storing node to TOP of stack\n");
+          auto* top = GetX87Top(IREmit);
+          IREmit->_Print(top);
+          IREmit->_StoreContextIndexed(AddNode, top, 16, MMBaseOffset(), 16, FPRClass);
         } else {
-          StackNode = StackMember->StackDataNode;
+          LogMan::Msg::DFmt("Fast path F80ADDVALUE\n");
+          auto AddNode = IREmit->_F80Add(ValueNode, StackMember->StackDataNode);
+          // Store it in the stack
+          StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
+                                            .StackDataSize = StackMember->StackDataSize,
+                                            .SourceDataNodeID = SourceNodeID,
+                                            .SourceDataNode = nullptr,
+                                            .StackDataNode = AddNode,
+                                            .InterpretAsFloat = StackMember->InterpretAsFloat});
+
+          IREmit->Remove(CodeNode);
+          LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          StackData.dump();
         }
-
-        auto AddNode = IREmit->_F80Add(ValueNode, StackNode);
-        // Store it in the stack
-        StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
-                                          .StackDataSize = StackMember->StackDataSize,
-                                          .SourceDataNodeID = SourceNodeID,
-                                          .SourceDataNode = nullptr,
-                                          .StackDataNode = AddNode,
-                                          .InterpretAsFloat = StackMember->InterpretAsFloat});
-
-        IREmit->Remove(CodeNode);
         Changed = true;
-        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
-        StackData.dump();
         break;
       }
       default: break;
@@ -246,36 +253,41 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
   // might screw up testing that expects the values to be in the stack registers
   // at the end, so maybe we need a testing flag that forces the writing of this
   // data to the context.
-  LogMan::Msg::DFmt("Writing stack to context\n");
-  StackData.dump();
-  for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
-    for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
-      if (IROp->Op == OP_ENTRYPOINTOFFSET) {
-        LogMan::Msg::DFmt("OP_ENTRYPOINTOFFSET\n");
-        // Set write cursor to previous instruction
-        IREmit->SetWriteCursor(IREmit->UnwrapNode(CodeNode->Header.Previous));
+  if (StackData.size() != 0) {
+    LogMan::Msg::DFmt("Writing stack to context\n");
+    StackData.dump();
+    for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
+      for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+        if (IROp->Op == OP_ENTRYPOINTOFFSET) {
+          LogMan::Msg::DFmt("OP_ENTRYPOINTOFFSET\n");
+          // Set write cursor to previous instruction
+          IREmit->SetWriteCursor(IREmit->UnwrapNode(CodeNode->Header.Previous));
 
-        // Store new top which is now the original top - the number of elements in stack.
-        // Careful with underflow wraparound.
-        auto* orig_top = GetX87Top(IREmit);
-        auto mask = IREmit->_Constant(0x7);
-        auto new_top = IREmit->_And(OpSize::i32Bit, IREmit->_Sub(OpSize::i32Bit, orig_top, IREmit->_Constant(1)), mask);
-        SetX87ValidTag(IREmit, new_top, true);
-        SetX87Top(IREmit, new_top);
+          // Store new top which is now the original top - the number of elements in stack.
+          // Careful with underflow wraparound.
+          auto* orig_top = GetX87Top(IREmit);
+          IREmit->_Print(orig_top);
 
-        // Before leaving we need to write the current values in the stack to
-        // context so that the values are correct. Copy SourceDataNode in the
-        // stack to the respective mmX register.
-        for (size_t i = 0; i < StackData.size(); ++i) {
-          LogMan::Msg::DFmt("Writing stack member {} to context TOP+{}", i, i);
-          Changed = true;
-          const auto StackMember = StackData.top(i);
-          LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack does not have enough elements");
-          auto* Node = StackMember->StackDataNode;
-          IREmit->_StoreContextIndexed(Node, IREmit->_Add(OpSize::i32Bit, new_top, IREmit->_Constant(i)), 16, MMBaseOffset(), 16, FPRClass);
+          auto mask = IREmit->_Constant(0x7);
+          auto new_top = IREmit->_And(OpSize::i32Bit, IREmit->_Sub(OpSize::i32Bit, orig_top, IREmit->_Constant(1)), mask);
+          SetX87ValidTag(IREmit, new_top, true);
+          SetX87Top(IREmit, new_top);
+          IREmit->_Print(new_top);
+
+          // Before leaving we need to write the current values in the stack to
+          // context so that the values are correct. Copy SourceDataNode in the
+          // stack to the respective mmX register.
+          for (size_t i = 0; i < StackData.size(); ++i) {
+            LogMan::Msg::DFmt("Writing stack member {} to context TOP+{}", i, i);
+            Changed = true;
+            const auto StackMember = StackData.top(i);
+            LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack does not have enough elements");
+            auto* Node = StackMember->StackDataNode;
+            IREmit->_StoreContextIndexed(Node, IREmit->_Add(OpSize::i32Bit, new_top, IREmit->_Constant(i)), 16, MMBaseOffset(), 16, FPRClass);
+          }
+
+          break;
         }
-
-        break;
       }
     }
   }
