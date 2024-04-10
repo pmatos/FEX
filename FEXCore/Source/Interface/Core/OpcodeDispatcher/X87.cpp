@@ -538,7 +538,7 @@ template
 void OpDispatchBuilder::FDIV<32, true, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 template
 void OpDispatchBuilder::FDIV<32, true, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
-
+#if 0
 template<size_t width, bool Integer, bool reverse, OpDispatchBuilder::OpResult ResInST0>
 void OpDispatchBuilder::FSUB(OpcodeArgs) {
   auto top = GetX87Top();
@@ -623,7 +623,7 @@ template
 void OpDispatchBuilder::FSUB<32, true, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 template
 void OpDispatchBuilder::FSUB<32, true, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
-
+#endif
 void OpDispatchBuilder::FCHS(OpcodeArgs) {
   auto top = GetX87Top();
   auto a = _LoadContextIndexed(top, 16, MMBaseOffset(), 16, FPRClass);

@@ -254,9 +254,6 @@ DEF_OP(StoreStackMemory) {
 DEF_OP(PopStackToStack) {
 }
 
-DEF_OP(PopStackDestroy) {
-}
-
 DEF_OP(ReadStackValue) {
 }
 

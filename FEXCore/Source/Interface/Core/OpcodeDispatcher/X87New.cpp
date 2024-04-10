@@ -112,7 +112,7 @@ template void OpDispatchBuilder::FADD<32, true, OpDispatchBuilder::OpResult::RES
 
 template<size_t width, bool Integer, OpDispatchBuilder::OpResult ResInST0>
 void OpDispatchBuilder::FMUL(OpcodeArgs) {
-  static_assert(width == 16 || width == 32 || width == 64 || width == 80, "Unsupported FADD width");
+  static_assert(width == 16 || width == 32 || width == 64 || width == 80, "Unsupported FMUL width");
 
   CurrentHeader->HasX87 = true;
   if (Op->Src[0].IsNone()) { // Implicit argument case
@@ -150,5 +150,77 @@ template void OpDispatchBuilder::FMUL<80, false, OpDispatchBuilder::OpResult::RE
 
 template void OpDispatchBuilder::FMUL<16, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 template void OpDispatchBuilder::FMUL<32, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+template<size_t width, bool Integer, bool reverse, OpDispatchBuilder::OpResult ResInST0>
+void OpDispatchBuilder::FSUB(OpcodeArgs) {
+  static_assert(width == 16 || width == 32 || width == 64 || width == 80, "Unsupported FSUB width");
+  CurrentHeader->HasX87 = true;
+
+  if (Op->Src[0].IsNone()) {
+    const auto offset = Op->OP & 7;
+    const auto st0 = 0;
+
+    if constexpr (reverse) {
+      if constexpr (ResInST0 == OpResult::RES_STI) {
+        _F80SubStack(offset, st0, offset);
+      } else {
+        _F80SubStack(st0, offset, st0);
+      }
+    } else {
+      if constexpr (ResInST0 == OpResult::RES_STI) {
+        _F80SubStack(offset, offset, st0);
+      } else {
+        _F80SubStack(st0, st0, offset);
+      }
+    }
+
+    if (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) {
+      _PopStackDestroy();
+    }
+    return;
+  }
+
+  // We have one memory argument
+  OrderedNode* arg {};
+
+  if constexpr (width == 16 || width == 32 || width == 64) {
+    if constexpr (Integer) {
+      arg = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTToInt(arg, width / 8);
+    } else {
+      arg = LoadSource(FPRClass, Op, Op->Src[0], Op->Flags);
+      arg = _F80CVTTo(arg, width / 8);
+    }
+  }
+
+  // top of stack is at offset zero
+  if constexpr (reverse) {
+    _F80SubRValue(arg, 0);
+  } else {
+    _F80SubValue(0, arg);
+  }
+
+  if (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) {
+    _PopStackDestroy();
+  }
+}
+
+template void OpDispatchBuilder::FSUB<32, false, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<32, false, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+template void OpDispatchBuilder::FSUB<64, false, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<64, false, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+template void OpDispatchBuilder::FSUB<80, false, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<80, false, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+template void OpDispatchBuilder::FSUB<80, false, false, OpDispatchBuilder::OpResult::RES_STI>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<80, false, true, OpDispatchBuilder::OpResult::RES_STI>(OpcodeArgs);
+
+template void OpDispatchBuilder::FSUB<16, true, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<16, true, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+template void OpDispatchBuilder::FSUB<32, true, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+template void OpDispatchBuilder::FSUB<32, true, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 
 } // namespace FEXCore::IR

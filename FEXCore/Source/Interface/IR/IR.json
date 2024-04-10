@@ -2398,13 +2398,12 @@
         "HasSideEffects": true,
         "DestSize": "4"
       },
-      "GPR = PopStackDestroy": {
+      "PopStackDestroy": {
         "Desc": [
-          "Pops the top value off the stack but doesn't save it anywhere.",
-          "Returns the new stack top after pop."
+          "Pops the top value off the stack but doesn't save it anywhere."
         ],
         "HasSideEffects": true,
-        "DestSize": "4"
+        "JITDispatch": false
       },
       "FPR = ReadStackValue u8:$StackLocation": {
         "Desc": [
@@ -2432,7 +2431,39 @@
         "DestSize": "16",
         "JITDispatch": false
       },
+      "FPR = F80SubStack u8:$DstStack, u8:$SrcStack1, u8:$SrcStack2": {
+        "Desc": [
+          "Subtracts the value in stack location TOP+$SrcStack2 from the value in stack location TOP+$SrcStack1.",
+          "The result is stored in stack location TOP+$DstStack and returned."
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80SubValue u8:$SrcStack, FPR:$X80Src": {
+        "Desc": [
+          "Subtracts the value $X80Src from the value in stack location TOP+$SrcStack.",
+          "The result is stored in stack location TOP and returned."
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80SubRValue FPR:$X80Src, u8:$SrcStack": {
+        "Desc": [
+          "Subtracts the value in stack location TOP+$SrcStack from the value $X80Src.",
+          "The result is stored in stack location TOP and returned."
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
       "FPR = F80Sub FPR:$X80Src1, FPR:$X80Src2": {
+        "Desc": [
+          "Subtracts the value in $X80Src1 from the value in $X80Src2.",
+          "The result is returned.",
+          "`FPR = X80Src2 - X80Src1`"
+        ],
         "DestSize": "16",
         "JITDispatch": false
       },
