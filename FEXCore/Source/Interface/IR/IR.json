@@ -2487,7 +2487,42 @@
         "DestSize": "16",
         "JITDispatch": false
       },
+      "FPR = F80DivStack u8:$DstStack, u8:$SrcStack1, u8:$SrcStack2": {
+        "Desc": [
+          "Divides the value in stack location TOP+$SrcStack1 by the value in stack location TOP+$SrcStack2.",
+          "The result is stored in stack location TOP+$DstStack and returned.",
+          "`FPR|Stack[TOP+DstStack] = Stack[TOP+SrcStack1] / Stack[TOP+SrcStack2]`"
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80DivValue u8:$SrcStack, FPR:$X80Src": {
+        "Desc": [
+          "Divides the value in stack location TOP+$SrcStack by the value $X80Src.",
+          "The result is stored in stack location TOP and returned.",
+          "`FPR|Stack[TOP] = Stack[TOP+SrcStack] / X80Src`"
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
+      "FPR = F80DivRValue FPR:$X80Src, u8:$SrcStack": {
+        "Desc": [
+          "Divides the value X80Src by the value in stack location TOP+$SrcStack.",
+          "The result is stored in stack location TOP and returned.",
+          "`FPR|Stack[TOP] = X80Src / Stack[TOP+SrcStack]`"
+        ],
+        "HasSideEffects": true,
+        "DestSize": "16",
+        "JITDispatch": false
+      },
       "FPR = F80Div FPR:$X80Src1, FPR:$X80Src2": {
+        "Desc": [
+          "Divides the value in $X80Src1 by the value in $X80Src2.",
+          "The result is returned.",
+          "`FPR = X80Src1 / X80Src2`"
+        ],
         "DestSize": "16",
         "JITDispatch": false
       },

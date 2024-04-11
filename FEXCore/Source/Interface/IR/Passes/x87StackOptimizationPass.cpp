@@ -380,6 +380,106 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         break;
       }
 
+      case IR::OP_F80DIVSTACK: {
+        LogMan::Msg::DFmt("OP_F80DIVSTACK\n");
+        const auto* Op = IROp->C<IR::IROp_F80DivStack>();
+
+        IREmit->SetWriteCursor(CodeNode);
+
+        // Adds two elements in the stack by offset.
+        auto StackOffset1 = Op->SrcStack1;
+        auto StackOffset2 = Op->SrcStack2;
+
+        auto StackMember1 = StackData.top(StackOffset1);
+        auto StackMember2 = StackData.top(StackOffset2);
+
+        if (!StackMember1 || !StackMember2) { // Slow Path
+
+          LogMan::Msg::DFmt("Slow path F80DIVSTACK\n");
+
+          auto* top = GetX87Top(IREmit);
+          // Load the current value from the x87 fpu stack
+          auto StackNode1 =
+            IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset1)), 16, MMBaseOffset(), 16, FPRClass);
+          auto StackNode2 =
+            IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset2)), 16, MMBaseOffset(), 16, FPRClass);
+
+          auto DivNode = IREmit->_F80Div(StackNode1, StackNode2);
+          IREmit->_StoreContextIndexed(DivNode, top, 16, MMBaseOffset(), 16, FPRClass);
+        } else {
+          // Fast path
+          LogMan::Msg::DFmt("Fast path F80DIVSTACK\n");
+          auto AddNode = IREmit->_F80Div(StackMember1->StackDataNode, StackMember2->StackDataNode);
+          // Store it in the stack
+          StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember1->SourceDataSize,
+                                            .StackDataSize = StackMember1->StackDataSize,
+                                            .SourceDataNodeID = StackMember1->SourceDataNodeID,
+                                            .SourceDataNode = nullptr,
+                                            .StackDataNode = AddNode,
+                                            .InterpretAsFloat = StackMember1->InterpretAsFloat},
+                           StackOffset1);
+        }
+
+        IREmit->Remove(CodeNode);
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
+        break;
+      }
+
+      case IR::OP_F80DIVRVALUE:
+      case IR::OP_F80DIVVALUE: {
+        LogMan::Msg::DFmt("F80DIVVALUE\n");
+        const auto* Op = IROp->C<IR::IROp_F80DivValue>();
+        auto SourceNodeID = Op->X80Src.ID();
+        auto* ValueNode = CurrentIR.GetNode(Op->X80Src);
+
+        auto StackOffset = Op->SrcStack;
+        const auto& StackMember = StackData.top(StackOffset);
+
+        IREmit->SetWriteCursor(CodeNode);
+
+        if (StackMember == std::nullopt) { // slow path
+          LogMan::Msg::DFmt("Slow path F80DIVVALUE\n");
+
+          auto* top = GetX87Top(IREmit);
+          // Load the current value from the x87 fpu stack
+          auto StackNode =
+            IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset)), 16, MMBaseOffset(), 16, FPRClass);
+
+          OrderedNode* DivNode = nullptr;
+          if (IROp->Op == IR::OP_F80DIVVALUE) {
+            DivNode = IREmit->_F80Div(StackNode, ValueNode);
+          } else {
+            DivNode = IREmit->_F80Div(ValueNode, StackNode); // IR::OP_F80DIVRVALUE
+          }
+
+          // Store it in stack TOP
+          LogMan::Msg::DFmt("Storing node to TOP of stack\n");
+          IREmit->_Print(top);
+          IREmit->_StoreContextIndexed(DivNode, top, 16, MMBaseOffset(), 16, FPRClass);
+        } else {
+          LogMan::Msg::DFmt("Fast path F80DIVVALUE\n");
+          OrderedNode* DivNode = nullptr;
+          if (IROp->Op == IR::OP_F80DIVVALUE) {
+            DivNode = IREmit->_F80Div(StackMember->StackDataNode, ValueNode);
+          } else {
+            DivNode = IREmit->_F80Div(ValueNode, StackMember->StackDataNode); // IR::OP_F80SUBRVALUE
+          }
+          // Store it in the stack
+          StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
+                                            .StackDataSize = StackMember->StackDataSize,
+                                            .SourceDataNodeID = SourceNodeID,
+                                            .SourceDataNode = nullptr,
+                                            .StackDataNode = DivNode,
+                                            .InterpretAsFloat = StackMember->InterpretAsFloat});
+          LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+          StackData.dump();
+        }
+        IREmit->Remove(CodeNode);
+        Changed = true;
+        break;
+      }
+
       case IR::OP_F80MULSTACK: {
         LogMan::Msg::DFmt("OP_F80MULSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80MulStack>();
