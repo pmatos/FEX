@@ -214,6 +214,8 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           StackData.setTop(*StackData.top(), offset);
         }
 
+        IREmit->Remove(CodeNode);
+
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         StackData.dump();
         break;
@@ -229,6 +231,8 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
           StackData.pop();
         }
+
+        IREmit->Remove(CodeNode);
 
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         StackData.dump();
