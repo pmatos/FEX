@@ -594,7 +594,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           IREmit->_Print(orig_top);
 
           auto mask = IREmit->_Constant(0x7);
-          auto new_top = IREmit->_And(OpSize::i32Bit, IREmit->_Sub(OpSize::i32Bit, orig_top, IREmit->_Constant(1)), mask);
+          auto new_top = IREmit->_And(OpSize::i32Bit, IREmit->_Sub(OpSize::i32Bit, orig_top, IREmit->_Constant(StackData.size())), mask);
           SetX87ValidTag(IREmit, new_top, true);
           SetX87Top(IREmit, new_top);
           IREmit->_Print(new_top);
