@@ -287,6 +287,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         IREmit->SetWriteCursor(CodeNode);
 
         // Adds two elements in the stack by offset.
+        auto StackDest = Op->DstStack;
         auto StackOffset1 = Op->SrcStack1;
         auto StackOffset2 = Op->SrcStack2;
 
@@ -304,20 +305,20 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           auto StackNode2 =
             IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset2)), 16, MMBaseOffset(), 16, FPRClass);
 
-          auto AddNode = IREmit->_F80Sub(StackNode2, StackNode1);
-          IREmit->_StoreContextIndexed(AddNode, top, 16, MMBaseOffset(), 16, FPRClass);
+          auto SubNode = IREmit->_F80Sub(StackNode1, StackNode2);
+          IREmit->_StoreContextIndexed(SubNode, IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackDest)), 16, MMBaseOffset(), 16, FPRClass);
         } else {
           // Fast path
           LogMan::Msg::DFmt("Fast path F80SUBSTACK\n");
-          auto AddNode = IREmit->_F80Sub(StackMember1->StackDataNode, StackMember2->StackDataNode);
+          auto SubNode = IREmit->_F80Sub(StackMember1->StackDataNode, StackMember2->StackDataNode);
           // Store it in the stack
           StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember1->SourceDataSize,
                                             .StackDataSize = StackMember1->StackDataSize,
                                             .SourceDataNodeID = StackMember1->SourceDataNodeID,
                                             .SourceDataNode = nullptr,
-                                            .StackDataNode = AddNode,
+                                            .StackDataNode = SubNode,
                                             .InterpretAsFloat = StackMember1->InterpretAsFloat},
-                           StackOffset1);
+                           StackDest);
         }
 
         IREmit->Remove(CodeNode);
