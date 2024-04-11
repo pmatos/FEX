@@ -243,20 +243,6 @@ DEF_OP(RDRAND) {
 DEF_OP(Yield) {
   yield();
 }
-
-// New x87
-DEF_OP(PopStackMemory) {
-}
-
-DEF_OP(StoreStackMemory) {
-}
-
-DEF_OP(PopStackToStack) {
-}
-
-DEF_OP(ReadStackValue) {
-}
-
 #undef DEF_OP
 }
 

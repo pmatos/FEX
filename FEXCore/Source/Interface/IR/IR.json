@@ -2367,36 +2367,25 @@
         "DestSize": "16",
         "JITDispatch": false
       },
-      "FPR = PopStackMemory GPR:$Addr, OpSize:$SourceSize, i1:$Float, u8:$StoreSize": {
-        "Desc": [
-          "Pops the top value off of the x87 stack and stores it to memory.",
-          "SourceSize is 128bit for F80 values, 64-bit for low precision.",
-          "StoreSize is the store size for conversion:",
-          "Float: 80-bit, 64-bit, or 32-bit",
-          "Int: 64-bit, 32-bit, 16-bit",
-          "Returns the new stack top after pop."
-        ],
-        "HasSideEffects": true,
-        "DestSize": "16"
-      },
       "StoreStackMemory GPR:$Addr, OpSize:$SourceSize, i1:$Float, u8:$StoreSize": {
         "Desc": [
           "Takes the top value off the x87 stack and stores it to memory.",
           "SourceSize is 128bit for F80 values, 64-bit for low precision.",
           "StoreSize is the store size for conversion:",
           "Float: 80-bit, 64-bit, or 32-bit",
-          "Int: 64-bit, 32-bit, 16-bit",
-          "Returns the new stack top after pop."
-        ],
-        "HasSideEffects": true
-      },
-      "GPR = PopStackToStack OpSize:$OpSize, u8:$StackLocation": {
-        "Desc": [
-          "Copies the top of the x87 stack to the new StackLocation and THEN pops the stack pointer.",
-          "Returns the new stack top after pop."
+          "Int: 64-bit, 32-bit, 16-bit"
         ],
         "HasSideEffects": true,
-        "DestSize": "4"
+        "JITDispatch": false
+      },
+      "StoreStackToStack i8:$StackLocation": {
+        "Desc": [
+          "Takes the top value off the x87 stack and stores it to stack location TOP+StackLocation",
+          "Float: 80-bit, 64-bit, or 32-bit",
+          "Int: 64-bit, 32-bit, 16-bit"
+        ],
+        "HasSideEffects": true,
+        "JITDispatch": false
       },
       "PopStackDestroy": {
         "Desc": [
@@ -2409,7 +2398,8 @@
         "Desc": [
           "Reads a value off the stack at the offset"
         ],
-        "DestSize": "16"
+        "DestSize": "16",
+        "JITDispatch": false
       },
       "FPR = F80AddStack u8:$SrcStack1, u8:$SrcStack2": {
         "Desc": [

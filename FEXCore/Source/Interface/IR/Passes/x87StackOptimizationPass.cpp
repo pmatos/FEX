@@ -1,4 +1,5 @@
 #include "FEXCore/Utils/LogManager.h"
+#include "Interface/IR/IR.h"
 #include "Interface/IR/IREmitter.h"
 #include "Interface/IR/PassManager.h"
 #include <FEXCore/IR/IR.h>
@@ -139,6 +140,8 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
   // Run optimization proper
   for (auto [BlockNode, BlockHeader] : CurrentIR.GetBlocks()) {
     for (auto [CodeNode, IROp] : CurrentIR.GetCode(BlockNode)) {
+      IREmit->SetWriteCursor(CodeNode);
+
       switch (IROp->Op) {
       case IR::OP_PUSHSTACK: {
         LogMan::Msg::DFmt("OP_PUSHSTACK\n");
@@ -158,37 +161,64 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         StackData.dump();
-        IREmit->SetWriteCursor(CodeNode);
         IREmit->Remove(CodeNode); // Remove PushStack - it's a nop, we just need to track the stack
         Changed = true;
         break;
       }
-      case IR::OP_POPSTACKMEMORY: {
-        LogMan::Msg::DFmt("OP_POPSTACKMEMORY\n");
-        const auto* Op = IROp->C<IR::IROp_PopStackMemory>();
-        const auto& StackMember = StackData.top();
-        LOGMAN_THROW_A_FMT(StackMember != std::nullopt, "Stack is empty");
-        if (Op->Float == StackMember->InterpretAsFloat && Op->StoreSize == StackMember->StackDataSize &&
-            Op->StoreSize == StackMember->SourceDataSize) {
-          LogMan::Msg::DFmt("Could optimize memcpy!");
+
+      case IR::OP_STORESTACKMEMORY: {
+        LogMan::Msg::DFmt("OP_STORESTACKMEMORY\n");
+        const auto* Op = IROp->C<IR::IROp_StoreStackMemory>();
+
+        if (StackData.size() == 0) { // slow path
+
+        } else { // fast path
         }
 
-        IREmit->SetWriteCursor(CodeNode);
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
+        break;
+      }
 
-        auto* AddrNode = CurrentIR.GetNode(Op->Addr);
-        if (StackMember->SourceDataSize == OpSize::i128Bit) {
-          IREmit->_StoreMem(FPRClass, OpSize::i64Bit, AddrNode, StackMember->SourceDataNode, 1);
-          auto NewLocation = IREmit->_Add(OpSize::i64Bit, AddrNode, IREmit->_Constant(8));
-          IREmit->_VStoreVectorElement(OpSize::i128Bit, OpSize::i16Bit, StackMember->SourceDataNode, 4, NewLocation);
+      case IR::OP_STORESTACKTOSTACK: {
+        LogMan::Msg::DFmt("OP_STORESTACKTOSTACK\n");
+        const auto* Op = IROp->C<IR::IROp_StoreStackToStack>();
+
+        auto offset = Op->StackLocation;
+
+        if (offset == 0) { // nop
+          IREmit->Remove(CodeNode);
+          break;
+        }
+
+        // Need to store st0 to stack location - basically a copy.
+        if (offset >= StackData.size()) { // slow path
+          LogMan::Msg::DFmt("Slow path STORESTACKTOSTACK\n");
+          auto* top = GetX87Top(IREmit);
+          OrderedNode* StackNode = IREmit->_LoadContextIndexed(top, 16, MMBaseOffset(), 16, FPRClass);
+          IREmit->_StoreContextIndexed(StackNode, IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(offset)), 16, MMBaseOffset(), 16, FPRClass);
+        } else { // fast path
+          LogMan::Msg::DFmt("Fast path STORESTACKTOSTACK\n");
+          StackData.setTop(*StackData.top(), offset);
+        }
+
+        LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
+        StackData.dump();
+        break;
+      }
+      case IR::OP_POPSTACKDESTROY: {
+        LogMan::Msg::DFmt("OP_POPSTACKDESTROY\n");
+        const auto* Op = IROp->C<IR::IROp_PopStackDestroy>();
+
+        if (StackData.size() == 0) { // slow path
+          LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
+          auto* top = GetX87Top(IREmit);
+          SetX87Top(IREmit, IREmit->_Sub(OpSize::i32Bit, top, IREmit->_Constant(1)));
         } else {
-          IREmit->_StoreMem(FPRClass, StackMember->SourceDataSize, AddrNode, StackMember->SourceDataNode, 1);
+          LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
+          StackData.pop();
         }
 
-        IREmit->Remove(StackMember->StackDataNode);
-        IREmit->Remove(CodeNode);
-        Changed = true;
-
-        StackData.pop();
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         StackData.dump();
         break;
@@ -196,8 +226,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
       case IR::OP_F80ADDSTACK: {
         LogMan::Msg::DFmt("OP_F80ADDSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80AddStack>();
-
-        IREmit->SetWriteCursor(CodeNode);
 
         // Adds two elements in the stack by offset.
         auto StackOffset1 = Op->SrcStack1;
@@ -247,8 +275,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         auto StackOffset = Op->SrcStack1;
         const auto& StackMember = StackData.top(StackOffset);
 
-        IREmit->SetWriteCursor(CodeNode);
-
         if (StackMember == std::nullopt) { // slow path
           LogMan::Msg::DFmt("Slow path F80ADDVALUE\n");
 
@@ -283,8 +309,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
       case IR::OP_F80SUBSTACK: {
         LogMan::Msg::DFmt("OP_F80SUBSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80SubStack>();
-
-        IREmit->SetWriteCursor(CodeNode);
 
         // Adds two elements in the stack by offset.
         auto StackDest = Op->DstStack;
@@ -337,8 +361,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         auto StackOffset = Op->SrcStack;
         const auto& StackMember = StackData.top(StackOffset);
 
-        IREmit->SetWriteCursor(CodeNode);
-
         if (StackMember == std::nullopt) { // slow path
           LogMan::Msg::DFmt("Slow path F80SUBVALUE\n");
 
@@ -384,8 +406,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
       case IR::OP_F80DIVSTACK: {
         LogMan::Msg::DFmt("OP_F80DIVSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80DivStack>();
-
-        IREmit->SetWriteCursor(CodeNode);
 
         // Adds two elements in the stack by offset.
         auto StackDest = Op->DstStack;
@@ -438,8 +458,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         auto StackOffset = Op->SrcStack;
         const auto& StackMember = StackData.top(StackOffset);
 
-        IREmit->SetWriteCursor(CodeNode);
-
         if (StackMember == std::nullopt) { // slow path
           LogMan::Msg::DFmt("Slow path F80DIVVALUE\n");
 
@@ -485,8 +503,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
       case IR::OP_F80MULSTACK: {
         LogMan::Msg::DFmt("OP_F80MULSTACK\n");
         const auto* Op = IROp->C<IR::IROp_F80MulStack>();
-
-        IREmit->SetWriteCursor(CodeNode);
 
         // Multiplies two elements in the stack by offset.
         auto StackOffset1 = Op->SrcStack1;
@@ -535,8 +551,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
 
         auto StackOffset = Op->SrcStack1;
         const auto& StackMember = StackData.top(StackOffset);
-
-        IREmit->SetWriteCursor(CodeNode);
 
         if (StackMember == std::nullopt) { // slow path
           LogMan::Msg::DFmt("Slow path F80MulVALUE\n");

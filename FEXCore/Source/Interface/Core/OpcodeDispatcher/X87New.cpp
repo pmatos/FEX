@@ -41,26 +41,22 @@ template void OpDispatchBuilder::FLD<80>(OpcodeArgs);
 
 template <size_t width> void OpDispatchBuilder::FST(OpcodeArgs) {
   static_assert(width == 32 || width == 64 || width == 80, "Unsupported FST width");
-
   CurrentHeader->HasX87 = true;
-  const bool Pop = (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) != 0;
-  OrderedNode *Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
 
-  if (Pop) {
-    if constexpr (width == 80) {
-      _PopStackMemory(Mem, OpSize::i128Bit, true, 10);
-    }
-    else if constexpr (width == 32 || width == 64) {
-      _PopStackMemory(Mem, OpSize::i128Bit, true, width / 8);
-    }
-  }
-  else {
+  if (Op->Src[0].IsNone()) { // Destination is stack
+    auto offset = Op->OP & 7;
+    _StoreStackToStack(offset);
+  } else {
+    // Destination is memory
+    OrderedNode* Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
     if constexpr (width == 80) {
       _StoreStackMemory(Mem, OpSize::i128Bit, true, 10);
-    }
-    else if constexpr (width == 32 || width == 64) {
+    } else if constexpr (width == 32 || width == 64) {
       _StoreStackMemory(Mem, OpSize::i128Bit, true, width / 8);
     }
+  }
+  if (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) {
+    _PopStackDestroy();
   }
 }
 
