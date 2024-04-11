@@ -326,6 +326,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         break;
       }
 
+      case IR::OP_F80SUBRVALUE:
       case IR::OP_F80SUBVALUE: {
         LogMan::Msg::DFmt("F80SUBVALUE\n");
         const auto* Op = IROp->C<IR::IROp_F80SubValue>();
@@ -344,21 +345,32 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
           // Load the current value from the x87 fpu stack
           auto StackNode =
             IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset)), 16, MMBaseOffset(), 16, FPRClass);
-          auto AddNode = IREmit->_F80Sub(StackNode, ValueNode);
+
+          OrderedNode* SubNode = nullptr;
+          if (IROp->Op == IR::OP_F80SUBVALUE) {
+            SubNode = IREmit->_F80Sub(StackNode, ValueNode);
+          } else {
+            SubNode = IREmit->_F80Sub(ValueNode, StackNode); // IR::OP_F80SUBRVALUE
+          }
 
           // Store it in stack TOP
           LogMan::Msg::DFmt("Storing node to TOP of stack\n");
           IREmit->_Print(top);
-          IREmit->_StoreContextIndexed(AddNode, top, 16, MMBaseOffset(), 16, FPRClass);
+          IREmit->_StoreContextIndexed(SubNode, top, 16, MMBaseOffset(), 16, FPRClass);
         } else {
           LogMan::Msg::DFmt("Fast path F80SUBVALUE\n");
-          auto AddNode = IREmit->_F80Sub(StackMember->StackDataNode, ValueNode);
+          OrderedNode* SubNode = nullptr;
+          if (IROp->Op == IR::OP_F80SUBVALUE) {
+            SubNode = IREmit->_F80Sub(StackMember->StackDataNode, ValueNode);
+          } else {
+            SubNode = IREmit->_F80Sub(ValueNode, StackMember->StackDataNode); // IR::OP_F80SUBRVALUE
+          }
           // Store it in the stack
           StackData.setTop(StackMemberInfo {.SourceDataSize = StackMember->SourceDataSize,
                                             .StackDataSize = StackMember->StackDataSize,
                                             .SourceDataNodeID = SourceNodeID,
                                             .SourceDataNode = nullptr,
-                                            .StackDataNode = AddNode,
+                                            .StackDataNode = SubNode,
                                             .InterpretAsFloat = StackMember->InterpretAsFloat});
           LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
           StackData.dump();
