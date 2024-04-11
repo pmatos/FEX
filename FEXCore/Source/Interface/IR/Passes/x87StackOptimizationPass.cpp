@@ -226,7 +226,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         if (StackData.size() == 0) { // slow path
           LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
           auto* top = GetX87Top(IREmit);
-          SetX87Top(IREmit, IREmit->_Sub(OpSize::i32Bit, top, IREmit->_Constant(1)));
+          SetX87Top(IREmit, IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(1)));
         } else {
           LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
           StackData.pop();
