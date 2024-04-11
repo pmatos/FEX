@@ -170,10 +170,22 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         LogMan::Msg::DFmt("OP_STORESTACKMEMORY\n");
         const auto* Op = IROp->C<IR::IROp_StoreStackMemory>();
 
+        OrderedNode* StackNode = nullptr;
         if (StackData.size() == 0) { // slow path
-
+          LogMan::Msg::DFmt("Slow path STORESTACKMEMORY\n");
+          auto* top = GetX87Top(IREmit);
+          StackNode = IREmit->_LoadContextIndexed(top, 16, MMBaseOffset(), 16, FPRClass);
         } else { // fast path
+          LogMan::Msg::DFmt("Fast path STORESTACKMEMORY\n");
+          StackNode = StackData.top()->StackDataNode;
         }
+
+        if (Op->StoreSize != 10) { // if it's not 80bits then convert
+          StackNode = IREmit->_F80CVT(Op->StoreSize, StackNode);
+        }
+        auto* AddrNode = CurrentIR.GetNode(Op->Addr);
+        IREmit->_StoreMem(FPRClass, Op->StoreSize, AddrNode, StackNode);
+        IREmit->Remove(CodeNode);
 
         LogMan::Msg::DFmt("Stack depth at: {}", StackData.size());
         StackData.dump();
@@ -208,7 +220,6 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
       }
       case IR::OP_POPSTACKDESTROY: {
         LogMan::Msg::DFmt("OP_POPSTACKDESTROY\n");
-        const auto* Op = IROp->C<IR::IROp_PopStackDestroy>();
 
         if (StackData.size() == 0) { // slow path
           LogMan::Msg::DFmt("Slow path POPSTACKDESTROY\n");
