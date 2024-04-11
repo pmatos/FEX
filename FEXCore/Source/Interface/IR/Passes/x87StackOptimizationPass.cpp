@@ -388,6 +388,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
         IREmit->SetWriteCursor(CodeNode);
 
         // Adds two elements in the stack by offset.
+        auto StackDest = Op->DstStack;
         auto StackOffset1 = Op->SrcStack1;
         auto StackOffset2 = Op->SrcStack2;
 
@@ -406,7 +407,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
             IREmit->_LoadContextIndexed(IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackOffset2)), 16, MMBaseOffset(), 16, FPRClass);
 
           auto DivNode = IREmit->_F80Div(StackNode1, StackNode2);
-          IREmit->_StoreContextIndexed(DivNode, top, 16, MMBaseOffset(), 16, FPRClass);
+          IREmit->_StoreContextIndexed(DivNode, IREmit->_Add(OpSize::i32Bit, top, IREmit->_Constant(StackDest)), 16, MMBaseOffset(), 16, FPRClass);
         } else {
           // Fast path
           LogMan::Msg::DFmt("Fast path F80DIVSTACK\n");
@@ -418,7 +419,7 @@ bool X87StackOptimization::Run(IREmitter* IREmit) {
                                             .SourceDataNode = nullptr,
                                             .StackDataNode = AddNode,
                                             .InterpretAsFloat = StackMember1->InterpretAsFloat},
-                           StackOffset1);
+                           StackDest);
         }
 
         IREmit->Remove(CodeNode);
