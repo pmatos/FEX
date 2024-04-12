@@ -290,4 +290,96 @@ template void OpDispatchBuilder::FDIV<16, true, true, OpDispatchBuilder::OpResul
 
 template void OpDispatchBuilder::FDIV<32, true, false, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
 template void OpDispatchBuilder::FDIV<32, true, true, OpDispatchBuilder::OpResult::RES_ST0>(OpcodeArgs);
+
+void OpDispatchBuilder::X87FNSTENV(OpcodeArgs) {
+  // FIXME(pmatos): Unsure if this should be a single IR instruction, a bunch of them
+  // or just lowered into memory stores here.
+
+  // 14 bytes for 16bit
+  // 2 Bytes : FCW
+  // 2 Bytes : FSW
+  // 2 bytes : FTW
+  // 2 bytes : Instruction offset
+  // 2 bytes : Instruction CS selector
+  // 2 bytes : Data offset
+  // 2 bytes : Data selector
+
+  // 28 bytes for 32bit
+  // 4 bytes : FCW
+  // 4 bytes : FSW
+  // 4 bytes : FTW
+  // 4 bytes : Instruction pointer
+  // 2 bytes : instruction pointer selector
+  // 2 bytes : Opcode
+  // 4 bytes : data pointer offset
+  // 4 bytes : data pointer selector
+
+  auto Size = GetDstSize(Op);
+  OrderedNode* Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
+  Mem = AppendSegmentOffset(Mem, Op->Flags);
+
+  {
+    auto FCW = _LoadContext(2, GPRClass, offsetof(FEXCore::Core::CPUState, FCW));
+    _StoreMem(GPRClass, Size, Mem, FCW, Size);
+  }
+
+  {
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 1));
+    _StoreMem(GPRClass, Size, MemLocation, ReconstructFSW(), Size);
+  }
+
+  auto ZeroConst = _Constant(0);
+
+  {
+    // FTW
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 2));
+    _StoreMem(GPRClass, Size, MemLocation, GetX87FTW(), Size);
+  }
+
+  {
+    // Instruction Offset
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 3));
+    _StoreMem(GPRClass, Size, MemLocation, ZeroConst, Size);
+  }
+
+  {
+    // Instruction CS selector (+ Opcode)
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 4));
+    _StoreMem(GPRClass, Size, MemLocation, ZeroConst, Size);
+  }
+
+  {
+    // Data pointer offset
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 5));
+    _StoreMem(GPRClass, Size, MemLocation, ZeroConst, Size);
+  }
+
+  {
+    // Data pointer selector
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 6));
+    _StoreMem(GPRClass, Size, MemLocation, ZeroConst, Size);
+  }
+}
+
+void OpDispatchBuilder::X87LDENV(OpcodeArgs) {
+  // FIXME(pmatos): Same.
+
+  auto Size = GetSrcSize(Op);
+  OrderedNode* Mem = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags, {.LoadData = false});
+  Mem = AppendSegmentOffset(Mem, Op->Flags);
+
+  auto NewFCW = _LoadMem(GPRClass, 2, Mem, 2);
+  _StoreContext(2, GPRClass, NewFCW, offsetof(FEXCore::Core::CPUState, FCW));
+
+  OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 1));
+  auto NewFSW = _LoadMem(GPRClass, Size, MemLocation, Size);
+  ReconstructX87StateFromFSW(NewFSW);
+
+  {
+    // FTW
+    OrderedNode* MemLocation = _Add(OpSize::i64Bit, Mem, _Constant(Size * 2));
+    SetX87FTW(_LoadMem(GPRClass, Size, MemLocation, Size));
+  }
+}
+
 } // namespace FEXCore::IR

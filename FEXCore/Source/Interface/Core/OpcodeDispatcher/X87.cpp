@@ -1018,7 +1018,7 @@ void OpDispatchBuilder::X87ATAN(OpcodeArgs) {
   // Write to ST[TOP]
   _StoreContextIndexed(result, top, 16, MMBaseOffset(), 16, FPRClass);
 }
-
+#if
 void OpDispatchBuilder::X87LDENV(OpcodeArgs) {
   auto Size = GetSrcSize(Op);
   OrderedNode *Mem = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags, {.LoadData = false});
@@ -1037,7 +1037,8 @@ void OpDispatchBuilder::X87LDENV(OpcodeArgs) {
     SetX87FTW(_LoadMem(GPRClass, Size, MemLocation, Size));
   }
 }
-
+#endif
+#if 0
 void OpDispatchBuilder::X87FNSTENV(OpcodeArgs) {
   // 14 bytes for 16bit
   // 2 Bytes : FCW
@@ -1104,7 +1105,7 @@ void OpDispatchBuilder::X87FNSTENV(OpcodeArgs) {
     _StoreMem(GPRClass, Size, MemLocation, ZeroConst, Size);
   }
 }
-
+#endif
 void OpDispatchBuilder::X87FLDCW(OpcodeArgs) {
   OrderedNode *NewFCW = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags);
   _StoreContext(2, GPRClass, NewFCW, offsetof(FEXCore::Core::CPUState, FCW));
