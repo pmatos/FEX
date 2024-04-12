@@ -1018,7 +1018,7 @@ void OpDispatchBuilder::X87ATAN(OpcodeArgs) {
   // Write to ST[TOP]
   _StoreContextIndexed(result, top, 16, MMBaseOffset(), 16, FPRClass);
 }
-#if
+#if 0
 void OpDispatchBuilder::X87LDENV(OpcodeArgs) {
   auto Size = GetSrcSize(Op);
   OrderedNode *Mem = LoadSource(GPRClass, Op, Op->Src[0], Op->Flags, {.LoadData = false});
