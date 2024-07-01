@@ -22,3 +22,8 @@ target_link_libraries(TestHarnessRunner
     ${LIBS}
     ${PTHREAD_LIB}
 )
+
+if (ENABLE_UBSAN)
+  target_compile_options(TestHarnessRunner PRIVATE ${UBSAN_OPTIONS})
+  target_link_libraries(TestHarnessRunner PRIVATE ${UBSAN_OPTIONS})
+endif()

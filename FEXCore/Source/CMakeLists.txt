@@ -369,6 +369,11 @@ function(AddLibrary Name Type)
   set_target_properties(${Name} PROPERTIES OUTPUT_NAME FEXCore)
 
   AddDefaultOptionsToTarget(${Name})
+
+  if (ENABLE_UBSAN)
+    target_compile_options(${Name} PRIVATE ${UBSAN_OPTIONS})
+    target_link_libraries(${Name} PRIVATE ${UBSAN_OPTIONS})
+  endif()
 endfunction()
 
 AddObject(${PROJECT_NAME}_object OBJECT)

@@ -16,6 +16,7 @@ set(USE_LINKER "" CACHE STRING "Allow overriding the linker path directly")
 option(ENABLE_ASAN "Enables Clang ASAN" FALSE)
 option(ENABLE_TSAN "Enables Clang TSAN" FALSE)
 option(ENABLE_COVERAGE "Enables Coverage" FALSE)
+option(ENABLE_UBSAN "Enables Clang UBSAN" FALSE)
 option(ENABLE_ASSERTIONS "Enables assertions in build" FALSE)
 option(ENABLE_GDB_SYMBOLS "Enables GDBSymbols integration support" ${HAVE_GDB_JIT_READER_H})
 option(ENABLE_STRICT_WERROR "Enables stricter -Werror for CI" FALSE)
@@ -195,6 +196,8 @@ if (ENABLE_COVERAGE)
   add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
   link_libraries(-fprofile-instr-generate -fcoverage-mapping)
 endif()
+
+set (UBSAN_OPTIONS -fsanitize=undefined)
 
 if (ENABLE_JEMALLOC_GLIBC_ALLOC)
   # The glibc jemalloc subproject which hooks the glibc allocator.

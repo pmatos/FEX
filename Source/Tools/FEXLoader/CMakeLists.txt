@@ -31,6 +31,11 @@ function(GenerateInterpreter NAME AsInterpreter)
   target_compile_options(${NAME} PRIVATE ${FEX_TUNE_COMPILE_FLAGS})
   target_compile_definitions(${NAME} PRIVATE -DFEXLOADER_AS_INTERPRETER=${AsInterpreter})
 
+  if (ENABLE_UBSAN)
+    target_compile_options(${NAME} PRIVATE ${UBSAN_OPTIONS})
+    target_link_libraries(${NAME} PRIVATE ${UBSAN_OPTIONS})
+  endif()
+
   if (CMAKE_BUILD_TYPE MATCHES "RELEASE")
     target_link_options(${NAME}
       PRIVATE
