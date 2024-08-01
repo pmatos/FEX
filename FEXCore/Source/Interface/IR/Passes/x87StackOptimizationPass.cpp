@@ -193,7 +193,12 @@ private:
   void Reset(bool AlsoSlowPath = true);
 
   struct StackMemberInfo {
-    StackMemberInfo() {}
+    StackMemberInfo() {
+      // FIXME: This constructs an invalid StackMemberInfo
+      // It's only used in FixedSizeStack when the Stack slot is unused or invalid.
+      // We should probably refactor this and remove this constructor that puts the class in an
+      // invalid state.
+    }
     StackMemberInfo(Ref Data)
       : StackDataNode(Data) {}
     StackMemberInfo(Ref Data, Ref Source, OpSize Size, bool Float)
