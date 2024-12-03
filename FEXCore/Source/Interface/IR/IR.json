@@ -2788,13 +2788,14 @@
         "HasSideEffects": true,
         "X87": true
       },
-      "StoreStackMemory GPR:$Addr, OpSize:$SourceSize, i1:$Float, OpSize:$StoreSize": {
+      "StoreStackMemory PRED:$PredReg, GPR:$Addr, OpSize:$SourceSize, i1:$Float, OpSize:$StoreSize": {
         "Desc": [
           "Takes the top value off the x87 stack and stores it to memory.",
           "SourceSize is 128bit for F80 values, 64-bit for low precision.",
           "StoreSize is the store size for conversion:",
           "Float: 80-bit, 64-bit, or 32-bit",
-          "Int: 64-bit, 32-bit, 16-bit"
+          "Int: 64-bit, 32-bit, 16-bit",
+          "If possible, it will use the PredReg for an SVE store."
         ],
         "HasSideEffects": true,
         "X87": true

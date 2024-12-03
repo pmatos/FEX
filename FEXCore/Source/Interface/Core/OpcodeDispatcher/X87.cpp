@@ -130,7 +130,11 @@ void OpDispatchBuilder::FILD(OpcodeArgs) {
 
 void OpDispatchBuilder::FST(OpcodeArgs, IR::OpSize Width) {
   Ref Mem = LoadSource(GPRClass, Op, Op->Dest, Op->Flags, {.LoadData = false});
-  _StoreStackMemory(Mem, OpSize::i128Bit, true, Width);
+  Ref PredReg = Invalid();
+  if (CTX->HostFeatures.SupportsSVE128 || CTX->HostFeatures.SupportsSVE256) {
+    PredReg = InitPredicateCached(OpSize::i16Bit, ARMEmitter::PredicatePattern::SVE_VL5);
+  }
+  _StoreStackMemory(PredReg, Mem, OpSize::i128Bit, true, Width);
   if (Op->TableInfo->Flags & X86Tables::InstFlags::FLAGS_POP) {
     _PopStackDestroy();
   }

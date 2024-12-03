@@ -718,7 +718,6 @@ public:
   void FNINIT(OpcodeArgs);
 
   void X87ModifySTP(OpcodeArgs, bool Inc);
-  void X87SinCos(OpcodeArgs);
   void X87FYL2X(OpcodeArgs, bool IsFYL2XP1);
   void X87LDENV(OpcodeArgs);
   void X87FLDCW(OpcodeArgs);
@@ -764,9 +763,6 @@ public:
   void FTSTF64(OpcodeArgs);
   void FRNDINTF64(OpcodeArgs);
   void FSQRTF64(OpcodeArgs);
-  void X87UnaryOpF64(OpcodeArgs, FEXCore::IR::IROps IROp);
-  void X87BinaryOpF64(OpcodeArgs, FEXCore::IR::IROps IROp);
-  void X87SinCosF64(OpcodeArgs);
   void X87FLDCWF64(OpcodeArgs);
   void X87TANF64(OpcodeArgs);
   void X87ATANF64(OpcodeArgs);
@@ -1175,9 +1171,11 @@ public:
   }
 
   void FlushRegisterCache(bool SRAOnly = false) {
-    // At block boundaries, fix up the carry flag.
+
+    // At block boundaries, fix up the carry flag, and reset the predicate cache.
     if (!SRAOnly) {
       RectifyCarryInvert(CFInvertedABI);
+      ResetInitPredicateCache();
     }
 
     CalculateDeferredFlags();
