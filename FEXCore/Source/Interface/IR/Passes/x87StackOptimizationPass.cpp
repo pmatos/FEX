@@ -6,7 +6,6 @@
 #include "FEXCore/IR/IR.h"
 #include "FEXCore/Utils/Profiler.h"
 #include "FEXCore/Core/HostFeatures.h"
-#include "Interface/Core/ArchHelpers/Arm64Emitter.h"
 
 #include <array>
 #include <cstddef>

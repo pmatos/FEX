@@ -5,8 +5,12 @@ tags: backend|arm64
 $end_info$
 */
 
+
+#include "Interface/Core/ArchHelpers/Arm64Emitter.h"
 #include "Interface/Core/Dispatcher/Dispatcher.h"
 #include "Interface/Core/JIT/JITClass.h"
+#include "CodeEmitter/Emitter.h"
+#include "Interface/IR/IR.h"
 
 #include <FEXCore/Utils/MathUtils.h>
 
@@ -1553,8 +1557,11 @@ DEF_OP(VFRSqrt) {
   } else {
     if (IsScalar) {
       if (ElementSize == IR::OpSize::i32Bit && HostSupportsRPRES) {
-        // RPRES gives enough precision for this.
-        frsqrte(SubRegSize.Scalar, Dst.S(), Vector.S());
+        frsqrte(SubRegSize.Scalar, VTMP2.S(), Vector.S());
+        // Improve initial estimate which is not good enough.
+        fmul(SubRegSize.Scalar, VTMP1.S(), VTMP2.S(), VTMP2.S());
+        frsqrts(SubRegSize.Scalar, VTMP1.S(), VTMP1.S(), Vector.S());
+        fmul(SubRegSize.Scalar, Dst.S(), VTMP2.S(), VTMP1.S());
         return;
       }
 
