@@ -1557,11 +1557,18 @@ DEF_OP(VFRSqrt) {
   } else {
     if (IsScalar) {
       if (ElementSize == IR::OpSize::i32Bit && HostSupportsRPRES) {
-        frsqrte(SubRegSize.Scalar, VTMP2.S(), Vector.S());
+        // The spec says that the value of a negative input is the same as for a positive input but negated.
+        // So we make the source positive and negate the result if the source was negative.
+        fabs(SubRegSize.Scalar, VTMP2.S(), Vector.S());
+        frsqrte(SubRegSize.Scalar, VTMP2.S(), VTMP2.S());
         // Improve initial estimate which is not good enough.
         fmul(SubRegSize.Scalar, VTMP1.S(), VTMP2.S(), VTMP2.S());
         frsqrts(SubRegSize.Scalar, VTMP1.S(), VTMP1.S(), Vector.S());
-        fmul(SubRegSize.Scalar, Dst.S(), VTMP2.S(), VTMP1.S());
+        fmul(SubRegSize.Scalar, VTMP2.S(), VTMP2.S(), VTMP1.S());
+        // Make the result negative if the source was negative.
+        fneg(SubRegSize.Scalar, VTMP1.S(), VTMP2.S());
+        fcmp(Vector.S());
+        fcsel(Dst.S(), VTMP1.S(), Dst.S(), ARMEmitter::Condition::CC_MI);
         return;
       }
 

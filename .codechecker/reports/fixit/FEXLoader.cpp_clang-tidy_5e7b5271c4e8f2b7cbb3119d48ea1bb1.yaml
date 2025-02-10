@@ -1,0 +1,1087 @@
+---
+MainSourceFile:  '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/FEXLoader.cpp'
+Diagnostics:
+  - DiagnosticName:  bugprone-switch-missing-default-case
+    DiagnosticMessage:
+      Message:         switching on non-enum value without default case may not cover all cases
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      42943
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-default
+    DiagnosticMessage:
+      Message:         '''switch'' missing ''default'' label'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      42943
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         logical expression is always false
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      56530
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-noexcept-move-constructor
+    DiagnosticMessage:
+      Message:         move constructors should be marked noexcept
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      77774
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+          Offset:          77813
+          Length:          0
+          ReplacementText: ' noexcept '
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-forwarding-reference-overload
+    DiagnosticMessage:
+      Message:         constructor accepting a forwarding reference can hide the copy and move constructors
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      83209
+      Replacements:    []
+    Notes:
+      - Message:         copy constructor declared here
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      82515
+        Replacements:    []
+      - Message:         move constructor declared here
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      82515
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-default
+    DiagnosticMessage:
+      Message:         '''switch'' missing ''default'' label'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      83841
+      Replacements:    []
+    Notes:
+      - Message:         'in instantiation of function template specialization ''fmt::basic_format_arg<fmt::context>::visit<fmt::detail::dynamic_spec_getter>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      132946
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::detail::get_dynamic_spec<fmt::context>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      133323
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::detail::handle_dynamic_spec<fmt::context>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      136680
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::detail::native_formatter<fmt::basic_string_view<char>, char, fmt::detail::type::string_type>::format<fmt::context>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      141173
+        Replacements:    []
+      - Message:         'expanded from macro ''FMT_FORMAT_AS'''
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      140798
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::formatter<std::basic_string_view<char>>::format<fmt::context>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/ranges.h'
+        FileOffset:      21995
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::formatter<fmt::join_view<std::_List_iterator<std::basic_string_view<char>>, std::_List_iterator<std::basic_string_view<char>>>>::format<fmt::context>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      75091
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fmt::detail::value<fmt::context>::format_custom<fmt::join_view<std::_List_iterator<std::basic_string_view<char>>, std::_List_iterator<std::basic_string_view<char>>>, fmt::formatter<fmt::join_view<std::_List_iterator<std::basic_string_view<char>>, std::_List_iterator<std::basic_string_view<char>>>>>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      74178
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''fextl::fmt::format<const char *, fmt::join_view<std::_List_iterator<std::basic_string_view<char>>, std::_List_iterator<std::basic_string_view<char>>>, const char *>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/FEXHeaderUtils/FEXHeaderUtils/Filesystem.h'
+        FileOffset:      9419
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-macro-identifier
+    DiagnosticMessage:
+      Message:         macro name is a reserved identifier
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      1588
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cert-dcl58-cpp
+    DiagnosticMessage:
+      Message:         'modification of ''std'' namespace can result in undefined behavior'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      4121
+      Replacements:    []
+    Notes:
+      - Message:         '''std'' namespace opened here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      4086
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45579
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45579
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45728
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45728
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45795
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45795
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''debug'' and ''string'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      69379
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          FileOffset:      69373
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''debug'' and ''string'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      73917
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          FileOffset:      73911
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         both sides of operator are equivalent
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      92222
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''bigint&'''
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      97468
+      Replacements:    []
+    Notes:
+      - Message:         'expanded from macro ''FMT_CONSTEXPR'''
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      2875
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''udl_arg&'''
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      134105
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-macro-identifier
+    DiagnosticMessage:
+      Message:         macro name is a reserved identifier
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      156985
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7115
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7325
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7577
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7844
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      8140
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-forward-declaration-namespace
+    DiagnosticMessage:
+      Message:         'declaration ''CodeLoader'' is never referenced, but a declaration with the same name found in another namespace ''FEX'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      444
+      Replacements:    []
+    Notes:
+      - Message:         'a declaration of ''CodeLoader'' is found here'
+        FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+        FileOffset:      1361
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-forward-declaration-namespace
+    DiagnosticMessage:
+      Message:         'no definition found for ''CodeLoader'', but a definition with the same name ''CodeLoader'' found in another namespace ''FEX'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      444
+      Replacements:    []
+    Notes:
+      - Message:         'a definition of ''CodeLoader'' is found here'
+        FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/CodeLoader.h'
+        FileOffset:      391
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Thread'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5841
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Thread'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5942
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Child'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5955
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Config'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/SignalDelegator.h'
+      FileOffset:      1458
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-non-virtual-dtor
+    DiagnosticMessage:
+      Message:         '''FEXCore::HLE::SourcecodeResolver'' has virtual functions but non-virtual destructor'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+      FileOffset:      2801
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cppcoreguidelines-virtual-class-destructor
+    DiagnosticMessage:
+      Message:         'destructor of ''SourcecodeResolver'' is public and non-virtual'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+      FileOffset:      2801
+      Replacements:    []
+    Notes:
+      - Message:         make it public and virtual
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+        FileOffset:      2801
+        Replacements:
+          - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+            Offset:          2829
+            Length:          0
+            ReplacementText: "\nvirtual ~SourcecodeResolver() = default;"
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Syscall'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1627
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Thread'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1828
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Start'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1845
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Length'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1861
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Start'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1916
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Length'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1932
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Start'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      1989
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Length'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      2005
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''CTX'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      2281
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Frame'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SyscallHandler.h'
+      FileOffset:      2316
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Commit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3053
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Commit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3289
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Recommit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3594
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''align'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      5273
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Format'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/Profiler.h'
+      FileOffset:      1249
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-noexcept-move-constructor
+    DiagnosticMessage:
+      Message:         move constructors should be marked noexcept
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+      FileOffset:      3796
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+          Offset:          3859
+          Length:          0
+          ReplacementText: ' noexcept '
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-noexcept-move-constructor
+    DiagnosticMessage:
+      Message:         move constructors should be marked noexcept
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+      FileOffset:      5326
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+          Offset:          5371
+          Length:          0
+          ReplacementText: ' noexcept '
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Mask'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+      FileOffset:      7051
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-missing-field-initializers
+    DiagnosticMessage:
+      Message:         'missing field ''lock'' initializer'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+      FileOffset:      7948
+      Replacements:    []
+    Notes:
+      - Message:         'in instantiation of function template specialization ''FEXCore::GuardSignalDeferringSectionWithFallback<std::unique_lock, FEXCore::ForkableSharedMutex>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/ThreadManager.h'
+        FileOffset:      4585
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''Value&'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/Telemetry.h'
+      FileOffset:      1062
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Size'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h'
+      FileOffset:      12264
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-sizeof-expression
+    DiagnosticMessage:
+      Message:         'suspicious usage of ''sizeof(A*)'' on pointer-to-aggregate type; did you mean ''sizeof(A)''?'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/allocator.h'
+      FileOffset:      635
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/allocator.h'
+          FileOffset:      635
+          Length:          18
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''bytes'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/memory_resource.h'
+      FileOffset:      504
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''alignment'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/memory_resource.h'
+      FileOffset:      523
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''p'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/memory_resource.h'
+      FileOffset:      2178
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''bytes'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/memory_resource.h'
+      FileOffset:      2193
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''alignment'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/memory_resource.h'
+      FileOffset:      2212
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cert-dcl58-cpp
+    DiagnosticMessage:
+      Message:         'modification of ''std'' namespace can result in undefined behavior'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/string.h'
+      FileOffset:      400
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cert-err33-c
+    DiagnosticMessage:
+      Message:         'the value returned by this function should not be disregarded; neglecting it may lead to errors'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Common/FEXServerClient.h'
+      FileOffset:      2925
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Common/FEXServerClient.h'
+          FileOffset:      2925
+          Length:          46
+    Notes:
+      - Message:         cast the expression to void to silence this warning
+        FilePath:        '/home/steamvr/dev/FEX/Source/Common/FEXServerClient.h'
+        FileOffset:      2925
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Reg'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Common/HostFeatures.h'
+      FileOffset:      2337
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Args'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/CodeLoader.h'
+      FileOffset:      977
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''addr'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/CodeLoader.h'
+      FileOffset:      1020
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''size'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/CodeLoader.h'
+      FileOffset:      1036
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Handler'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/CodeLoader.h'
+      FileOffset:      1161
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      4555
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          Offset:          4555
+          Length:          9
+          ReplacementText: 'phdrs.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      4864
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          Offset:          4864
+          Length:          18
+          ReplacementText: 'InterpreterElf.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''Elf64_Off'' (aka ''unsigned long'') and ''off_t'' (aka ''long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      5162
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5148
+          Length:          13
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5165
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''uint64_t'' (aka ''unsigned long'') and ''off_t'' (aka ''long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      5211
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5180
+          Length:          29
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5213
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''Elf64_Addr'' (aka ''unsigned long'') and ''ptrdiff_t'' (aka ''long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      5526
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5513
+          Length:          12
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5529
+          Length:          8
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''uint64_t'' (aka ''unsigned long'') and ''ptrdiff_t'' (aka ''long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+      FileOffset:      5571
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5542
+          Length:          27
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/CommonTools/Linux/Utils/ELFParser.h'
+          FileOffset:      5573
+          Length:          8
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''ssize_t'' (aka ''long'') and ''size_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+      FileOffset:      5669
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+          FileOffset:      5662
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+          FileOffset:      5672
+          Length:          8
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-suspicious-stringview-data-usage
+    DiagnosticMessage:
+      Message:         'result of a `data()` call may not be null terminated, provide size information to the callee to prevent potential issues'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+      FileOffset:      29207
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+          FileOffset:      29186
+          Length:          25
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-suspicious-stringview-data-usage
+    DiagnosticMessage:
+      Message:         'result of a `data()` call may not be null terminated, provide size information to the callee to prevent potential issues'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+      FileOffset:      29301
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/ELFCodeLoader.h'
+          FileOffset:      29282
+          Length:          23
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-no-automatic-move
+    DiagnosticMessage:
+      Message:         'constness of ''BadResult'' prevents automatic move'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/FEXLoader.cpp'
+      FileOffset:      4776
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-no-automatic-move
+    DiagnosticMessage:
+      Message:         'constness of ''BadResult'' prevents automatic move'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/FEXLoader.cpp'
+      FileOffset:      5004
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  performance-no-automatic-move
+    DiagnosticMessage:
+      Message:         'constness of ''BadResult'' prevents automatic move'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/FEXLoader/FEXLoader.cpp'
+      FileOffset:      5355
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''__reserved'' is reserved because it starts with ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/ArchHelpers/UContext.h'
+      FileOffset:      4297
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''__pad0'' is reserved because it starts with ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/ArchHelpers/UContext.h'
+      FileOffset:      6962
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_Arm64__llseek'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Arm64/SyscallsEnum.h'
+      FileOffset:      13728
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_Arm64__newselect'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Arm64/SyscallsEnum.h'
+      FileOffset:      13789
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_Arm64__sysctl'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Arm64/SyscallsEnum.h'
+      FileOffset:      13822
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''int'' and ''size_type'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+      FileOffset:      1980
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      1973
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      1983
+          Length:          11
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''int'' and ''size_type'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+      FileOffset:      2037
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      2030
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      2040
+          Length:          11
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''size_type'' (aka ''unsigned long'') and ''int'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+      FileOffset:      2122
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      2100
+          Length:          20
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/GdbServer.h'
+          FileOffset:      2124
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Required'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/SignalDelegator.h'
+      FileOffset:      5517
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Required'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/SignalDelegator.h'
+      FileOffset:      5682
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SyscallNumber'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5347
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''HostSyscallNumber'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5370
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Flags'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5415
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SyscallHandler'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5563
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''ArgumentCount'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5583
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SyscallNumber'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5643
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''HostSyscallNumber'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5666
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Flags'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5711
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SyscallHandler'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5859
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''ArgumentCount'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      5879
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_SyscallHandler'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/Syscalls.h'
+      FileOffset:      15115
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''int'' to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/Syscalls.h'
+      FileOffset:      1703
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/Syscalls.h'
+          FileOffset:      1703
+          Length:          13
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/Syscalls.h'
+          FileOffset:      1701
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Name'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/Syscalls.h'
+      FileOffset:      2791
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Handler'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/Syscalls.h'
+      FileOffset:      3507
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x86__llseek'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/SyscallsEnum.h'
+      FileOffset:      4509
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x86__newselect'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/SyscallsEnum.h'
+      FileOffset:      4568
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x86__sysctl'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x32/SyscallsEnum.h'
+      FileOffset:      4768
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''int'' to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/Syscalls.h'
+      FileOffset:      1626
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/Syscalls.h'
+          FileOffset:      1626
+          Length:          13
+        - FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/Syscalls.h'
+          FileOffset:      1624
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Name'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/Syscalls.h'
+      FileOffset:      2563
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Handler'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/Syscalls.h'
+      FileOffset:      3279
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x64__sysctl'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/SyscallsEnum.h'
+      FileOffset:      4741
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x64__llseek'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/SyscallsEnum.h'
+      FileOffset:      13321
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''SYSCALL_x64__newselect'' is reserved because it contains ''__'''
+      FilePath:        '/home/steamvr/dev/FEX/Source/Tools/LinuxEmulation/LinuxSyscalls/x64/SyscallsEnum.h'
+      FileOffset:      13349
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+...

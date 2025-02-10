@@ -10,13 +10,13 @@
 %macro check_relerr 2; %1=REF %2=X
         movss   xmm0, dword [ %1 ] ; xmm0 has REF
         movss   xmm1, dword [ %2 ] ; xmm1 has X
-        movss   xmm3, dword [rel relative_error_tolerance_float] ; xmm3 has tolerance value 1.5*2^-12
-        movaps  xmm2, xmm0 ; xmm2 has REF
-        subss   xmm2, xmm1 ; xmm2 = REF - X
-        andps   xmm0, xmm3 ; xmm0 = abs(REF)
-        mulss   xmm0, dword [rel abs_mask_float] ; xmm0 = abs(REF) * tolerance
-        movaps  xmm1, xmm2 ; xmm1 = REF - X
-        andps   xmm1, xmm3 ; xmm1 = abs(REF - X)
+        movss   xmm3, dword [rel abs_mask_float] ; xmm3 has the abs float mask
+        movaps  xmm2, xmm0 ; xmm2 has REF StoreRegister
+        subss   xmm2, xmm1 ; xmm2 = REF - X  VFSubScalarInsert
+        andps   xmm0, xmm3 ; xmm0 = abs(REF) VAnd
+        mulss   xmm0, dword [rel relative_error_tolerance_float] ; xmm0 = abs(REF) * tolerance VFMulScalarInsert
+        movaps  xmm1, xmm2 ; xmm1 = REF - X StoreRegister
+        andps   xmm1, xmm3 ; xmm1 = abs(REF - X) VAnd
 
         xor     eax, eax ; clears eax
         comiss  xmm0, xmm1 ; compares xmm0 and xmm1

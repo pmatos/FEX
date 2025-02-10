@@ -2072,6 +2072,8 @@ private:
   // Compares two floats and sets flags for a COMISS instruction
   void Comiss(IR::OpSize ElementSize, Ref Src1, Ref Src2, bool InvalidateAF = false) {
     // First, set flags according to Arm FCMP.
+    _Print(Src1);
+    _Print(Src2);
     HandleNZCVWrite();
     _FCmp(ElementSize, Src1, Src2);
     CFInverted = false;

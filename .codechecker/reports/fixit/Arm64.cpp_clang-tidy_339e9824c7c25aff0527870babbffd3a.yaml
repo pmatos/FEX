@@ -1,0 +1,1711 @@
+---
+MainSourceFile:  '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+Diagnostics:
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      44996
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      47166
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      69277
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      71053
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      74628
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      75453
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      76766
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      77489
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      78374
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      79254
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      80135
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      81015
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      81895
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      82774
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      83656
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      84538
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      93139
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      96239
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      98864
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      100087
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      101314
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      102540
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-double-promotion
+    DiagnosticMessage:
+      Message:         'implicit conversion increases floating-point precision: ''float'' to ''double'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+      FileOffset:      158161
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+          FileOffset:      158161
+          Length:          5
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ASIMDOps.inl'
+          FileOffset:      158150
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration value ''UNKNOWN'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/Emitter.h'
+      FileOffset:      19044
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/Emitter.h'
+          FileOffset:      19044
+          Length:          11
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      43807
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      45200
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      49082
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      50535
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      51995
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      53466
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      54944
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''PostOffset'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/LoadstoreOps.inl'
+      FileOffset:      56432
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-double-promotion
+    DiagnosticMessage:
+      Message:         'implicit conversion increases floating-point precision: ''float'' to ''double'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      69626
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      69626
+          Length:          5
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      69615
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      108828
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         '''true'' and ''false'' expressions are equivalent'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      109927
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-double-promotion
+    DiagnosticMessage:
+      Message:         'implicit conversion increases floating-point precision: ''float'' to ''double'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      157729
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      157729
+          Length:          5
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      157718
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-default
+    DiagnosticMessage:
+      Message:         '''switch'' missing ''default'' label'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      159130
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''i8Bit'' and ''i128Bit'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      175598
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      175598
+          Length:          4
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''i8Bit'', ''i16Bit'', and ''i128Bit'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      175655
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      175655
+          Length:          2
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''i8Bit'', ''i32Bit'', and ''i128Bit'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      175871
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      175871
+          Length:          2
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''i8Bit'', ''i64Bit'', and ''i128Bit'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+      FileOffset:      176087
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/SVEOps.inl'
+          FileOffset:      176087
+          Length:          2
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-double-promotion
+    DiagnosticMessage:
+      Message:         'implicit conversion increases floating-point precision: ''float'' to ''double'''
+      FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ScalarOps.inl'
+      FileOffset:      47259
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ScalarOps.inl'
+          FileOffset:      47259
+          Length:          5
+        - FilePath:        '/home/steamvr/dev/FEX/CodeEmitter/CodeEmitter/ScalarOps.inl'
+          FileOffset:      47248
+          Length:          10
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-switch-missing-default-case
+    DiagnosticMessage:
+      Message:         switching on non-enum value without default case may not cover all cases
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      42943
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-default
+    DiagnosticMessage:
+      Message:         '''switch'' missing ''default'' label'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      42943
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-forwarding-reference-overload
+    DiagnosticMessage:
+      Message:         constructor accepting a forwarding reference can hide the copy and move constructors
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+      FileOffset:      83209
+      Replacements:    []
+    Notes:
+      - Message:         copy constructor declared here
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      82515
+        Replacements:    []
+      - Message:         move constructor declared here
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      82515
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-macro-identifier
+    DiagnosticMessage:
+      Message:         macro name is a reserved identifier
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      1588
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cert-dcl58-cpp
+    DiagnosticMessage:
+      Message:         'modification of ''std'' namespace can result in undefined behavior'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      4121
+      Replacements:    []
+    Notes:
+      - Message:         '''std'' namespace opened here'
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+        FileOffset:      4086
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45579
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45579
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45728
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45728
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  readability-container-data-pointer
+    DiagnosticMessage:
+      Message:         '''data'' should be used for accessing the data pointer instead of taking the address of the 0-th element'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      45795
+      Replacements:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          Offset:          45795
+          Length:          11
+          ReplacementText: 'buffer_.data()'
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''debug'' and ''string'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      69379
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          FileOffset:      69373
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-switch-enum
+    DiagnosticMessage:
+      Message:         'enumeration values ''debug'' and ''string'' not explicitly handled in switch'
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      73917
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+          FileOffset:      73911
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         both sides of operator are equivalent
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      92222
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''bigint&'''
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      97468
+      Replacements:    []
+    Notes:
+      - Message:         'expanded from macro ''FMT_CONSTEXPR'''
+        FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/base.h'
+        FileOffset:      2875
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''udl_arg&'''
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      134105
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-macro-identifier
+    DiagnosticMessage:
+      Message:         macro name is a reserved identifier
+      FilePath:        '/home/steamvr/dev/FEX/External/fmt/include/fmt/format.h'
+      FileOffset:      156985
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         both sides of operator are equivalent
+      FilePath:        '/home/steamvr/dev/FEX/External/robin-map/include/tsl/robin_hash.h'
+      FileOffset:      3596
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Function'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/ArchHelpers/Arm64Emitter.h'
+      FileOffset:      9106
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Reg'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/ArchHelpers/Arm64Emitter.h'
+      FileOffset:      9256
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Pad'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/CPUBackend.h'
+      FileOffset:      2805
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Entry'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/CPUBackend.h'
+      FileOffset:      5331
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SerializationData'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/CPUBackend.h'
+      FileOffset:      5382
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Function'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/CPUID.h'
+      FileOffset:      2583
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''size_type'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+      FileOffset:      2192
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2169
+          Length:          26
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2162
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''size_type'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+      FileOffset:      2267
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2249
+          Length:          24
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2242
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+      FileOffset:      2433
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2414
+          Length:          24
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2412
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+      FileOffset:      2604
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2583
+          Length:          26
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/Dispatcher/Dispatcher.h'
+          FileOffset:      2581
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Pad'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/ObjectCache/CodeObjectSerializationConfig.h'
+      FileOffset:      1169
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-header-include-cycle
+    DiagnosticMessage:
+      Message:         'circular header file dependency detected while including ''Context.h'', please check the include path'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Core/ObjectCache/ObjectCacheService.h'
+      FileOffset:      54
+      Replacements:    []
+    Notes:
+      - Message:         '''ObjectCacheService.h'' included from here'
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/Context/Context.h'
+        FileOffset:      161
+        Replacements:    []
+      - Message:         '''Context.h'' included from here'
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+        FileOffset:      81
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''int'' to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+      FileOffset:      11763
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+          FileOffset:      11757
+          Length:          10
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+          FileOffset:      11755
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''int'' to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+      FileOffset:      11939
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+          FileOffset:      11926
+          Length:          31
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+          FileOffset:      11924
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-misplaced-const
+    DiagnosticMessage:
+      Message:         '''Node'' declared with a const-qualified type alias; results in the type being ''FEXCore::IR::OrderedNode *const'' instead of ''const FEXCore::IR::OrderedNode *'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IntrusiveIRList.h'
+      FileOffset:      6090
+      Replacements:    []
+    Notes:
+      - Message:         type alias declared here
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+        FileOffset:      10760
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-misplaced-const
+    DiagnosticMessage:
+      Message:         '''block'' declared with a const-qualified type alias; results in the type being ''FEXCore::IR::OrderedNode *const'' instead of ''const FEXCore::IR::OrderedNode *'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IntrusiveIRList.h'
+      FileOffset:      9097
+      Replacements:    []
+    Notes:
+      - Message:         type alias declared here
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+        FileOffset:      10760
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-misplaced-const
+    DiagnosticMessage:
+      Message:         '''Node'' declared with a const-qualified type alias; results in the type being ''FEXCore::IR::OrderedNode *const'' instead of ''const FEXCore::IR::OrderedNode *'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IntrusiveIRList.h'
+      FileOffset:      10292
+      Replacements:    []
+    Notes:
+      - Message:         type alias declared here
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/IR.h'
+        FileOffset:      10760
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''value_type'' (aka ''unsigned int'') to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/RegisterAllocationData.h'
+      FileOffset:      521
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/RegisterAllocationData.h'
+          FileOffset:      515
+          Length:          9
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Interface/IR/RegisterAllocationData.h'
+          FileOffset:      514
+          Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      7123
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      7113
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      7104
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      7590
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      7580
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      7571
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      8049
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      8039
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      8030
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint32_t'' (aka ''unsigned int'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      8959
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      8949
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      8942
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      9897
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      9890
+          Length:          25
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      9883
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      10120
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      10110
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      10101
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      13484
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      13484
+          Length:          11
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      13465
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      13588
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      13588
+          Length:          10
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      13570
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      15209
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      15189
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      15174
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      15629
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      15609
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      15594
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      17626
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      17606
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      17591
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint16_t'' (aka ''unsigned short'') to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      23624
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      23624
+          Length:          7
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      23609
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint16_t'' (aka ''unsigned short'') to ''uint8_t'' (aka ''unsigned char'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      23772
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      23772
+          Length:          8
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      23756
+          Length:          13
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      25774
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      25762
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      25746
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      25903
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      25891
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      25874
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      26367
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      26358
+          Length:          27
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      26351
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      27433
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      27413
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      27398
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      28150
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28138
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28122
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      28280
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28268
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28251
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      28765
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28756
+          Length:          27
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      28749
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      29855
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      29835
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      29820
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      30571
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      30559
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      30543
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''unsigned short'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      30701
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      30689
+          Length:          30
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      30672
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      31186
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      31177
+          Length:          27
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      31170
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint32_t'' (aka ''unsigned int'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      32276
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      32256
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      32241
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned int'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      36751
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      36741
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      36725
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned int'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      36842
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      36832
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      36815
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint32_t'' (aka ''unsigned int'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      37325
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      37325
+          Length:          8
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      37318
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint32_t'' (aka ''unsigned int'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      38382
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      38362
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      38347
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned long'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      42126
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42116
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42100
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned long'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      42215
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42205
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42188
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      42555
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42555
+          Length:          11
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42536
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      42655
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42655
+          Length:          10
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42637
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      42977
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42977
+          Length:          8
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      42970
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      44183
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      44163
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      44148
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned long'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      45119
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45109
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45093
+          Length:          15
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''unsigned long'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      45208
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45198
+          Length:          28
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45181
+          Length:          16
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      45667
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45667
+          Length:          8
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      45660
+          Length:          6
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''__uint128_t'' (aka ''unsigned __int128'') to ''uint64_t'' (aka ''unsigned long'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      46688
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      46668
+          Length:          38
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      46653
+          Length:          12
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      47498
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      47498
+          Length:          16
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      47476
+          Length:          7
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      47516
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      47516
+          Length:          17
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      47476
+          Length:          7
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SrcVal'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      50439
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      51015
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      51015
+          Length:          15
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      51001
+          Length:          7
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SrcVal'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      51986
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SrcVal'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      53533
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      55720
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      55720
+          Length:          13
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      55696
+          Length:          7
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Desired'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      65650
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''SrcVal'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      65757
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-implicit-int-conversion
+    DiagnosticMessage:
+      Message:         'implicit conversion loses integer precision: ''uint64_t'' (aka ''unsigned long'') to ''uint16_t'' (aka ''unsigned short'')'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      66928
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      66928
+          Length:          19
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+          FileOffset:      66911
+          Length:          7
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         logical expression is always false
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      80143
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-redundant-expression
+    DiagnosticMessage:
+      Message:         logical expression is always false
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/ArchHelpers/Arm64.cpp'
+      FileOffset:      80690
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''unsigned int'' and ''int'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+      FileOffset:      4916
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      4909
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      4919
+          Length:          13
+    Notes:
+      - Message:         'in instantiation of function template specialization ''FEXCore::Utils::SpinWaitLock::Wait<unsigned int, int>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+        FileOffset:      7904
+        Replacements:    []
+      - Message:         'in instantiation of function template specialization ''FEXCore::Utils::SpinWaitLock::lock<unsigned int>'' requested here'
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+        FileOffset:      8954
+        Replacements:    []
+      - Message:         'in instantiation of member function ''FEXCore::Utils::SpinWaitLock::UniqueSpinMutex<unsigned int>::UniqueSpinMutex'' requested here'
+        FilePath:        '/usr/lib/gcc/aarch64-linux-gnu/14/../../../../include/c++/14/bits/stl_construct.h'
+        FileOffset:      3825
+        Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''unsigned int'' and ''int'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+      FileOffset:      5010
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      5003
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      5013
+          Length:          13
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-sign-compare
+    DiagnosticMessage:
+      Message:         'comparison of integers of different signs: ''unsigned int'' and ''int'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+      FileOffset:      5103
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      5096
+          Length:          6
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/Source/Utils/SpinWaitLock.h'
+          FileOffset:      5106
+          Length:          13
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7115
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7325
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7577
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      7844
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Option'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Config/Config.h'
+      FileOffset:      8140
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Thread'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5841
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Thread'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5942
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Child'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/Context.h'
+      FileOffset:      5955
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-reserved-identifier
+    DiagnosticMessage:
+      Message:         'identifier ''_Config'' is reserved because it starts with ''_'' followed by a capital letter'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Core/SignalDelegator.h'
+      FileOffset:      1458
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-non-virtual-dtor
+    DiagnosticMessage:
+      Message:         '''FEXCore::HLE::SourcecodeResolver'' has virtual functions but non-virtual destructor'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+      FileOffset:      2801
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cppcoreguidelines-virtual-class-destructor
+    DiagnosticMessage:
+      Message:         'destructor of ''SourcecodeResolver'' is public and non-virtual'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+      FileOffset:      2801
+      Replacements:    []
+    Notes:
+      - Message:         make it public and virtual
+        FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+        FileOffset:      2801
+        Replacements:
+          - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/HLE/SourcecodeResolver.h'
+            Offset:          2829
+            Length:          0
+            ReplacementText: "\nvirtual ~SourcecodeResolver() = default;"
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Commit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3053
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Commit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3289
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Recommit'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      3594
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''align'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/AllocatorHooks.h'
+      FileOffset:      5273
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Mask'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/SignalScopeGuards.h'
+      FileOffset:      7051
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  misc-unconventional-assign-operator
+    DiagnosticMessage:
+      Message:         'operator=() should return ''Value&'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/Telemetry.h'
+      FileOffset:      1062
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  clang-diagnostic-unused-parameter
+    DiagnosticMessage:
+      Message:         'unused parameter ''Size'''
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h'
+      FileOffset:      12264
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  bugprone-sizeof-expression
+    DiagnosticMessage:
+      Message:         'suspicious usage of ''sizeof(A*)'' on pointer-to-aggregate type; did you mean ''sizeof(A)''?'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/allocator.h'
+      FileOffset:      635
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/allocator.h'
+          FileOffset:      635
+          Length:          18
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+  - DiagnosticName:  cert-dcl58-cpp
+    DiagnosticMessage:
+      Message:         'modification of ''std'' namespace can result in undefined behavior'
+      FilePath:        '/home/steamvr/dev/FEX/FEXCore/include/FEXCore/fextl/string.h'
+      FileOffset:      400
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/home/steamvr/dev/FEX/build'
+...
