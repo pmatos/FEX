@@ -1557,18 +1557,11 @@ DEF_OP(VFRSqrt) {
   } else {
     if (IsScalar) {
       if (ElementSize == IR::OpSize::i32Bit && HostSupportsRPRES) {
-        // The spec says that the value of a negative input is the same as for a positive input but negated.
-        // So we make the source positive and negate the result if the source was negative.
-        fabs(SubRegSize.Scalar, VTMP2.S(), Vector.S());
-        frsqrte(SubRegSize.Scalar, VTMP2.S(), VTMP2.S());
+        frsqrte(SubRegSize.Scalar, VTMP1.S(), Vector.S());
         // Improve initial estimate which is not good enough.
-        fmul(SubRegSize.Scalar, VTMP1.S(), VTMP2.S(), VTMP2.S());
-        frsqrts(SubRegSize.Scalar, VTMP1.S(), VTMP1.S(), Vector.S());
-        fmul(SubRegSize.Scalar, VTMP2.S(), VTMP2.S(), VTMP1.S());
-        // Make the result negative if the source was negative.
-        fneg(SubRegSize.Scalar, VTMP1.S(), VTMP2.S());
-        fcmp(Vector.S());
-        fcsel(Dst.S(), VTMP1.S(), Dst.S(), ARMEmitter::Condition::CC_MI);
+        fmul(SubRegSize.Scalar, VTMP2.S(), VTMP1.S(), VTMP1.S());
+        frsqrts(SubRegSize.Scalar, VTMP2.S(), VTMP2.S(), Vector.S());
+        fmul(SubRegSize.Scalar, Dst.S(), VTMP1.S(), VTMP2.S());
         return;
       }
 
@@ -4466,6 +4459,22 @@ DEF_OP(VFNMLS) {
     }
   }
 }
+
+
+DEF_OP(FCopySign) {
+  auto Op = IROp->C<IR::IROp_FCopySign>();
+  ARMEmitter::SubRegSize Size = Op->ElementSize == IR::OpSize::i64Bit ? ARMEmitter::SubRegSize::i64Bit : ARMEmitter::SubRegSize::i32Bit;
+
+  ARMEmitter::VRegister Magnitude = GetVReg(Op->Scalar1.ID());
+  ARMEmitter::VRegister Sign = GetVReg(Op->Scalar2.ID());
+
+  // Dst will have the magniture of Scalar1 and the sign of Scalar2.
+  // Similar in semantics to C's copysignf.
+  movi(Size, VTMP1.D(), 0x80, 24);
+  bit(Magnitude.D(), Sign.D(), VTMP1.D());
+  // We don't assign explicity to Dst but Dst and Magniture are tied to the same register.
+}
+
 
 #undef DEF_OP
 } // namespace FEXCore::CPU

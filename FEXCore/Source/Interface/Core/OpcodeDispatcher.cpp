@@ -4379,7 +4379,6 @@ Ref OpDispatchBuilder::LoadSource(RegisterClassType Class, const X86Tables::Deco
 void OpDispatchBuilder::StoreResult_WithOpSize(FEXCore::IR::RegisterClassType Class, FEXCore::X86Tables::DecodedOp Op,
                                                const FEXCore::X86Tables::DecodedOperand& Operand, const Ref Src, IR::OpSize OpSize,
                                                IR::OpSize Align, MemoryAccessType AccessType) {
-  _Print(Src);
   if (Operand.IsGPR()) {
     // 8Bit and 16bit destination types store their result without effecting the upper bits
     // 32bit ops ZEXT the result to 64bit

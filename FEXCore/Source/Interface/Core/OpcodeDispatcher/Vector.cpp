@@ -312,9 +312,6 @@ Ref OpDispatchBuilder::VectorScalarInsertALUOpImpl(OpcodeArgs, IROps IROp, IR::O
   Ref Src1 = LoadSource_WithOpSize(FPRClass, Op, Src1Op, DstSize, Op->Flags);
   Ref Src2 = LoadSource_WithOpSize(FPRClass, Op, Src2Op, SrcSize, Op->Flags, {.AllowUpperGarbage = true});
 
-  _Print(Src1);
-  _Print(Src2);
-
   // If OpSize == ElementSize then it only does the lower scalar op
   DeriveOp(ALUOp, IROp, _VFAddScalarInsert(DstSize, ElementSize, Src1, Src2, ZeroUpperBits));
   return ALUOp;
@@ -638,7 +635,23 @@ void OpDispatchBuilder::VectorUnaryOp(OpcodeArgs, IROps IROp, IR::OpSize Element
 
   Ref Src = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], SrcSize, Op->Flags);
 
+  // For the sqrt reciprocal in 3DNow!, if the source is negative,
+  // then the result has the same sign as the source but the result is always calculated
+  // as if the source was positive.
+  if (IROp == IR::OP_VFSQRT) {
+    Src = _VAbs(SrcSize, ElementSize, Src);
+  }
+
   DeriveOp(ALUOp, IROp, _VFSqrt(SrcSize, ElementSize, Src));
+
+  // Now we just reinsert the sign of Src into ALUOp.
+  if (IROp == IR::OP_VFSQRT) {
+    Ref NegALUOp = _VNeg(SrcSize, ElementSize, ALUOp);
+    _TestNZ(SrcSize, Src, _Constant(0));
+    auto Result = _NZCVSelectV(SrcSize, {COND_FGE}, ALUOp, NegALUOp);
+    StoreResult(FPRClass, Op, Result, OpSize::iInvalid);
+    return;
+  }
 
   StoreResult(FPRClass, Op, ALUOp, OpSize::iInvalid);
 }
@@ -666,6 +679,21 @@ void OpDispatchBuilder::VectorUnaryDuplicateOpImpl(OpcodeArgs, IROps IROp, IR::O
   const auto Size = OpSizeFromSrc(Op);
 
   Ref Src = LoadSource(FPRClass, Op, Op->Src[0], Op->Flags);
+
+  // For the sqrt reciprocal in 3DNow!, if the source is negative,
+  // then the result has the same sign as the source but the result is always calculated
+  // as if the source was positive.
+  if (IROp == IR::OP_VFRSQRT) {
+    Ref AbsSrc = _VFAbs(Size, ElementSize, Src);
+
+    DeriveOp(ALUOp, IROp, _VFSqrt(ElementSize, ElementSize, AbsSrc));
+
+    Ref Result = _FCopySign(ElementSize, ALUOp, Src);
+    // Duplicate the lower bits
+    Result = _VDupElement(Size, ElementSize, Result, 0);
+    StoreResult(FPRClass, Op, Result, OpSize::iInvalid);
+    return;
+  }
 
   DeriveOp(ALUOp, IROp, _VFSqrt(ElementSize, ElementSize, Src));
 

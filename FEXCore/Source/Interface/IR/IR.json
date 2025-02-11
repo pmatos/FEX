@@ -1881,6 +1881,10 @@
         "DestSize": "RegisterSize",
         "ElementSize": "ElementSize",
         "TiedSource": 0
+      },
+      "FPR = FCopySign OpSize:$ElementSize, FPR:$Scalar1,  FPR:$Scalar2": {
+        "Desc": ["Returns a scalar that has the magnitude of Scalar1 and the sign of Scalar2."],
+        "TiedSource": 0
       }
     },
     "Vector": {
