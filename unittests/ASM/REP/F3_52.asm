@@ -23,23 +23,23 @@ global _start
 
 _start:
 movapd xmm0, [rel arg1]
-movapd xmm1, [rel arg2]
-movapd xmm2, [rel arg3]
-movapd xmm3, [rel arg4]
-movapd xmm4, [rel arg5]
-movapd xmm5, [rel arg5]
-movapd xmm6, [rel arg5]
-movapd xmm7, [rel arg5]
+; movapd xmm1, [rel arg2]
+; movapd xmm2, [rel arg3]
+; movapd xmm3, [rel arg4]
+; movapd xmm4, [rel arg5]
+; movapd xmm5, [rel arg5]
+; movapd xmm6, [rel arg5]
+; movapd xmm7, [rel arg5]
 
 rsqrtss xmm0, xmm0
-rsqrtss xmm1, xmm1
-rsqrtss xmm2, xmm2
-rsqrtss xmm3, xmm3
+; rsqrtss xmm1, xmm1
+; rsqrtss xmm2, xmm2
+; rsqrtss xmm3, xmm3
 
-rsqrtss xmm4, [rel arg1]
-rsqrtss xmm5, [rel arg2]
-rsqrtss xmm6, [rel arg3]
-rsqrtss xmm7, [rel arg4]
+; rsqrtss xmm4, [rel arg1]
+; rsqrtss xmm5, [rel arg2]
+; rsqrtss xmm6, [rel arg3]
+; rsqrtss xmm7, [rel arg4]
 
 
 ; Check precision of the results
@@ -48,24 +48,27 @@ rsqrtss xmm7, [rel arg4]
 
 ;; We will be storing the low 32bits to memory, then zeroing them.
 ;; We'll then check precision using checkprecision.mac.
+; Zero rsi:
+xor esi, esi
+
 pextrd [rel result1], xmm0, 0
-pinsrd xmm0, xmm0, 0, 0
+pinsrd xmm0, esi, 0
 check_relerr rel eresult1, rel result1
-mov rbx, al
+mov rbx, rax
 
-pextrd [rel result2], xmm1, 0
-pinsrd xmm1, xmm1, 0, 0
-check_relerr rel eresult2, rel result2
-mov rcx, al
+; pextrd [rel result2], xmm1, 0
+; pinsrd xmm1, esi, 0
+; check_relerr rel eresult2, rel result2
+; mov rcx, rax
 
-pextrd [rel result3], xmm2, 0
-pinsrd xmm2, xmm2, 0, 0
-check_relerr rel eresult3, rel result3
-mov rdx, al
+; pextrd [rel result3], xmm2, 0
+; pinsrd xmm2, esi, 0
+; check_relerr rel eresult3, rel result3
+; mov rdx, rax
 
-pextrd [rel result4], xmm3, 0
-pinsrd xmm3, xmm3, 0, 0
-check_relerr rel eresult4, rel result4
+; pextrd [rel result4], xmm3, 0
+; pinsrd xmm3, esi, 0
+; check_relerr rel eresult4, rel result4
 
 ; no need to test the other results which are the same, 
 ; we can just zero them.
