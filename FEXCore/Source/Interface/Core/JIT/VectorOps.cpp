@@ -533,7 +533,11 @@ DEF_OP(VFRSqrtScalarInsert) {
 
   auto ScalarEmitRPRES = [this, SubRegSize](ARMEmitter::VRegister Dst, std::variant<ARMEmitter::VRegister, ARMEmitter::Register> SrcVar) {
     auto Src = *std::get_if<ARMEmitter::VRegister>(&SrcVar);
-    frsqrte(SubRegSize.Scalar, Dst.D(), Src.D());
+    frsqrte(SubRegSize.Scalar, VTMP1.D(), Src.D());
+    // Improve initial estimate which is not good enough.
+    fmul(SubRegSize.Scalar, VTMP2.D(), VTMP1.D(), VTMP1.D());
+    frsqrts(SubRegSize.Scalar, VTMP2.D(), VTMP2.D(), Src.D());
+    fmul(SubRegSize.Scalar, Dst.D(), VTMP1.D(), VTMP2.D());
   };
 
   std::array<ScalarUnaryOpCaller, 2> Handlers = {
@@ -4459,7 +4463,6 @@ DEF_OP(VFNMLS) {
     }
   }
 }
-
 
 DEF_OP(FCopySign) {
   auto Op = IROp->C<IR::IROp_FCopySign>();

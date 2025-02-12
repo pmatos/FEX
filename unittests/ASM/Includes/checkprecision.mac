@@ -4,23 +4,23 @@
 ; CheckPrecision.inc - NASM include file containing macro to check precision
 ; of single floating-point number.
 
-;; Clobbers xmm0, xmm1, xmm2, xmm3
+;; Clobbers xmm12, xmm13, xmm14, xmm15
 ;; Returns result in al.
 ;; Arguments are in memory locations.
 %macro check_relerr 2; %1=REF %2=X
-        movss   xmm0, dword [ %1 ] ; xmm0 has REF
-        movss   xmm1, dword [ %2 ] ; xmm1 has X
-        movss   xmm3, dword [rel abs_mask_float] ; xmm3 has the abs float mask
-        movaps  xmm2, xmm0 ; xmm2 has REF StoreRegister
-        subss   xmm2, xmm1 ; xmm2 = REF - X  VFSubScalarInsert
-        andps   xmm0, xmm3 ; xmm0 = abs(REF) VAnd
-        mulss   xmm0, dword [rel relative_error_tolerance_float] ; xmm0 = abs(REF) * tolerance VFMulScalarInsert
-        movaps  xmm1, xmm2 ; xmm1 = REF - X StoreRegister
-        andps   xmm1, xmm3 ; xmm1 = abs(REF - X) VAnd
+        movss   xmm12, dword [ %1 ] ; xmm12 has REF
+        movss   xmm13, dword [ %2 ] ; xmm13 has X
+        movss   xmm15, dword [rel abs_mask_float] ; xmm15 has the abs float mask
+        movaps  xmm14, xmm12 ; xmm14 has REF StoreRegister
+        subss   xmm14, xmm13 ; xmm14 = REF - X  VFSubScalarInsert
+        andps   xmm12, xmm15 ; xmm12 = abs(REF) VAnd
+        mulss   xmm12, dword [rel relative_error_tolerance_float] ; xmm12 = abs(REF) * tolerance VFMulScalarInsert
+        movaps  xmm13, xmm14 ; xmm13 = REF - X StoreRegister
+        andps   xmm13, xmm15 ; xmm13 = abs(REF - X) VAnd
 
         xor     eax, eax ; clears eax
-        comiss  xmm0, xmm1 ; compares xmm0 and xmm1
-        setnb   al ; stores xmm0 >= xmm1, i.e. abs(REF) * tolerance >= abs(REF - X)
+        comiss  xmm12, xmm13 ; compares xmm12 and xmm13
+        setnb   al ; stores xmm12 >= xmm13, i.e. abs(REF) * tolerance >= abs(REF - X)
 %endmacro
 
 %macro define_check_data_constants 0
