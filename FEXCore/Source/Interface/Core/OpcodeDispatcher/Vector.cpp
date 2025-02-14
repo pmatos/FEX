@@ -626,33 +626,36 @@ void OpDispatchBuilder::AVXInsertScalarFCMPOp(OpcodeArgs) {
 template void OpDispatchBuilder::AVXInsertScalarFCMPOp<OpSize::i32Bit>(OpcodeArgs);
 template void OpDispatchBuilder::AVXInsertScalarFCMPOp<OpSize::i64Bit>(OpcodeArgs);
 
+void OpDispatchBuilder::RSqrt3DNowOp(OpcodeArgs, bool Duplicate) {
+  const auto Size = OpSizeFromSrc(Op);
+  const auto ElementSize = OpSize::i32Bit;
+
+  Ref Src = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], Size, Op->Flags);
+
+  // For the sqrt reciprocal in 3DNow!, if the source is negative,
+  // then the result has the same sign as the source but the result is always calculated
+  // as if the source was positive.
+  Ref AbsSrc = _VFAbs(Size, ElementSize, Src);
+  Ref PosRSqrt = _VFRSqrt(Size, ElementSize, AbsSrc);
+  Ref Result = _VFCopySign(Size, ElementSize, PosRSqrt, Src);
+
+  if (Duplicate) {
+    Result = _VDupElement(Size, ElementSize, Result, 0);
+  }
+
+  StoreResult(FPRClass, Op, Result, OpSize::iInvalid);
+}
+
 void OpDispatchBuilder::VectorUnaryOp(OpcodeArgs, IROps IROp, IR::OpSize ElementSize) {
   // In the event of a scalar operation and a vector source, then
   // we can specify the entire vector length in order to avoid
   // unnecessary sign extension on the element to be operated on.
   // In the event of a memory operand, we load the exact element size.
-  const auto SrcSize = OpSizeFromSrc(Op);
+  const auto Size = OpSizeFromSrc(Op);
 
-  Ref Src = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], SrcSize, Op->Flags);
+  Ref Src = LoadSource_WithOpSize(FPRClass, Op, Op->Src[0], Size, Op->Flags);
 
-  // For the sqrt reciprocal in 3DNow!, if the source is negative,
-  // then the result has the same sign as the source but the result is always calculated
-  // as if the source was positive.
-  if (IROp == IR::OP_VFSQRT) {
-    Src = _VAbs(SrcSize, ElementSize, Src);
-  }
-
-  DeriveOp(ALUOp, IROp, _VFSqrt(SrcSize, ElementSize, Src));
-
-  // Now we just reinsert the sign of Src into ALUOp.
-  if (IROp == IR::OP_VFSQRT) {
-    Ref NegALUOp = _VNeg(SrcSize, ElementSize, ALUOp);
-    _TestNZ(SrcSize, Src, _Constant(0));
-    auto Result = _NZCVSelectV(SrcSize, {COND_FGE}, ALUOp, NegALUOp);
-    StoreResult(FPRClass, Op, Result, OpSize::iInvalid);
-    return;
-  }
-
+  DeriveOp(ALUOp, IROp, _VFSqrt(Size, ElementSize, Src));
   StoreResult(FPRClass, Op, ALUOp, OpSize::iInvalid);
 }
 
@@ -679,21 +682,6 @@ void OpDispatchBuilder::VectorUnaryDuplicateOpImpl(OpcodeArgs, IROps IROp, IR::O
   const auto Size = OpSizeFromSrc(Op);
 
   Ref Src = LoadSource(FPRClass, Op, Op->Src[0], Op->Flags);
-
-  // For the sqrt reciprocal in 3DNow!, if the source is negative,
-  // then the result has the same sign as the source but the result is always calculated
-  // as if the source was positive.
-  if (IROp == IR::OP_VFRSQRT) {
-    Ref AbsSrc = _VFAbs(Size, ElementSize, Src);
-
-    DeriveOp(ALUOp, IROp, _VFSqrt(ElementSize, ElementSize, AbsSrc));
-
-    Ref Result = _FCopySign(ElementSize, ALUOp, Src);
-    // Duplicate the lower bits
-    Result = _VDupElement(Size, ElementSize, Result, 0);
-    StoreResult(FPRClass, Op, Result, OpSize::iInvalid);
-    return;
-  }
 
   DeriveOp(ALUOp, IROp, _VFSqrt(ElementSize, ElementSize, Src));
 

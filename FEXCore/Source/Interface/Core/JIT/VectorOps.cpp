@@ -537,7 +537,9 @@ DEF_OP(VFRSqrtScalarInsert) {
     // Improve initial estimate which is not good enough.
     fmul(SubRegSize.Scalar, VTMP2.D(), VTMP1.D(), VTMP1.D());
     frsqrts(SubRegSize.Scalar, VTMP2.D(), VTMP2.D(), Src.D());
-    fmul(SubRegSize.Scalar, Dst.D(), VTMP1.D(), VTMP2.D());
+    fmul(SubRegSize.Scalar, VTMP1.D(), VTMP1.D(), VTMP2.D());
+    // TODO: can we avoid the insert?
+    ins(SubRegSize.Vector, Dst, 0, VTMP1, 0);
   };
 
   std::array<ScalarUnaryOpCaller, 2> Handlers = {
@@ -4464,18 +4466,27 @@ DEF_OP(VFNMLS) {
   }
 }
 
-DEF_OP(FCopySign) {
-  auto Op = IROp->C<IR::IROp_FCopySign>();
-  ARMEmitter::SubRegSize Size = Op->ElementSize == IR::OpSize::i64Bit ? ARMEmitter::SubRegSize::i64Bit : ARMEmitter::SubRegSize::i32Bit;
+DEF_OP(VFCopySign) {
+  auto Op = IROp->C<IR::IROp_VFCopySign>();
+  const auto OpSize = IROp->Size;
+  const auto SubRegSize = ConvertSubRegSize248(IROp);
 
-  ARMEmitter::VRegister Magnitude = GetVReg(Op->Scalar1.ID());
-  ARMEmitter::VRegister Sign = GetVReg(Op->Scalar2.ID());
+  ARMEmitter::VRegister Magnitude = GetVReg(Op->Vector1.ID());
+  ARMEmitter::VRegister Sign = GetVReg(Op->Vector2.ID());
 
-  // Dst will have the magniture of Scalar1 and the sign of Scalar2.
-  // Similar in semantics to C's copysignf.
-  movi(Size, VTMP1.D(), 0x80, 24);
-  bit(Magnitude.D(), Sign.D(), VTMP1.D());
-  // We don't assign explicity to Dst but Dst and Magniture are tied to the same register.
+  //  We don't assign explicity to Dst but Dst and Magniture are tied to the same register.
+  //  Similar in semantics to C's copysignf.
+  switch (OpSize) {
+  case IR::OpSize::i64Bit:
+    movi(SubRegSize, VTMP1.D(), 0x80, 24);
+    bit(Magnitude.D(), Sign.D(), VTMP1.D());
+    break;
+  case IR::OpSize::i128Bit:
+    movi(SubRegSize, VTMP1.Q(), 0x80, 24);
+    bit(Magnitude.Q(), Sign.Q(), VTMP1.Q());
+    break;
+  default: LOGMAN_THROW_A_FMT(false, "Unsupported element size for operation {}", __func__);
+  }
 }
 
 
