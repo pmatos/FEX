@@ -69,7 +69,6 @@ namespace x64 {
   constexpr std::array<ARMEmitter::VRegister, 14> RAFPR = {
     // v0 ~ v1 are used as temps.
     // ARMEmitter::VReg::v0, ARMEmitter::VReg::v1,
-
     ARMEmitter::VReg::v2,  ARMEmitter::VReg::v3,  ARMEmitter::VReg::v4,  ARMEmitter::VReg::v5,  ARMEmitter::VReg::v6,
     ARMEmitter::VReg::v7,  ARMEmitter::VReg::v8,  ARMEmitter::VReg::v9,  ARMEmitter::VReg::v10, ARMEmitter::VReg::v11,
     ARMEmitter::VReg::v12, ARMEmitter::VReg::v13, ARMEmitter::VReg::v14, ARMEmitter::VReg::v15,

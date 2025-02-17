@@ -11,10 +11,7 @@
 #endif
 
 #include <cstdint>
-#include <signal.h>
 #include <stddef.h>
-#include <stack>
-#include <tuple>
 
 namespace FEXCore {
 struct GuestSigAction;

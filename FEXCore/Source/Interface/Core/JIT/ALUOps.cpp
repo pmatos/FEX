@@ -8,6 +8,7 @@ $end_info$
 #include "CodeEmitter/Emitter.h"
 #include "FEXCore/IR/IR.h"
 #include "Interface/Context/Context.h"
+#include "Interface/Core/ArchHelpers/Arm64Emitter.h"
 #include "Interface/Core/JIT/JITClass.h"
 #include "Interface/IR/Passes/RegisterAllocationPass.h"
 

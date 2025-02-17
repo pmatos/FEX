@@ -41,7 +41,6 @@ $end_info$
 #include <FEXHeaderUtils/Filesystem.h>
 #include <FEXHeaderUtils/StringArgumentParser.h>
 
-#include <atomic>
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
@@ -49,9 +48,6 @@ $end_info$
 #include <cstring>
 #include <elf.h>
 #include <fcntl.h>
-#include <mutex>
-#include <queue>
-#include <set>
 #include <sys/auxv.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
