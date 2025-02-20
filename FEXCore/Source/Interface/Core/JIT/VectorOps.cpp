@@ -6,6 +6,7 @@ $end_info$
 */
 
 
+#include "FEXCore/Utils/CompilerDefs.h"
 #include "Interface/Core/ArchHelpers/Arm64Emitter.h"
 #include "Interface/Core/Dispatcher/Dispatcher.h"
 #include "Interface/Core/JIT/JITClass.h"
@@ -566,7 +567,12 @@ DEF_OP(VFRecpScalarInsert) {
     auto Src = *std::get_if<ARMEmitter::VRegister>(&SrcVar);
 
     fmov(SubRegSize.Scalar, VTMP1.Q(), 1.0f);
-    fdiv(SubRegSize.Scalar, Dst, VTMP1, Src);
+    if (HostSupportsAFP) {
+      fdiv(SubRegSize.Scalar, VTMP1, VTMP1, Src);
+      ins(SubRegSize.Vector, Dst, 0, VTMP1, 0);
+    } else {
+      fdiv(SubRegSize.Scalar, Dst, VTMP1, Src);
+    }
   };
 
   auto ScalarEmitRPRES = [this, SubRegSize](ARMEmitter::VRegister Dst, std::variant<ARMEmitter::VRegister, ARMEmitter::Register> SrcVar) {
@@ -1525,7 +1531,10 @@ DEF_OP(VFRecp) {
         fdiv(Dst.D(), VTMP1.D(), Vector.D());
         break;
       }
-      default: break;
+      default: {
+        LOGMAN_MSG_A_FMT("Unexpected ElementSize for {}", __func__);
+        FEX_UNREACHABLE;
+      }
       }
     } else {
       if (ElementSize == IR::OpSize::i32Bit && HostSupportsRPRES) {
