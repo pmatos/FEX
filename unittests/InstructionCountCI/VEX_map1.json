@@ -658,7 +658,7 @@
       ]
     },
     "vrsqrtss xmm0, xmm1, xmm2": {
-      "ExpectedInstructionCount": 5,
+      "ExpectedInstructionCount": 7,
       "Comment": [
         "Map 1 0b10 0x52 128-bit"
       ],
@@ -667,6 +667,8 @@
         "fmov s0, #0x70 (1.0000)",
         "fsqrt s1, s18",
         "fdiv s0, s0, s1",
+        "movi v1.2s, #0x80, lsl #24",
+        "bit v0.8b, v18.8b, v1.8b",
         "mov v16.s[0], v0.s[0]"
       ]
     },
