@@ -529,6 +529,8 @@ DEF_OP(VFRSqrtScalarInsert) {
       ins(SubRegSize.Vector, Dst, 0, VTMP1, 0);
     } else {
       fdiv(SubRegSize.Scalar, Dst, VTMP1, VTMP2);
+      // If Src is negative, fsqrt returns nan (on non-AFP systems) instead of -nan.
+      // We need to add the sign of the input to the result.
     }
   };
 
@@ -4512,7 +4514,7 @@ DEF_OP(VFCopySign) {
     movi(SubRegSize, VTMP1.Q(), 0x80, 24);
     bit(Magnitude.Q(), Sign.Q(), VTMP1.Q());
     break;
-  default: LOGMAN_THROW_A_FMT(false, "Unsupported element size for operation {}", __func__);
+  default: LOGMAN_MSG_A_FMT("Unsupported element size for operation {}", __func__); FEX_UNREACHABLE;
   }
 }
 
