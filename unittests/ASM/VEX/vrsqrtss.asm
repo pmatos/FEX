@@ -115,15 +115,12 @@ result3: resq 2
 result4: resq 2
 
 section .data
-align 32
+align 16
 arg1:
 dq 0x414243443F800000 ; 1.0
 dq 0xEEEEEEEEEEEEEEEE
 dq 0x5152535455565758
 dq 0x5152535455565758
-
-eresult1:
-dd 0x3F800000 ; 1.0
 
 arg2:
 dq 0x4142434440800000 ; 4.0
@@ -131,17 +128,11 @@ dq 0xDDDDDDDDDDDDDDDD
 dq 0x5152535455565758
 dq 0x5152535455565758
 
-eresult2:
-dd 0x3f000000 ; 0.5 
-
 arg3:
 dq 0x4142434441100000 ; 9.0
 dq 0xCCCCCCCCCCCCCCCC
 dq 0x5152535455565758
 dq 0x5152535455565758
-
-eresult3:
-dd 0x3eaaaaab ; 1/3 = 0.(3)
 
 arg4:
 dq 0x4142434441800000 ; 16.0
@@ -149,14 +140,23 @@ dq 0xBBBBBBBBBBBBBBBB
 dq 0x5152535455565758
 dq 0x5152535455565758
 
-eresult4:
-dd 0x3e800000 ; 0.25
-
 arg5:
 dq 0x4142434441C80000 ; 25.0
 dq 0xAAAAAAAAAAAAAAAA
 dq 0x5152535455565758
 dq 0x5152535455565758
+
+eresult1:
+dd 0x3F800000 ; 1.0
+
+eresult2:
+dd 0x3f000000 ; 0.5
+
+eresult3:
+dd 0x3eaaaaab ; 1/3 = 0.(3)
+
+eresult4:
+dd 0x3e800000 ; 0.25
 
 tolerance:
 dd 0x39c00000

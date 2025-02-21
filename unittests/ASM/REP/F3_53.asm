@@ -46,25 +46,25 @@ result1 resd 1
 result2 resd 1
 
 section .data
-align 32
+align 16
 
 arg1: 
 dq 0x3f8000003f800000 ; 1.0
 dq 0x3f8000003f800000
 
-eresult1: 
-dd 0x3f800000 ; 1.0
-
 arg2:
 dq 0x4080000040800000 ; 4.0
 dq 0x4080000040800000
 
-eresult2:
-dd 0x3e800000 ; 0.5
-
 arg3:
 dq 0xdeadbeef00000000 ; 0.0
 dq 0xbadc0ffebadc0ffe
+
+eresult1: 
+dd 0x3f800000 ; 1.0
+
+eresult2:
+dd 0x3e800000 ; 0.5
 
 tolerance:
 dd 0x39c00000
