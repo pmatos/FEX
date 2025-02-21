@@ -231,7 +231,7 @@
       ]
     },
     "rsqrtss xmm0, xmm1": {
-      "ExpectedInstructionCount": 6,
+      "ExpectedInstructionCount": 4,
       "Comment": [
         "0xf3 0x0f 0x52"
       ],
@@ -239,8 +239,6 @@
         "fmov s0, #0x70 (1.0000)",
         "fsqrt s1, s17",
         "fdiv s0, s0, s1",
-        "movi v1.2s, #0x80, lsl #24",
-        "bit v0.8b, v17.8b, v1.8b",
         "mov v16.s[0], v0.s[0]"
       ]
     },
