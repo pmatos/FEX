@@ -50,7 +50,7 @@ align 32
 result: resq 2
 
 section .data
-align 16
+align 32
 arg1:
 dq 0x3F8000003F800000 ; 1.0
 dq 0x3F8000003F800000

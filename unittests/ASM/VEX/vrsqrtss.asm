@@ -115,7 +115,7 @@ result3: resq 2
 result4: resq 2
 
 section .data
-align 16
+align 32
 arg1:
 dq 0x414243443F800000 ; 1.0
 dq 0xEEEEEEEEEEEEEEEE
