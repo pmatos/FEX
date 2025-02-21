@@ -528,11 +528,7 @@ DEF_OP(VFRSqrtScalarInsert) {
       fdiv(SubRegSize.Scalar, VTMP1, VTMP1, VTMP2);
       ins(SubRegSize.Vector, Dst, 0, VTMP1, 0);
     } else {
-      fdiv(SubRegSize.Scalar, VTMP1, VTMP1, VTMP2);
-      // If Src is negative, fsqrt returns nan (on non-AFP systems) instead of -nan.
-      // We need to add the sign of the input to the result.
-      movi(SubRegSize.Vector, VTMP2.D(), 0x80, 24);
-      bit(Dst.D(), Src.D(), VTMP2.D());
+      fdiv(SubRegSize.Scalar, Dst, VTMP1, VTMP2);
     }
   };
 
