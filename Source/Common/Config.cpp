@@ -24,6 +24,12 @@ namespace JSON {
   static void LoadJSonConfig(const fextl::string& Config, std::function<void(const char* Name, const char* ConfigSring)> Func) {
     fextl::vector<char> Data;
     if (!FEXCore::FileLoading::LoadFile(Data, Config)) {
+      LogMan::Msg::EFmt("Failed to load JSON file: '{}'", Config);
+      return;
+    }
+
+    if (Data.empty()) {
+      LogMan::Msg::EFmt("JSON file is empty: '{}'", Config);
       return;
     }
 
@@ -31,14 +37,19 @@ namespace JSON {
     const json_t* json = FEX::JSON::CreateJSON(Data, Pool);
 
     if (!json) {
-      LogMan::Msg::EFmt("Couldn't create json");
+      LogMan::Msg::EFmt("Failed to parse JSON from file '{}' - invalid JSON format", Config);
       return;
     }
 
     const json_t* ConfigList = json_getProperty(json, "Config");
 
     if (!ConfigList) {
-      // This is a non-error if the configuration file exists but no Config section
+      LogMan::Msg::WFmt("JSON file '{}' does not contain a 'Config' section", Config);
+      return;
+    }
+
+    if (json_getType(ConfigList) != JSON_OBJ) {
+      LogMan::Msg::EFmt("JSON file '{}': 'Config' section must be an object", Config);
       return;
     }
 
@@ -47,12 +58,12 @@ namespace JSON {
       const char* ConfigString = json_getValue(ConfigItem);
 
       if (!ConfigName) {
-        LogMan::Msg::EFmt("Couldn't get config name");
+        LogMan::Msg::EFmt("JSON file '{}': Couldn't get config name for an item", Config);
         return;
       }
 
       if (!ConfigString) {
-        LogMan::Msg::EFmt("Couldn't get ConfigString for '{}'", ConfigName);
+        LogMan::Msg::EFmt("JSON file '{}': Couldn't get value for config item '{}'", Config, ConfigName);
         return;
       }
 

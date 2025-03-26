@@ -555,7 +555,7 @@ std::optional<std::vector<FileTargets>> GetRootFSLinks() {
   const json_t* json = FEX::JSON::CreateJSON(Data, Pool);
 
   if (!json) {
-    fprintf(stderr, "Couldn't create json");
+    fprintf(stderr, "Error parsing RootFS links JSON: Invalid JSON format\n");
     return {};
   }
 

@@ -41,6 +41,7 @@ static void LoadThunkDatabase(fextl::unordered_map<fextl::string, bool>& HostLib
   FEX::JSON::JsonAllocator Pool {};
   const json_t* json = FEX::JSON::CreateJSON(FileData, Pool);
   if (!json) {
+    LogMan::Msg::WFmt("Failed to parse ThunksDB.json: Invalid JSON format");
     return;
   }
 
