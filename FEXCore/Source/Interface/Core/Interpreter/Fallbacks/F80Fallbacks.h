@@ -8,6 +8,8 @@
 #include <FEXCore/Debug/InternalThreadState.h>
 #include <FEXCore/Utils/Profiler.h>
 
+#include <limits>
+
 namespace FEXCore::CPU {
 FEXCORE_PRESERVE_ALL_ATTR static softfloat_state SoftFloatStateFromFCW(uint16_t FCW, bool Force80BitPrecision = false) {
   softfloat_state State {};
@@ -397,6 +399,13 @@ template<>
 struct OpHandlers<IR::OP_F64FPREM> {
   FEXCORE_PRESERVE_ALL_ATTR static double handle(uint16_t FCW, double src1, double src2, FEXCore::Core::CpuStateFrame* Frame) {
     FEXCORE_PROFILE_INSTANT_INCREMENT(Frame->Thread, AccumulatedFloatFallbackCount, 1);
+
+    // Check for invalid operation cases that should set Invalid Operation flag
+    if (std::isinf(src1) || src2 == 0.0) {
+      // FPREM with infinite dividend or zero divisor is invalid operation
+      Frame->State.flags[FEXCore::X86State::X87FLAG_IE_LOC] = 1;
+      return std::numeric_limits<double>::quiet_NaN();
+    }
     return fmod(src1, src2);
   }
 };
@@ -405,6 +414,12 @@ template<>
 struct OpHandlers<IR::OP_F64FPREM1> {
   FEXCORE_PRESERVE_ALL_ATTR static double handle(uint16_t FCW, double src1, double src2, FEXCore::Core::CpuStateFrame* Frame) {
     FEXCORE_PROFILE_INSTANT_INCREMENT(Frame->Thread, AccumulatedFloatFallbackCount, 1);
+    // Check for invalid operation cases that should set Invalid Operation flag
+    if (std::isinf(src1) || src2 == 0.0) {
+      // FPREM1 with infinite dividend or zero divisor is invalid operation
+      Frame->State.flags[FEXCore::X86State::X87FLAG_IE_LOC] = 1;
+      return std::numeric_limits<double>::quiet_NaN();
+    }
     return remainder(src1, src2);
   }
 };

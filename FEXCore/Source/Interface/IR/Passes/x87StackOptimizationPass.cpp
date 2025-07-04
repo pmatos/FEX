@@ -6,7 +6,6 @@
 #include "Interface/IR/PassManager.h"
 #include "FEXCore/IR/IR.h"
 #include "FEXCore/Utils/Profiler.h"
-#include "FEXCore/Utils/MathUtils.h"
 #include "FEXCore/Core/HostFeatures.h"
 #include "Interface/Core/Addressing.h"
 
@@ -262,11 +261,131 @@ private:
     return Const->Constant == 0;
   }
 
+  // Helper to check if a floating point value is infinity and set invalid operation bit
+  void CheckInfAndSetIOBit(Ref Value) {
+    if (ReducedPrecisionMode) {
+      Ref ValueBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, Value, 0);
+      Ref ValueExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, ValueBits, IREmit->_Constant(0x7FF0000000000000ULL)),
+                                   IREmit->_Constant(52));
+      Ref ValueIsInf = IREmit->_Select(IR::COND_EQ, ValueExp, IREmit->_Constant(0x7FF), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      // Set invalid operation bit
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, ValueIsInf);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    } else {
+      Ref ValueHi = IREmit->_VExtractToGPR(OpSize::i128Bit, OpSize::i64Bit, Value, 1);
+      Ref ValueExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, ValueHi, IREmit->_Constant(0x7FFF)), IREmit->_Constant(0));
+      Ref ValueIsInf = IREmit->_Select(IR::COND_EQ, ValueExp, IREmit->_Constant(0x7FFF), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      // Set invalid operation bit
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, ValueIsInf);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    }
+  }
+
+  // Helper to check division by zero (0/0) and set invalid operation bit
+  void CheckZeroDivAndSetIOBit(Ref StackNode, Ref ValueNode) {
+    if (ReducedPrecisionMode) {
+      Ref StackBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, StackNode, 0);
+      Ref ValueBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, ValueNode, 0);
+
+      Ref StackIsZero = IREmit->_Select(IR::COND_EQ, IREmit->_And(OpSize::i64Bit, StackBits, IREmit->_Constant(0x7FFFFFFFFFFFFFFFULL)),
+                                        IREmit->_Constant(0), IREmit->_Constant(1), IREmit->_Constant(0));
+      Ref ValueIsZero = IREmit->_Select(IR::COND_EQ, IREmit->_And(OpSize::i64Bit, ValueBits, IREmit->_Constant(0x7FFFFFFFFFFFFFFFULL)),
+                                        IREmit->_Constant(0), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      Ref BothZero = IREmit->_And(OpSize::i32Bit, StackIsZero, ValueIsZero);
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, BothZero);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    }
+  }
+
+  // Helper to check infinity * zero and set invalid operation flag
+  void CheckInfZeroMulAndSetIOBit(Ref StackNode, Ref ValueNode) {
+    if (ReducedPrecisionMode) {
+      Ref StackBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, StackNode, 0);
+      Ref ValueBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, ValueNode, 0);
+
+      Ref StackExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, StackBits, IREmit->_Constant(0x7FF0000000000000ULL)),
+                                   IREmit->_Constant(52));
+      Ref ValueExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, ValueBits, IREmit->_Constant(0x7FF0000000000000ULL)),
+                                   IREmit->_Constant(52));
+
+      Ref StackIsInf = IREmit->_Select(IR::COND_EQ, StackExp, IREmit->_Constant(0x7FF), IREmit->_Constant(1), IREmit->_Constant(0));
+      Ref ValueIsInf = IREmit->_Select(IR::COND_EQ, ValueExp, IREmit->_Constant(0x7FF), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      Ref StackIsZero = IREmit->_Select(IR::COND_EQ, IREmit->_And(OpSize::i64Bit, StackBits, IREmit->_Constant(0x7FFFFFFFFFFFFFFFULL)),
+                                        IREmit->_Constant(0), IREmit->_Constant(1), IREmit->_Constant(0));
+      Ref ValueIsZero = IREmit->_Select(IR::COND_EQ, IREmit->_And(OpSize::i64Bit, ValueBits, IREmit->_Constant(0x7FFFFFFFFFFFFFFFULL)),
+                                        IREmit->_Constant(0), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      // Invalid if (inf * 0) or (0 * inf)
+      Ref InfTimesZero = IREmit->_Or(OpSize::i32Bit, IREmit->_And(OpSize::i32Bit, StackIsInf, ValueIsZero),
+                                     IREmit->_And(OpSize::i32Bit, ValueIsInf, StackIsZero));
+
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, InfTimesZero);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    }
+  }
+
+  // Helper to check infinity + (-infinity) and set invalid operation flag
+  void CheckInfInfMinusAndSetIOBit(Ref StackNode, Ref ValueNode) {
+    if (ReducedPrecisionMode) {
+      Ref StackBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, StackNode, 0);
+      Ref ValueBits = IREmit->_VExtractToGPR(OpSize::i64Bit, OpSize::i64Bit, ValueNode, 0);
+
+      Ref StackExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, StackBits, IREmit->_Constant(0x7FF0000000000000ULL)),
+                                   IREmit->_Constant(52));
+      Ref ValueExp = IREmit->_Lshr(OpSize::i64Bit, IREmit->_And(OpSize::i64Bit, ValueBits, IREmit->_Constant(0x7FF0000000000000ULL)),
+                                   IREmit->_Constant(52));
+
+      Ref StackIsInf = IREmit->_Select(IR::COND_EQ, StackExp, IREmit->_Constant(0x7FF), IREmit->_Constant(1), IREmit->_Constant(0));
+      Ref ValueIsInf = IREmit->_Select(IR::COND_EQ, ValueExp, IREmit->_Constant(0x7FF), IREmit->_Constant(1), IREmit->_Constant(0));
+
+      Ref StackSign = IREmit->_Lshr(OpSize::i64Bit, StackBits, IREmit->_Constant(63));
+      Ref ValueSign = IREmit->_Lshr(OpSize::i64Bit, ValueBits, IREmit->_Constant(63));
+
+      Ref BothInf = IREmit->_And(OpSize::i32Bit, StackIsInf, ValueIsInf);
+      Ref DifferentSigns = IREmit->_Select(IR::COND_NEQ, StackSign, ValueSign, IREmit->_Constant(1), IREmit->_Constant(0));
+      Ref InfMinusInf = IREmit->_And(OpSize::i32Bit, BothInf, DifferentSigns);
+
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, InfMinusInf);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    }
+  }
+
+  // Helper to read FPSR IOC bit and set x87 invalid operation flag
+  void CheckFPSRIOCAndSetIOBit() {
+    if (ReducedPrecisionMode) {
+      // Read FPSR register
+      Ref FPSR = IREmit->_ReadFPSR();
+      
+      // Extract IOC bit (bit 0) from FPSR
+      Ref IOCBit = IREmit->_And(OpSize::i32Bit, FPSR, IREmit->_Constant(1));
+      
+      // Set x87 invalid operation bit if IOC is set
+      Ref CurrentIE = IREmit->_LoadContext(OpSize::i8Bit, GPRClass, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+      Ref CurrentIE32 = IREmit->_Bfe(OpSize::i32Bit, 8, 0, CurrentIE);
+      Ref NewIE32 = IREmit->_Or(OpSize::i32Bit, CurrentIE32, IOCBit);
+      IREmit->_StoreContext(OpSize::i8Bit, GPRClass, NewIE32, offsetof(FEXCore::Core::CPUState, flags) + FEXCore::X86State::X87FLAG_IE_LOC);
+    }
+  }
+
   // Handles a Unary operation.
   // Takes the op we are handling, the Node for the reduced precision case and the node for the normal case.
   // Depending on the type of Op64, we might need to pass a couple of extra constant arguments, this happens
   // when VFOp64 is true.
-  void HandleUnop(IROps Op64, bool VFOp64, IROps Op80);
+  void HandleUnop(IROps Op64, bool VFOp64, IROps Op80, Ref MaybeSt0 = nullptr);
   void HandleBinopValue(IROps Op64, bool VFOp64, IROps Op80, uint8_t DestStackOffset, bool MarkDestValid, uint8_t StackOffset,
                         Ref ValueNode, bool Reverse = false);
   void HandleBinopStack(IROps Op64, bool VFOp64, IROps Op80, uint8_t DestStackOffset, uint8_t StackOffset1, uint8_t StackOffset2,
@@ -479,8 +598,8 @@ inline void X87StackOptimization::StackPop() {
 }
 
 
-void X87StackOptimization::HandleUnop(IROps Op64, bool VFOp64, IROps Op80) {
-  Ref St0 = LoadStackValue();
+void X87StackOptimization::HandleUnop(IROps Op64, bool VFOp64, IROps Op80, Ref MaybeSt0) {
+  Ref St0 = MaybeSt0 ? MaybeSt0 : LoadStackValue();
   Ref Value {};
 
   if (ReducedPrecisionMode) {
@@ -495,7 +614,6 @@ void X87StackOptimization::HandleUnop(IROps Op64, bool VFOp64, IROps Op80) {
 
   StoreStackValue(Value);
 }
-
 
 void X87StackOptimization::HandleBinopValue(IROps Op64, bool VFOp64, IROps Op80, uint8_t DestStackOffset, bool MarkDestValid,
                                             uint8_t StackOffset, Ref ValueNode, bool Reverse) {
@@ -657,6 +775,7 @@ void X87StackOptimization::Run(IREmitter* Emit) {
       case OP_F80ADDSTACK: {
         const auto* Op = IROp->C<IROp_F80AddStack>();
         HandleBinopStack(OP_VFADD, true, OP_F80ADD, Op->SrcStack1, Op->SrcStack1, Op->SrcStack2);
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
@@ -669,12 +788,14 @@ void X87StackOptimization::Run(IREmitter* Emit) {
       case OP_F80MULSTACK: {
         const auto* Op = IROp->C<IROp_F80MulStack>();
         HandleBinopStack(OP_VFMUL, true, OP_F80MUL, Op->SrcStack1, Op->SrcStack1, Op->SrcStack2);
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
       case OP_F80DIVSTACK: {
         const auto* Op = IROp->C<IROp_F80DivStack>();
         HandleBinopStack(OP_VFDIV, true, OP_F80DIV, Op->DstStack, Op->SrcStack1, Op->SrcStack2);
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
@@ -708,6 +829,7 @@ void X87StackOptimization::Run(IREmitter* Emit) {
       case OP_F80ADDVALUE: {
         const auto* Op = IROp->C<IROp_F80AddValue>();
         HandleBinopValue(OP_VFADD, true, OP_F80ADD, 0, true, Op->SrcStack, CurrentIR.GetNode(Op->X80Src));
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
@@ -722,27 +844,34 @@ void X87StackOptimization::Run(IREmitter* Emit) {
       case OP_F80DIVVALUE: {
         const auto* Op = IROp->C<IROp_F80DivValue>();
         HandleBinopValue(OP_VFDIV, true, OP_F80DIV, 0, true, Op->SrcStack, CurrentIR.GetNode(Op->X80Src), IROp->Op == OP_F80DIVRVALUE);
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
       case OP_F80MULVALUE: {
         const auto* Op = IROp->C<IROp_F80MulValue>();
         HandleBinopValue(OP_VFMUL, true, OP_F80MUL, 0, true, Op->SrcStack, CurrentIR.GetNode(Op->X80Src));
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
       case OP_F80SQRTSTACK: {
-        HandleUnop(OP_VFSQRT, true, OP_F80SQRT);
+        HandleUnop(OP_VFSQRT, true, OP_F80SQRT, nullptr);
+        CheckFPSRIOCAndSetIOBit();
         break;
       }
 
       case OP_F80SINSTACK: {
-        HandleUnop(OP_F64SIN, false, OP_F80SIN);
+        Ref St0 = LoadStackValue();
+        CheckInfAndSetIOBit(St0);
+        HandleUnop(OP_F64SIN, false, OP_F80SIN, St0);
         break;
       }
 
       case OP_F80COSSTACK: {
-        HandleUnop(OP_F64COS, false, OP_F80COS);
+        Ref St0 = LoadStackValue();
+        CheckInfAndSetIOBit(St0);
+        HandleUnop(OP_F64COS, false, OP_F80COS, St0);
         break;
       }
 
@@ -753,7 +882,10 @@ void X87StackOptimization::Run(IREmitter* Emit) {
 
 
       case OP_F80PTANSTACK: {
-        HandleUnop(OP_F64TAN, false, OP_F80TAN);
+        Ref St0 = LoadStackValue();
+        CheckInfAndSetIOBit(St0);
+        HandleUnop(OP_F64TAN, false, OP_F80TAN, St0);
+
         Ref OneConst {};
         if (ReducedPrecisionMode) {
           OneConst = IREmit->_VCastFromGPR(OpSize::i64Bit, OpSize::i64Bit, GetConstant(0x3FF0000000000000));
@@ -772,6 +904,7 @@ void X87StackOptimization::Run(IREmitter* Emit) {
 
       case OP_F80SINCOSSTACK: {
         Ref St0 = LoadStackValue();
+        CheckInfAndSetIOBit(St0);
 
         Ref SinValue {};
         Ref CosValue {};
