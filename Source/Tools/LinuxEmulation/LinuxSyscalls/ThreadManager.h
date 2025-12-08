@@ -27,9 +27,9 @@ $end_info$
 #include <cstdint>
 #include <mutex>
 #include <optional>
+#include <signal.h>
 #include <sys/stat.h>
 
-#include <bits/types/sigset_t.h>
 #include <linux/seccomp.h>
 
 namespace FEX::HLE {

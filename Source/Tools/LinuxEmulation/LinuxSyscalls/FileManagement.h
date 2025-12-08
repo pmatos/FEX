@@ -25,6 +25,12 @@ $end_info$
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifndef __GLIBC__
+// musl doesn't have *64 variants on 64-bit hosts since struct stat already uses 64-bit types
+struct stat64 : public stat {};
+#define fstatat64 fstatat
+#endif
+
 #include "LinuxSyscalls/EmulatedFiles/EmulatedFiles.h"
 
 namespace FEXCore::Context {

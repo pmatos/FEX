@@ -617,7 +617,9 @@ uint64_t SignalDelegator::SetupFrame_ia32(FEXCore::Core::InternalThreadState* Th
 
   // 32-bit Guest can provide its own restorer or we need to provide our own.
   // On a real host this restorer will live in VDSO.
+#ifndef SA_RESTORER
   constexpr uint32_t SA_RESTORER = 0x04000000;
+#endif
   const bool HasRestorer = (GuestAction->sa_flags & SA_RESTORER) == SA_RESTORER;
   if (HasRestorer) {
     guest_uctx->pretcode = (uint32_t)(uint64_t)GuestAction->restorer;
@@ -818,7 +820,9 @@ uint64_t SignalDelegator::SetupRTFrame_ia32(FEXCore::Core::InternalThreadState* 
 
   // 32-bit Guest can provide its own restorer or we need to provide our own.
   // On a real host this restorer will live in VDSO.
+#ifndef SA_RESTORER
   constexpr uint32_t SA_RESTORER = 0x04000000;
+#endif
   const bool HasRestorer = (GuestAction->sa_flags & SA_RESTORER) == SA_RESTORER;
   if (HasRestorer) {
     guest_uctx->pretcode = (uint32_t)(uint64_t)GuestAction->restorer;

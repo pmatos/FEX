@@ -2,10 +2,13 @@
 #pragma once
 
 #ifndef _WIN32
-#include <linux/prctl.h>
 #include <sys/mman.h>
 #include <sys/user.h>
 #include <sys/prctl.h>
+// musl's sys/prctl.h already defines prctl_mm_map, but glibc's doesn't
+#ifdef __GLIBC__
+#include <linux/prctl.h>
+#endif
 
 #ifndef PR_SET_VMA
 #define PR_SET_VMA 0x53564d41

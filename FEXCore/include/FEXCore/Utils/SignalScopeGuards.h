@@ -47,8 +47,13 @@ public:
 
   // Asserts that the mutex isn't exclusively owned by the calling thread.
   void check_lock_owned_by_self() {
+#ifdef __GLIBC__
+    // glibc returns EDEADLK when attempting to re-lock an already-held mutex.
     const auto Result = pthread_mutex_lock(&Mutex);
     LOGMAN_THROW_A_FMT(Result == EDEADLK, "User of unique lock must have already locked mutex as write!");
+#else
+    // musl doesn't support EDEADLK for recursive lock detection, skip this check.
+#endif
   }
 
 private:
@@ -95,8 +100,13 @@ public:
 
   // Asserts that the rwlock isn't exclusively owned by the calling thread.
   void check_lock_owned_by_self_as_write() {
+#ifdef __GLIBC__
+    // glibc returns EDEADLK when attempting to re-lock an already-held rwlock.
     const auto Result = pthread_rwlock_wrlock(&Mutex);
     LOGMAN_THROW_A_FMT(Result == EDEADLK, "User of rwlock must have already locked mutex as write!");
+#else
+    // musl doesn't support EDEADLK for recursive lock detection, skip this check.
+#endif
   }
 
   // Initialize the internal pthread object to its default initializer state.
@@ -190,12 +200,18 @@ private:
 template<template<typename> class LockType = std::unique_lock, typename MutexType>
 [[nodiscard]]
 static auto MaskSignalsAndLockMutex(MutexType& mutex, uint64_t Mask = ~0ULL) {
+#ifdef __GLIBC__
   // Signals are masked first, and then the lock is acquired
   struct {
     ScopedSignalMasker mask;
     LockType<MutexType> lock;
   } scope_guard {ScopedSignalMasker {Mask}, LockType<MutexType> {mutex}};
   return scope_guard;
+#else
+  // musl's pthread_rwlock hangs when all signals are blocked.
+  // Skip signal masking on non-glibc systems.
+  return LockType<MutexType> {mutex};
+#endif
 }
 
 /**
@@ -218,6 +234,7 @@ static auto GuardSignalDeferringSection(MutexType& mutex, FEXCore::Core::Interna
 template<template<typename> class LockType = std::unique_lock, typename MutexType>
 [[nodiscard]]
 static auto GuardSignalDeferringSectionWithFallback(MutexType& mutex, FEXCore::Core::InternalThreadState* Thread, uint64_t Mask = ~0ULL) {
+#ifdef __GLIBC__
   using ExtraGuard = std::variant<ScopedSignalMasker, DeferredSignalRefCountGuard>;
 
   struct {
@@ -226,6 +243,19 @@ static auto GuardSignalDeferringSectionWithFallback(MutexType& mutex, FEXCore::C
   } scope_guard {Thread ? ExtraGuard {DeferredSignalRefCountGuard {Thread}} : ExtraGuard {ScopedSignalMasker {Mask}}};
   scope_guard.lock = LockType<MutexType> {mutex};
   return scope_guard;
+#else
+  // musl's pthread_rwlock hangs when all signals are blocked.
+  // When Thread is nullptr (initialization phase), we're single-threaded so signal masking isn't needed.
+  // When Thread is valid, use the deferred signal mechanism instead of signal masking.
+  using ExtraGuard = std::variant<std::monostate, DeferredSignalRefCountGuard>;
+
+  struct {
+    ExtraGuard refcount_or_none;
+    LockType<MutexType> lock;
+  } scope_guard {Thread ? ExtraGuard {DeferredSignalRefCountGuard {Thread}} : ExtraGuard {std::monostate {}}};
+  scope_guard.lock = LockType<MutexType> {mutex};
+  return scope_guard;
+#endif
 }
 
 #else

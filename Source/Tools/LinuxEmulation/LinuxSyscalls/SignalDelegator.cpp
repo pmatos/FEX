@@ -652,7 +652,7 @@ void SignalDelegator::HandleGuestSignal(FEX::HLE::ThreadStateObject* ThreadObjec
     ThreadObject->SignalInfo.DeferredSignalFrames.emplace_back(ThreadStateObject::DeferredSignalState {
       .Info = SigInfo,
       .Signal = Signal,
-      .SigMask = _context->uc_sigmask.__val[0],
+      .SigMask = *reinterpret_cast<const uint64_t*>(&_context->uc_sigmask),
     });
 
     uint64_t NewMask = GetNewSigMask(Signal);

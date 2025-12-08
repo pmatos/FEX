@@ -15,6 +15,12 @@ $end_info$
 #include <sys/shm.h>
 #include <sys/mman.h>
 #include <sys/personality.h>
+#include <sys/stat.h>
+
+#ifndef __GLIBC__
+// musl doesn't have *64 variants on 64-bit hosts since off_t is already 64-bit
+#define fstat64 fstat
+#endif
 
 #include "LinuxSyscalls/Syscalls.h"
 #include "LinuxSyscalls/SignalDelegator.h"

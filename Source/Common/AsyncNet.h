@@ -82,7 +82,7 @@ struct tcp_socket {
       .msg_name = nullptr,
       .msg_namelen = 0,
       .msg_iov = iov,
-      .msg_iovlen = NumIovs,
+      .msg_iovlen = static_cast<decltype(msghdr::msg_iovlen)>(NumIovs),
     };
 
     // Setup the ancillary buffer. This is where we will be getting pipe FDs
@@ -130,7 +130,7 @@ private:
       .msg_name = nullptr,
       .msg_namelen = 0,
       .msg_iov = iov,
-      .msg_iovlen = NumIovs,
+      .msg_iovlen = static_cast<decltype(msghdr::msg_iovlen)>(NumIovs),
     };
 
     // If requested, set up a 4-byte ancillary buffer for receiving a file descriptor

@@ -39,6 +39,16 @@ $end_info$
 #include <type_traits>
 #include <unistd.h>
 
+#ifndef __GLIBC__
+// musl doesn't have *64 variants on 64-bit hosts since off_t is already 64-bit
+#define fstat64 fstat
+#define fstatfs64 fstatfs
+#define pread64 pread
+#define pwrite64 pwrite
+#define posix_fadvise64 posix_fadvise
+struct statfs64 : public statfs {};
+#endif
+
 ARG_TO_STR(FEX::HLE::x32::compat_ptr<FEX::HLE::x32::sigset_argpack32>, "%lx")
 
 namespace FEXCore::Core {

@@ -3,8 +3,9 @@
 #include <jemalloc/jemalloc.h>
 #endif
 
-#include <malloc.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <malloc.h>
 
 namespace FEXCore::Allocator {
 

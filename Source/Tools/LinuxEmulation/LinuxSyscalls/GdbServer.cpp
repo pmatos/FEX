@@ -28,6 +28,7 @@ $end_info$
 #include <FEXCore/Utils/FileLoading.h>
 #include <FEXCore/Utils/LogManager.h>
 #include <FEXCore/Utils/StringUtils.h>
+#include <FEXHeaderUtils/Syscalls.h>
 #include <FEXCore/Utils/Threads.h>
 #include <FEXCore/fextl/fmt.h>
 #include <FEXCore/fextl/map.h>
@@ -1171,7 +1172,7 @@ GdbServer::HandledPacketType GdbServer::CommandMultiLetterV(const fextl::string&
   }
 
   if (packet.starts_with("vKill")) {
-    tgkill(::getpid(), ::getpid(), SIGKILL);
+    FHU::Syscalls::tgkill(::getpid(), ::getpid(), SIGKILL);
   }
 
   // TODO: vRun

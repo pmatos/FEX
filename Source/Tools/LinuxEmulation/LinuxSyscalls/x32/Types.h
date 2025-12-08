@@ -475,7 +475,7 @@ struct
 #undef COPY
   }
 
-#ifndef stat64
+#ifdef __GLIBC__
   stat64_32(const struct stat64& host) {
 #define COPY(x) x = host.x
     COPY(st_dev);
@@ -541,7 +541,7 @@ struct FEX_PACKED FEX_ALIGNED(4) FEX_ANNOTATE("alias-x86_32-statfs64") FEX_ANNOT
 #undef COPY
   }
 
-#ifndef statfs64
+#ifdef __GLIBC__
   statfs64_32(const struct statfs64& host) {
 #define COPY(x) x = host.x
     COPY(f_type);
@@ -596,7 +596,7 @@ struct FEX_ANNOTATE("alias-x86_32-statfs") FEX_ANNOTATE("fex-match") statfs32_32
 #undef COPY
   }
 
-#ifndef statfs64
+#ifdef __GLIBC__
   statfs32_32(struct statfs64 host) {
 #define COPY(x) x = host.x
     COPY(f_type);
