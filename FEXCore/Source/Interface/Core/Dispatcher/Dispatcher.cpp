@@ -947,6 +947,9 @@ void Dispatcher::EmitF64Sin() {
   (void)Bind(&Fallback);
   ldp<ARMEmitter::IndexType::OFFSET>(ARMEmitter::QReg::q4, ARMEmitter::QReg::q5, ARMEmitter::Reg::rsp, 32);
   ldp<ARMEmitter::IndexType::POST>(ARMEmitter::QReg::q2, ARMEmitter::QReg::q3, ARMEmitter::Reg::rsp, 64);
+  // Restore NZCV so the ABI thunk's SpillStaticRegs re-spills the correct guest flags.
+  ldr(TMP1.W(), STATE.R(), offsetof(FEXCore::Core::CpuStateFrame, State.flags[24]));
+  msr(ARMEmitter::SystemRegister::NZCV, TMP1);
   str<ARMEmitter::IndexType::PRE>(ARMEmitter::XReg::lr, ARMEmitter::Reg::rsp, -16);
   ldr(TMP1, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64SIN].ABIHandler));
   ldr(TMP4, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64SIN].Func));
@@ -1068,6 +1071,9 @@ void Dispatcher::EmitF64Cos() {
   // Fallback path.
   (void)Bind(&Fallback);
   ldr<ARMEmitter::IndexType::POST>(ARMEmitter::QReg::q2, ARMEmitter::Reg::rsp, 16);
+  // Restore NZCV so the ABI thunk's SpillStaticRegs re-spills the correct guest flags.
+  ldr(TMP1.W(), STATE.R(), offsetof(FEXCore::Core::CpuStateFrame, State.flags[24]));
+  msr(ARMEmitter::SystemRegister::NZCV, TMP1);
   str<ARMEmitter::IndexType::PRE>(ARMEmitter::XReg::lr, ARMEmitter::Reg::rsp, -16);
   ldr(TMP1, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64COS].ABIHandler));
   ldr(TMP4, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64COS].Func));
@@ -1209,6 +1215,9 @@ void Dispatcher::EmitF64Tan() {
   // Fallback path.
   (void)Bind(&Fallback);
   ldr<ARMEmitter::IndexType::POST>(ARMEmitter::QReg::q2, ARMEmitter::Reg::rsp, 16);
+  // Restore NZCV so the ABI thunk's SpillStaticRegs re-spills the correct guest flags.
+  ldr(TMP1.W(), STATE.R(), offsetof(FEXCore::Core::CpuStateFrame, State.flags[24]));
+  msr(ARMEmitter::SystemRegister::NZCV, TMP1);
   str<ARMEmitter::IndexType::PRE>(ARMEmitter::XReg::lr, ARMEmitter::Reg::rsp, -16);
   ldr(TMP1, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64TAN].ABIHandler));
   ldr(TMP4, STATE_PTR(CpuStateFrame, Pointers.FallbackHandlerPointers[FEXCore::Core::OPINDEX_F64TAN].Func));
